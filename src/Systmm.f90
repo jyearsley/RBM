@@ -41,6 +41,8 @@ real, parameter :: cuft_cum=1./(3.2808*3.2808*3.2808)
 real             :: tntrp
 real,dimension(4):: cla,ta,xa
 !
+real             :: Cl_loading  !Temporary variable for testing
+!
 ! Allocate the arrays
 !
 ! Allocate chloride
@@ -261,7 +263,7 @@ do nyear=start_year,1971
             T_0  = T_0 + thermal(nr,nseg)/Q_mps
 !
             if(T_0 .lt. 0.0) T_0=0.0
-            write(60,*) nr,nseg, chloride(nr,nseg),Cl_0,thermal(nr,nseg),T_0
+!            write(60,*) nr,nseg, chloride(nr,nseg),Cl_0,thermal(nr,nseg),T_0
 !
 !     Look for a tributary.
 !
@@ -327,8 +329,9 @@ do nyear=start_year,1971
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
+            Cl_loading = Cl_0*Q_mps 
             if (mod(ns,2) .eq. 0) then
-              call WRITE(time,nd,nr,ncell,ns,T_0,Cl_0,T_head(nr),dbt(ncell),chloride(nr,ns),Q_in(ncell))
+              call WRITE(time,nd,nr,ncell,ns,T_0,Cl_0,T_head(nr),dbt(ncell),CL_loading,Q_in(ncell))
             end if
 !
 !     End of computational element loop
