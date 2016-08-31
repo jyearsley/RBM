@@ -18,7 +18,7 @@ integer:: start_year,start_month,start_day,cell_45
 integer:: end_year,end_month,end_day
 integer:: cell_check_cl,cell_check_heat,head_name,trib_cell
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-integer:: ns_max_test,nndlta,node,ncol,nrow,nr,cum_sgmnt
+integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
 ! Logical variables
 !
@@ -26,9 +26,11 @@ logical:: first_cell,source
 !
 ! Real variables
 !
+  real            :: nndlta
   real            :: rmile0,rmile1,xwpd
   real            :: cl_inp,heat_inp
   real, parameter :: rho_Cp=1000. ! Units are kcal/m**3/deg K
+  real, parameter :: miles_to_ft=5280. ! Convert miles to feet
 !
 
 !
@@ -87,10 +89,13 @@ write(*,*) nreach,flow_cells,heat_cells,source
  allocate(trib(heat_cells,10))
  trib=0
  allocate(head_cell(nreach))
+ allocate (conflnce(heat_cells,10))
+ conflnce=0
+ allocate(reach_cell(nreach,200))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- allocate(chloride(nreach,0:ns_max))
- allocate(thermal(nreach,0:ns_max))
+ allocate(chloride(nreach))
+ allocate(thermal(nreach))
  !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -140,6 +145,10 @@ do nr=1,nreach
   do nc=1,no_cells(nr)
     ncell=ncell+1
 !
+!   Relate the cell number from the linear list to the local cell number
+!
+    reach_cell(nr,nc)=ncell
+!
 !   Read the data for point sources
 !
     if (source) then
@@ -166,6 +175,13 @@ do nr=1,nreach
 !
     end if 
 !
+!  Add chloride
+!
+      chloride(ncell) = cl_inp
+!q
+!  Add thermal
+!
+      thermal(ncell)  = heat_inp    !
 !     The headwaters index for each cell in this reach is given
 !     in the order the cells are read
 !
@@ -180,16 +196,16 @@ do nr=1,nreach
 !
 !    Set the number of segments of the default, if not specified
 !
-    if (ndelta(ncell).lt.1) ndelta(ncell)=n_default
+    if (ndelta(ncell).lt. 1.0) ndelta(ncell)=n_default
     if(first_cell) then
       first_cell=.false.
       head_cell(nr)=ncell
-      x_dist(nr,0)=5280.*rmile0
+      x_dist(nr,0)=miles_to_ft*rmile0
     end if
 !
 ! Added variable ndelta (UW_JRY_2011/03/15)
 !
-    dx(ncell)=5280.*(rmile0-rmile1)/ndelta(ncell)
+    dx(ncell)=miles_to_ft*(rmile0-rmile1)/ndelta(ncell)
     rmile0=rmile1
     nndlta=0
 200 continue
@@ -202,13 +218,11 @@ do nr=1,nreach
 !
 !  Add chloride
 !
-      chloride(nr,nseg) = cl_inp
-      write(55,*) nreach,nseg,chloride(nr,nseg)
+      chloride(ncell) = cl_inp
 !
 !  Add thermal
 !
-      thermal(nr,nseg)  = heat_inp
-      write(56,*) nreach,nseg,thermal(nr,nseg)
+      thermal(ncell)  = heat_inp
 !      
     end if         
 ! 
@@ -227,11 +241,21 @@ do nr=1,nreach
     if(nndlta.lt.ndelta(ncell)) go to 200  
     no_celm(nr)=nseg
     segment_cell(nr,nseg)=ncell
-    x_dist(nr,nseg)=5280.*rmile1
+    x_dist(nr,nseg)=miles_to_ft*rmile1
 !
 ! End of segment loop
 !
   end do
+!
+! If this is a reach that is tributary to another, set the confluence cell to the previous 
+! cell. This is necessary because the last cell in the reach has the same cell number
+! as that of the cell it enters. This is to account for the half portion of the cell the
+! the parcel traverses to the center of the grid.
+!
+if (trib_cell .gt. 0) then
+    conflnce(trib_cell,no_tribs(trib_cell)) = ncell-1
+end if
+!
 if(ns_max_test.lt.nseg) ns_max_test=nseg
 !
 ! End of reach loop

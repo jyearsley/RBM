@@ -17,7 +17,7 @@ module Block_Hydro
     real, dimension(:,:), allocatable  :: Q_nps
     real, dimension(:),   allocatable  :: Cl_trib
     real,dimension(:),    allocatable  :: T_smth,T_trib
-    real, dimension(:,:), allocatable  :: chloride,temp_nps,thermal
+    real, dimension(:),   allocatable  :: chloride,thermal
     real, dimension(:,:), allocatable  :: x_dist
     real, dimension(:,:,:), allocatable :: chlr,temp
 !
@@ -25,5 +25,8 @@ module Block_Hydro
 !   
     real, dimension(:),   allocatable  :: T_head,Cl_head
 
-
+!  Parameters
+!
+    real,parameter          :: cuft_cum = 0.028318 ! Cubic feet to cubic meters
+!
 end module Block_Hydro
