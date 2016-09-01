@@ -105,9 +105,9 @@ open(40,file=TRIM(chloride_file),status='old')
 !
 ! Thermal file
 !
-!thermal_file  = TRIM(inPrefix)//'_T_PointSource'
+thermal_file  = TRIM(inPrefix)//'_T_PointSource'
 !open(45,file=TRIM(thermal_file),status='old')
-thermal_file  = 'T_PointSource'
+!thermal_file  = '_T_PointSource'
 open(50,file=TRIM(thermal_file),status='old')
 write(*,*) 'Thermal File ',thermal_file
 !
@@ -157,11 +157,11 @@ open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STA
 write(*,*) 'Calling BEGIN'
 !
 !     SUBROUTINE BEGIN reads in river system information from the NETWORK file
-!
+! 
 CALL BEGIN(param_file, spatial_file)
 !
 !     SUBROUTINE SYSTMM performs the simulations
-!
+! 
 CALL SYSTMM 
 !
 !     Close files after simulation is complete

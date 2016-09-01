@@ -86,16 +86,16 @@ write(*,*) nreach,flow_cells,heat_cells,source
  no_cells=0
  allocate(no_tribs(heat_cells))
  no_tribs=0
- allocate(trib(heat_cells,10))
+ allocate(trib(heat_cells,20))
  trib=0
  allocate(head_cell(nreach))
- allocate (conflnce(heat_cells,10))
+ allocate (conflnce(heat_cells,20))
  conflnce=0
- allocate(reach_cell(nreach,200))
+ allocate(reach_cell(nreach,50))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- allocate(chloride(nreach))
- allocate(thermal(nreach))
+ allocate(chloride(heat_cells))
+ allocate(thermal(heat_cells))
  !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -120,6 +120,7 @@ do nr=1,nreach
 !
   read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
       ,head_name,trib_cell,main_stem,rmile0
+  write(*,*) no_cells(nr),head_name
 !
 !     If this is reach that is tributary to cell TRIB_CELL, give it the
 !     pointer TRIB(TRIB_CELL) the index of this reach for further use.
@@ -148,6 +149,7 @@ do nr=1,nreach
 !   Relate the cell number from the linear list to the local cell number
 !
     reach_cell(nr,nc)=ncell
+    write(*,*) 'reach cell',nr,nc,reach_cell(nr,nc)
 !
 !   Read the data for point sources
 !
@@ -156,7 +158,6 @@ do nr=1,nreach
 !   Read chloride source file
 !
       read(40,*) cell_check_cl,cl_inp
-      write(*,*) 'Chloride',cell_check_cl,ncell,cl_inp
       if (cell_check_cl .ne. ncell) then
         write(*,*) 'Chloride input file error. Missmatch with ncell'
       end if
@@ -181,7 +182,9 @@ do nr=1,nreach
 !q
 !  Add thermal
 !
-      thermal(ncell)  = heat_inp    !
+      thermal(ncell)  = heat_inp    
+      write(*,*) 'thermal ',heat_inp,ncell
+!
 !     The headwaters index for each cell in this reach is given
 !     in the order the cells are read
 !
@@ -190,13 +193,14 @@ do nr=1,nreach
 !     Variable ndelta read in here.  At present, number of elements
 !     is entered manually into the network file (UW_JRY_2011/03/15)
 !
-    read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
+    read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')                   &
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
-
+    write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
 !
 !    Set the number of segments of the default, if not specified
 !
     if (ndelta(ncell).lt. 1.0) ndelta(ncell)=n_default
+    write(*,*) 'ndelta default ',ncell,ndelta(ncell)
     if(first_cell) then
       first_cell=.false.
       head_cell(nr)=ncell
@@ -206,6 +210,7 @@ do nr=1,nreach
 ! Added variable ndelta (UW_JRY_2011/03/15)
 !
     dx(ncell)=miles_to_ft*(rmile0-rmile1)/ndelta(ncell)
+    write(*,*) 'dx,ncell',ncell,dx(ncell)
     rmile0=rmile1
     nndlta=0
 200 continue
@@ -228,11 +233,12 @@ do nr=1,nreach
 ! 
     segment_cell(nr,nseg)=ncell
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
+    write(*,*) 'nr,nseg ',nr,nseg,segment_cell(nr,nseg),x_dist(nr,nseg)
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
 !
-    open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
-    write(22,'(4i6,1x,a8,1x,a10,i5)') nr,ncell,nrow,ncol,lat,long,nndlta
+!    open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
+    write(22,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
 !
 ! 
 !
@@ -240,7 +246,9 @@ do nr=1,nreach
 !
     if(nndlta.lt.ndelta(ncell)) go to 200  
     no_celm(nr)=nseg
+    write(*,*) 'no_celm(nr) ',nseg
     segment_cell(nr,nseg)=ncell
+    write(*,*) 'segment cell ',nr,nseg,segment_cell(nr,nseg)
     x_dist(nr,nseg)=miles_to_ft*rmile1
 !
 ! End of segment loop
@@ -254,6 +262,7 @@ do nr=1,nreach
 !
 if (trib_cell .gt. 0) then
     conflnce(trib_cell,no_tribs(trib_cell)) = ncell-1
+    write(*,*) 'number of tribs ',trib_cell,no_tribs(trib_cell)
 end if
 !
 if(ns_max_test.lt.nseg) ns_max_test=nseg
