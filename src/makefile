@@ -33,7 +33,7 @@ Block_Network.o: Block_Network.f90
 block_network.mod: Block_Network.o Block_Network.f90
 	$(f90comp) -c Block_Network.f90
 Bgin.o: block_energy.mod block_network.mod block_hydro.mod Bgin.f90
-	$(f90comp) -c Bgin.f90 block_energy.mod block_network.mod block_hydro.mod
+	$(f90comp) -c Bgin.f90
 bgin.mod: Bgin.o Bgin.f90
 	$(f90comp) -c Bgin.f90
 Read_Forcing.o: block_energy.mod block_hydro.mod block_network.mod Read_Forcing.f90
