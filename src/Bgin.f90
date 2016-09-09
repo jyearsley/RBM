@@ -90,7 +90,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(head_cell(nreach))
  allocate (conflnce(heat_cells,20))
  conflnce=0
- allocate(reach_cell(nreach,50))
+ allocate(reach_cell(nreach,ns_max))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
  allocate(chloride(heat_cells))

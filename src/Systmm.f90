@@ -199,7 +199,7 @@ do nyear=start_year,end_year
 !
           npndx=2
 !
-!     Interpolation at the upstream boundary
+!     Use the headwaters value if particle reaches the upstream boundary
 !
           if(nx_head .eq. 0) then
             Cl_0 = Cl_head(nr)
@@ -234,7 +234,6 @@ do nyear=start_year,end_year
 300 continue
 350 continue
 !
-          dt_calc=dt_part(ns)
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
 !    Initialize inflow
@@ -244,8 +243,9 @@ do nyear=start_year,end_year
 !    Set NCELL0 for purposes of tributary input
 !
           ncell0=nncell
-          dt_total=dt_calc
+          dt_total=0.0
           do nm=no_dt(ns),1,-1
+            dt_calc=dt_part(nm)
             z=depth(nncell)
             call energy(T_0,q_surf,nncell)
             q_dot=(q_surf/(z*rfac))
@@ -288,7 +288,7 @@ do nyear=start_year,end_year
 ! 
 !  Update water temperature with tributary input
 !                 
-                  T_trib_load = (Q_trib_mps*T_trib(nr_trib))/Q_out_mps       &
+                  T_trib_load = (Q_trib_mps*T_trib(nr_trib))       &
                               +  T_trib_load
                 end if
 !
@@ -343,7 +343,6 @@ do nyear=start_year,end_year
 !
 !  Update dt_calc and Q_in_mps
 !
-            dt_calc=dt(nncell)
             dt_total=dt_total+dt_calc
             Q_in_mps = Q_out_mps
           end do
