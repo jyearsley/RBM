@@ -24,7 +24,7 @@ do nr=1,nreach
            ,rec=nrec_flow) nnd,ncell &
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
-if (nr.eq.36) write(70,*) 'nc = ',nc,'Q_in - ',Q_in(no_heat)
+!
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
@@ -43,7 +43,7 @@ if (nr.eq.36) write(70,*) 'nc = ',nc,'Q_in - ',Q_in(no_heat)
     delta_n=ndelta(ncell)
 ! 
     Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
-    Q_diff(no_heat)=Q_diff(no_heat)/delta_n
+!
     dt(no_heat)=dx(no_heat)/u(no_heat)
 
 !
@@ -56,34 +56,34 @@ if (nr.eq.36) write(70,*) 'nc = ',nc,'Q_in - ',Q_in(no_heat)
            'Travel time=',dt(no_heat) &
             , '> dt_comp at node -',no_heat
   end do
-!
-!      Tributary flow is Q_out from the next to the last cell
-!
+
 !
 !       Read the meteorology for the last cell, but not the flow
 !
   no_heat=no_heat+1 
   Q_in(no_heat)=Q_out(no_heat-1)
   Q_out(no_heat)=Q_in(no_heat)
+  u(no_heat)=u(no_heat-1)
+  depth(no_heat)=depth(no_heat-1)
+  width(no_heat)=width(no_heat-1)
+  dt(no_heat)=dx(ncell)/u(no_heat)
+!
+!      Tributary flow is Q_out from the next to the last cell
+!
   Q_trib(nr)=Q_out(no_heat)    
+!
+!  Meteorology for the part of the cell that's in the confluent
+!
   nrec_heat=heat_cells*(ndays-1)+no_heat
   read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
          ,rec=nrec_heat) ncell &
          ,dbt(no_heat),ea(no_heat) &   
          ,Q_ns(no_heat),Q_na(no_heat),rho &
-         ,press(no_heat),wind(no_heat)
-!
-!  The flow and hydraulics for the last cell has to be 
-!  modified so they do not
-!  take the values of the segment to which it is tributary
-!
-  Q_in(ncell)=Q_out(ncell-1)
-!
-  Q_out(ncell)=Q_in(ncell-1)
-  Q_diff(no_heat)=0.0
-  u(no_heat)=u(no_heat-1)
-  depth(no_heat)=depth(no_heat-1)
-  width(no_heat)=width(no_heat-1)
-  dt(no_heat)=0.5*dx(ncell)/u(no_heat)
+         ,press(no_heat),wind(no_heat)
 end do
+!  
+!  Call the Water Balance routine
+!
+  call Water_Balance
+!
 END SUBROUTINE Read_Forcing
