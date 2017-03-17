@@ -11,9 +11,8 @@ Module Block_Network
 ! Integer variables 
 !
     integer:: flow_cells,heat_cells
-    integer:: ndays,nreach,ntrb,nwpd
+    integer:: ndays,nreach,ntrb
     integer,parameter::ns_max=1000
-    integer:: start_year,end_year
     integer:: n_default=2
 !
 ! Real variables

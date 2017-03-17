@@ -1,6 +1,14 @@
-module BGIN
+!
+Subroutine BEGIN(param_file,spatial_file)
+!
+use Block_Energy
+use Block_Hydro
+use Block_Network
 !
 implicit none
+!
+    character (len=200):: param_file,source_file,spatial_file
+    integer:: Julian
 !
 ! Integer variables 
 !
@@ -30,21 +38,6 @@ logical:: first_cell,source
   real            :: cl_inp,heat_inp
   real, parameter :: rho_Cp=1000. ! Units are kcal/m**3/deg K
 !
-
-!
-contains
-!
-!
-Subroutine BEGIN(param_file,spatial_file)
-!
-use Block_Energy
-use Block_Hydro
-use Block_Network
-!
-implicit none
-!
-    character (len=200):: param_file,source_file,spatial_file
-    integer:: Julian
 !
 !
 !   Mohseni parameters, if used
@@ -65,8 +58,8 @@ write(*,'(2(2x,i4,2i2))')  &
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
+!
 read(90,*) nreach,flow_cells,heat_cells,source
-write(*,*) nreach,flow_cells,heat_cells,source
 !
 ! Allocate dynamic arrays
 !
@@ -75,7 +68,6 @@ write(*,*) nreach,flow_cells,heat_cells,source
  allocate(alphamu(nreach))
  allocate(beta(nreach))
  allocate(gmma(nreach))
- allocate(cl_head(nreach))
  allocate (smooth_param(nreach))
  allocate(dx(heat_cells))
  allocate(no_celm(nreach))
@@ -86,12 +78,13 @@ write(*,*) nreach,flow_cells,heat_cells,source
  no_tribs=0
  allocate(trib(heat_cells,10))
  trib=0
+ allocate (conflnce(heat_cells,10))
+ conflnce=0
+ allocate(reach_cell(nreach,ns_max)) 
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- allocate(chloride(nreach,0:ns_max))
- allocate(thermal(nreach,0:ns_max))
- !
+!
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
 !
@@ -232,6 +225,15 @@ do nr=1,nreach
 ! End of segment loop
 !
   end do
+  !
+! If this is a reach that is tributary to another, set the confluence cell to the previous 
+! cell. This is necessary because the last cell in the reach has the same cell number
+! as that of the cell it enters. This is to account for the half portion of the cell the
+! the parcel traverses to the center of the grid.
+!
+if (trib_cell .gt. 0) then
+    conflnce(trib_cell,no_tribs(trib_cell)) = ncell
+end if
 if(ns_max_test.lt.nseg) ns_max_test=nseg
 !
 ! End of reach loop
@@ -255,5 +257,3 @@ dt_comp=86400./xwpd
 !
 !
 end subroutine BEGIN
-!
-   END Module BGIN
