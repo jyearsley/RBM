@@ -10,10 +10,6 @@ implicit none
     character (len=200):: param_file,source_file,spatial_file
     integer:: Julian
 !
-! Integer variables 
-!
-    integer:: nwpd
-!
 ! Character variables
 !
     character (len=8) :: end_date,start_date     
@@ -22,8 +18,6 @@ implicit none
 !
 ! Integer variables
 !
-integer:: start_year,start_month,start_day,cell_45
-integer:: end_year,end_month,end_day
 integer:: cell_check_cl,cell_check_heat,head_name,trib_cell
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
 integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt

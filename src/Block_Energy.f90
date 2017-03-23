@@ -1,5 +1,6 @@
 module Block_Energy
 !
+!
 !   Energy budget variables
 !
 !   Incoming short wave radiation, kcal/m**2/sec
@@ -28,9 +29,12 @@ module Block_Energy
 
 !
     real, dimension (:), allocatable::mu,alphamu,beta,gmma,smooth_param
-
+!
 !   Some important constants
 !
-      real   :: lvp,rb,rho,evap_coeff=1.5e-9,pf=0.640,pi=3.14159       
-!
+      integer          :: nwpd
+      real             :: lvp,rb,rho
+      real,parameter   :: evap_coeff=1.5e-9 !Lake Hefner coefficient, 1/meters
+      real,parameter   :: pf=0.640,pi=3.14159
+      real,parameter   :: rfac=304.8        !rho/Cp kg/meter**3/Kilocalories/kg/Deg K    
 end module Block_Energy  

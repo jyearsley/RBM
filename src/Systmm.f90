@@ -1,32 +1,3 @@
-Module SYSTM
-!
-integer:: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer:: nc,nd,ndd,nm,nr,ns,ndmmy
-integer:: nr_trib,ntrb,ntribs
-integer:: nrec_flow,nrec_heat
-integer:: nnd,nobs,nyear,nd_year,ntmp
-integer:: npart,nseg,nwpd,nx_s,nx_head 
-real   :: dt_comp,dt_calc,dt_total,hpd,Q1,Q2
-real   :: q_dot,q_surf,z
-real   :: rminsmooth
-real   :: Cl_0,Cl_dist,T_0,T_dist
-real(8):: time
-real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd
-!
-! Indices for lagrangian interpolation
-!
-integer:: npndx,ntrp
-!integer, dimension(3):: ndltp=(/-2,-2,-3/)
-!integer, dimension(3):: nterp=(/3,3,3/)
-integer, dimension(2):: ndltp=(/-2,-3/)
-integer, dimension(2):: nterp=(/2,3/)
-
-!
-real, parameter:: pi=3.14159,rfac=304.8
-!
-!
-contains
-!
 SUBROUTINE SYSTMM
 !
 use Block_Energy
@@ -36,7 +7,27 @@ use Block_Network
 Implicit None
 !
 !
-logical             :: SRCES_DONE,TRIBS_DONE,LEAP_YEAR
+logical      :: SRCES_DONE,TRIBS_DONE,LEAP_YEAR
+integer      :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer      :: nc,nd,ndd,nm,nr,ns,ndmmy
+integer      :: nr_trib,ntrb,ntribs
+integer      :: nrec_flow,nrec_heat
+integer      :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer      :: npart,nseg,nx_s,nx_head 
+real         :: dt_calc,dt_total,hpd,Q1,Q2
+real         :: q_dot,q_surf,z
+real         :: rminsmooth
+real         :: Cl_0,Cl_dist,T_0,T_dist
+real(8)      :: time
+real         :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd
+!
+! Indices for lagrangian interpolation
+!
+integer:: npndx,ntrp
+
+integer, dimension(2):: ndltp=(/-1,-2/)
+integer, dimension(2):: nterp=(/2,3/)
+!
 !
 real             :: tntrp
 real,dimension(4):: cla,ta,xa
@@ -45,10 +36,6 @@ real             :: Cl_dist_load,Cl_point_load,Cl_trib_load
 real             :: T_dist_load,T_point_load,T_trib_load
 real             :: Q_in_mps,Q_out_mps,Q_dist_mps,Q_trib_mps,Q_trib_sum,Q_ratio
 real             :: Cl_loading  !Temporary variable for testing
-!
-real             :: Cl_loading  !Temporary variable for testing
-!
-! Allocate the arrays
 !
 ! Allocate chloride
 !
@@ -409,4 +396,3 @@ do nyear=start_year,end_year
 !
 950 return
 end SUBROUTINE SYSTMM
-end module SYSTM
