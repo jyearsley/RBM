@@ -105,8 +105,8 @@ open(45,file=TRIM(cl_background),status='old')
 ! Thermal file
 !
 thermal_file  = TRIM(inPrefix)//'_T_PointSource'
-
-!open(50,file=TRIM(thermal_file),status='old')
+!
+open(50,file=TRIM(thermal_file),status='old')
 write(*,*) 'Thermal File ',thermal_file
 !
 ! Output files

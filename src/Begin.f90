@@ -59,6 +59,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
 !
 ! Allocate dynamic arrays
 !
+ allocate(cl_head(nreach))
  allocate(ndelta(heat_cells))
  allocate(mu(nreach))
  allocate(alphamu(nreach))
@@ -127,6 +128,7 @@ do nr=1,nreach
 !
 !     Reading Reach Element information
 !
+
   first_cell=.true.
   do nc=1,no_cells(nr)
     ncell=ncell+1
@@ -153,6 +155,7 @@ do nr=1,nreach
       if (cell_check_heat .ne. ncell) then
         write(*,*) 'Thermal input file error. Missmatch with ncell'
       end if
+
 !
 ! Convert kcal/m**2/sec to deg K/sec
 !
@@ -182,16 +185,17 @@ do nr=1,nreach
 !
 !    Set the number of segments of the default, if not specified
 !
+
     if (ndelta(ncell).lt. 1.0) ndelta(ncell)=n_default
     if(first_cell) then
       first_cell=.false.
       head_cell(nr)=ncell
-      x_dist(nr,0)=miles_to_ft*rmile0
+      x_dist(nr,0)=miles_to_ft * rmile0
     end if
 !
 ! Added variable ndelta (UW_JRY_2011/03/15)
 !
-    dx(ncell)=miles_to_ft*(rmile0-rmile1)/ndelta(ncell)
+    dx(ncell)=miles_to_ft*(rmile0 - rmile1)/ndelta(ncell)
     write(*,*) 'dx,ncell',ncell,dx(ncell)
     rmile0=rmile1
     nndlta=0
@@ -214,7 +218,7 @@ do nr=1,nreach
     end if         
 ! 
     segment_cell(nr,nseg)=ncell
-    x_dist(nr,nseg)=amax1(0.0,x_dist(nr,nseg-1)-dx(ncell))
+    x_dist(nr,nseg)=amax1(0.0,x_dist(nr,nseg-1) - dx(ncell))
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
 !
@@ -228,7 +232,7 @@ do nr=1,nreach
     if(nndlta.lt.ndelta(ncell)) go to 200  
     no_celm(nr)=nseg
     segment_cell(nr,nseg)=ncell
-    x_dist(nr,nseg)=miles_to_ft*rmile1
+    x_dist(nr,nseg)=miles_to_ft * rmile1
 !
 ! End of segment loop
 !

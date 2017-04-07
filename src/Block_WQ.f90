@@ -1,5 +1,10 @@
 module block_wq
 !
+! Temporary variable for testing 
+!
+      real, dimension(:), allocatable  :: cl_head
+
+!
 ! Dimensioned and allocated water quality variables 
 !
       real, dimension(:,:), allocatable:: DO
