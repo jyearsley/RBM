@@ -4,6 +4,7 @@ Subroutine BEGIN(param_file,spatial_file)
 use Block_Energy
 use Block_Hydro
 use Block_Network
+use Block_WQ
 !
 implicit none
 !
@@ -19,12 +20,13 @@ implicit none
 ! Integer variables
 !
 integer:: cell_check_cl,cell_check_heat,head_name,trib_cell
-integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
+integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg,seg_inp
 integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
 ! Logical variables
 !
 logical:: first_cell,source
+logical:: TRIBS_DONE
 !
 ! Real variables
 !
@@ -81,8 +83,8 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(reach_cell(nreach,ns_max))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- allocate(chloride(heat_cells))
- allocate(thermal(heat_cells))
+ allocate(chloride(nreach,ns_max))
+ allocate(thermal(nreach,ns_max))
  !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -143,14 +145,18 @@ do nr=1,nreach
 !
 !   Read chloride source file
 !
-      read(40,*) cell_check_cl,cl_inp
+      read(40,*) cell_check_cl,cl_inp,seg_inp
       if (cell_check_cl .ne. ncell) then
         write(*,*) 'Chloride input file error. Missmatch with ncell'
       end if
 !
+!  Add chloride
+!
+      chloride(nr,seg_inp) = cl_inp
+!
 !   Read thermal file
 !      
-      read(50,*) cell_check_heat,heat_inp
+      read(50,*) cell_check_heat,heat_inp,seg_inp
       write(*,*) cell_check_heat,heat_inp
       if (cell_check_heat .ne. ncell) then
         write(*,*) 'Thermal input file error. Missmatch with ncell'
@@ -161,16 +167,11 @@ do nr=1,nreach
 !
       heat_inp=heat_inp/rho_Cp
 !
-    end if 
-!
-!  Add chloride
-!
-!      chloride(ncell) = cl_inp
-      chloride(ncell) = 0.0
-!
 !  Add thermal
 !
-      thermal(ncell)  = heat_inp    
+      thermal(nr,seg_inp)  = heat_inp
+!
+    end if 
 !
 !     The headwaters index for each cell in this reach is given
 !     in the order the cells are read
@@ -203,19 +204,10 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
 !
-!  Add the sources if nndlta = 2
-!
-    if (nndlta .eq. 2) then
-!
-!  Add chloride
-!
-      chloride(ncell) = cl_inp
-!
-!  Add thermal
-!
-      thermal(ncell)  = heat_inp
-!      
-    end if         
+!  Identify tributaries
+! 
+!    if (nndlta .eq. 1 .and. ) then      
+!    end if         
 ! 
     segment_cell(nr,nseg)=ncell
     x_dist(nr,nseg)=amax1(0.0,x_dist(nr,nseg-1) - dx(ncell))

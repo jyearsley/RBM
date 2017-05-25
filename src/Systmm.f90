@@ -17,7 +17,7 @@ integer      :: npart,nseg,nx_s,nx_head
 real         :: dt_calc,dt_total,hpd,Q1,Q2
 real         :: q_dot,q_surf,z
 real         :: rminsmooth
-real         :: Cl_0,Cl_dist,T_0,T_dist
+real         :: Cl_0,Cl_dist,T_0,T_dist,Cl_00
 real(8)      :: time
 real         :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd
 !
@@ -36,6 +36,7 @@ real             :: Cl_dist_load,Cl_point_load,Cl_trib_load
 real             :: T_dist_load,T_point_load,T_trib_load
 real             :: Q_in_mps,Q_out_mps,Q_dist_mps,Q_trib_mps,Q_trib_sum,Q_ratio
 real             :: Cl_loading  !Temporary variable for testing
+real             :: QQ_in_mps
 !
 ! Allocate chloride
 !
@@ -56,7 +57,9 @@ allocate (T_trib(nreach))
 allocate (depth(heat_cells))
 allocate (width(heat_cells))
 allocate (Q_in(heat_cells))
+allocate (Q_in_seg(nreach,ns_max))
 allocate (Q_out(heat_cells))
+allocate (Q_out_seg(nreach,ns_max))
 allocate (Q_diff(heat_cells))
 allocate (Q_trib(nreach))
 allocate (u(heat_cells))
@@ -218,7 +221,9 @@ do nyear=start_year,end_year
 !     Call the interpolation function
 !
             T_0  = tntrp(xa,ta,x,nterp(npndx))
-            Cl_0 = tntrp(xa,cla,x,nterp(npndx))
+!            Cl_0 = tntrp(xa,cla,x,nterp(npndx))
+            Cl_0 = chlr(nr,nseg,n1)  
+            Cl_00 = Cl_0          
             end if
 300 continue
 350 continue
@@ -227,7 +232,12 @@ do nyear=start_year,end_year
 !
 !    Initialize inflow
 !
-          Q_in_mps = cuft_cum*Q_in(nncell)
+!          Q_in_mps = cuft_cum*Q_in(nncell)
+!
+! Q_in is the segment flow where the parcel begins
+!
+          Q_in_mps = cuft_cum*Q_in_seg(nr,nstrt_elm(ns))
+
 !
 !    Set NCELL0 for purposes of tributary input
 !
@@ -312,8 +322,12 @@ do nyear=start_year,end_year
 !
 ! Do the mass/energy balance
 !
+              Cl_loading = Cl_0*Q_in_mps 
+
             Cl_0 = (Cl_0*Q_in_mps                                            &
-                 + Cl_point_load + Cl_dist_load + Cl_trib_load)/Q_out_mps          
+                 + Cl_point_load + Cl_dist_load + Cl_trib_load)/Q_out_mps   
+         write(29,*) nd,nr,nm,nseg,nncell,Cl_0,Cl_loading    &
+                               ,Cl_point_load,Q_in_mps,Q_out_mps
             T_0  = T_0*Q_ratio                                               &
                  + (T_point_load + T_dist_load + T_trib_load)/Q_out_mps      &
                  + q_dot*dt_calc              
@@ -333,6 +347,7 @@ do nyear=start_year,end_year
 !  Update dt_calc and Q_in_mps
 !
             dt_total=dt_total+dt_calc
+            QQ_in_mps = Q_in_mps
             Q_in_mps = Q_out_mps
           end do
 
@@ -340,6 +355,7 @@ do nyear=start_year,end_year
 !  Update chloride and water temperture
 !        
             chlr(nr,ns,n2) = Cl_0
+!
             temp(nr,ns,n2) = T_0
 !
 !
@@ -358,11 +374,12 @@ do nyear=start_year,end_year
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
             Cl_loading = Cl_0*Q_out_mps 
-            if (mod(ns,2) .eq. 0) then
+!            if (mod(ns,2) .eq. 0) then
               call WRITE(time,nd,nr,ncell,ns,T_0,Cl_0,   &
-                        T_head(nr),dbt(ncell),CL_loading,&
-                        Q_in(ncell),Q_out(ncell))
-            end if
+                        T_head(nr),dbt(ncell),CL_loading,      &
+                        QQ_in_mps,Q_out_mps)
+!                        Q_in(ncell),Q_out(ncell))
+!            end if
 !
 !     End of computational element loop
 !
