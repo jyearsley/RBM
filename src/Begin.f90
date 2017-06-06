@@ -19,7 +19,7 @@ implicit none
 !
 ! Integer variables
 !
-integer:: cell_check_cl,cell_check_heat,head_name,trib_cell
+integer:: cell_check_tds,cell_check_temp,head_name,trib_cell
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg,seg_inp
 integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
@@ -32,7 +32,7 @@ logical:: TRIBS_DONE
 !
   real            :: nndlta
   real            :: rmile0,rmile1,xwpd
-  real            :: tds_inp,heat_inp
+  real            :: tds_inp,temp_inp
   real, parameter :: rho_Cp=1000. ! Units are kcal/m**3/deg K
   real, parameter :: miles_to_ft=5280. ! Convert miles to feet
 !
@@ -62,6 +62,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
 ! Allocate dynamic arrays
 !
  allocate(tds_head(nreach))
+ allocate(temp_head(nreach))
  allocate(ndelta(heat_cells))
  allocate(mu(nreach))
  allocate(alphamu(nreach))
@@ -84,7 +85,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
  allocate(tds_source(nreach,ns_max))
- allocate(t_source(nreach,ns_max))
+ allocate(temp_source(nreach,ns_max))
  !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -126,7 +127,7 @@ do nr=1,nreach
 !
 ! Initial values for chloride
 !
-            ,cl_head(nr)
+            ,tds_head(nr)
 !
 !     Reading Reach Element information
 !
@@ -145,31 +146,31 @@ do nr=1,nreach
 !
 !   Read chloride source file
 !
-      read(40,*) cell_check_cl,cl_inp,seg_inp
-      if (cell_check_cl .ne. ncell) then
+      read(40,*) cell_check_tds,tds_inp,seg_inp
+      if (cell_check_tds .ne. ncell) then
         write(*,*) 'Chloride input file error. Missmatch with ncell'
       end if
 !
 !  Add chloride
 !
-      chloride(nr,seg_inp) = cl_inp
+      tds_source(nr,seg_inp) = tds_inp
 !
 !   Read thermal file
 !      
-      read(50,*) cell_check_heat,heat_inp,seg_inp
-      write(*,*) cell_check_heat,heat_inp
-      if (cell_check_heat .ne. ncell) then
+      read(50,*) cell_check_temp,temp_inp,seg_inp
+      write(*,*) cell_check_temp,temp_inp
+      if (cell_check_temp .ne. ncell) then
         write(*,*) 'Thermal input file error. Missmatch with ncell'
       end if
 
 !
 ! Convert kcal/m**2/sec to deg K/sec
 !
-      heat_inp=heat_inp/rho_Cp
+      temp_inp=temp_inp/rho_Cp
 !
 !  Add thermal
 !
-      thermal(nr,seg_inp)  = heat_inp
+      temp_source(nr,seg_inp)  = temp_inp
 !
     end if 
 !

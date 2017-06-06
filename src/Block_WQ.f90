@@ -45,6 +45,8 @@ module block_wq
       real, dimension(:,:,:), allocatable:: ZOO_2
       real, dimension(:,:,:), allocatable:: TDS
 ! 
+! Tributary input
+!
       real, dimension(:,:), allocatable:: DO_trib
       real, dimension(:,:), allocatable:: BOD_trib
       real, dimension(:,:), allocatable:: TEMP_trib
