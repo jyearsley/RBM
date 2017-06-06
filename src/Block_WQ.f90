@@ -20,6 +20,8 @@ module block_wq
       real, dimension(:), allocatable:: ALGAE_2_head
       real, dimension(:), allocatable:: ZOO_1_head
       real, dimension(:), allocatable:: ZOO_2_head
+      real, dimension(:), allocatable:: TDS_head
+
 !
 ! Dimensioned and allocated water quality variables 
 !
@@ -41,9 +43,11 @@ module block_wq
       real, dimension(:,:,:), allocatable:: ALGAE_2
       real, dimension(:,:,:), allocatable:: ZOO_1
       real, dimension(:,:,:), allocatable:: ZOO_2
+      real, dimension(:,:,:), allocatable:: TDS
 ! 
       real, dimension(:,:), allocatable:: DO_trib
       real, dimension(:,:), allocatable:: BOD_trib
+      real, dimension(:,:), allocatable:: TEMP_trib
       real, dimension(:,:), allocatable:: PO4_trib
       real, dimension(:,:), allocatable:: P_Org_trib
       real, dimension(:,:), allocatable:: NO2_trib
@@ -58,9 +62,13 @@ module block_wq
       real, dimension(:,:), allocatable:: ALGAE_2_trib
       real, dimension(:,:), allocatable:: ZOO_1_trib
       real, dimension(:,:), allocatable:: ZOO_2_trib
+      real, dimension(:,:), allocatable:: TDS_trib
+!
+! Nonpoint source concentrations
 !
       real, dimension(:,:), allocatable:: DO_nps
       real, dimension(:,:), allocatable:: BOD_nps
+      real, dimension(:,:), allocatable:: TEMP_nps
       real, dimension(:,:), allocatable:: PO4_nps
       real, dimension(:,:), allocatable:: P_Org_nps
       real, dimension(:,:), allocatable:: NO2_nps
@@ -75,5 +83,18 @@ module block_wq
       real, dimension(:,:), allocatable:: ALGAE_2_nps
       real, dimension(:,:), allocatable:: ZOO_1_nps
       real, dimension(:,:), allocatable:: ZOO_2_nps
+      real, dimension(:,:), allocatable:: TDS_npsemp
 !
+! Point sources
+!
+      real, dimension(:,:), allocatable:: DO_source
+      real, dimension(:,:), allocatable:: BOD_source
+      real, dimension(:,:), allocatable:: TEMP_source
+      real, dimension(:,:), allocatable:: PO4_source
+      real, dimension(:,:), allocatable:: P_Org_source
+      real, dimension(:,:), allocatable:: NO2_source
+      real, dimension(:,:), allocatable:: NO3_source
+      real, dimension(:,:), allocatable:: NH4_source
+      real, dimension(:,:), allocatable:: TDS_source
+
 end module block_wq

@@ -32,7 +32,7 @@ logical:: TRIBS_DONE
 !
   real            :: nndlta
   real            :: rmile0,rmile1,xwpd
-  real            :: cl_inp,heat_inp
+  real            :: tds_inp,heat_inp
   real, parameter :: rho_Cp=1000. ! Units are kcal/m**3/deg K
   real, parameter :: miles_to_ft=5280. ! Convert miles to feet
 !
@@ -61,7 +61,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
 !
 ! Allocate dynamic arrays
 !
- allocate(cl_head(nreach))
+ allocate(tds_head(nreach))
  allocate(ndelta(heat_cells))
  allocate(mu(nreach))
  allocate(alphamu(nreach))
@@ -83,8 +83,8 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(reach_cell(nreach,ns_max))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- allocate(chloride(nreach,ns_max))
- allocate(thermal(nreach,ns_max))
+ allocate(tds_source(nreach,ns_max))
+ allocate(t_source(nreach,ns_max))
  !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL

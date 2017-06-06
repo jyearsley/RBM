@@ -40,9 +40,9 @@ real             :: QQ_in_mps
 !
 ! Allocate chloride
 !
-allocate (chlr(nreach,-2:ns_max,2))
+allocate (tds(nreach,-2:ns_max,2))
 chlr(:,:,:) = 0.0
-allocate (Cl_trib(nreach))
+allocate (tds_trib(nreach))
 !
 !  Allocate water temperature
 !
