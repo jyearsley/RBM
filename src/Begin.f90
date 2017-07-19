@@ -20,6 +20,7 @@ implicit none
 ! Integer variables
 !
 integer:: cell_check_tds,cell_check_temp,head_name,trib_cell
+integer:: nsr,no_srces,src_nr,src_seg
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg,seg_inp
 integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
@@ -61,8 +62,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
 !
 ! Allocate dynamic arrays
 !
- allocate(tds_head(nreach))
- allocate(temp_head(nreach))
+
  allocate(ndelta(heat_cells))
  allocate(mu(nreach))
  allocate(alphamu(nreach))
@@ -70,6 +70,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(gmma(nreach))
  allocate (smooth_param(nreach))
  allocate(dx(heat_cells))
+ allocate(first_seg(heat_cells))
  allocate(no_celm(nreach))
  no_celm=0
  allocate(no_cells(nreach))
@@ -85,8 +86,44 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
  allocate(tds_source(nreach,ns_max))
+ tds_source = 0.0
  allocate(temp_source(nreach,ns_max))
- !
+ temp_source = 0.0
+!
+! Check to see if there are sources. If so, read the source files
+!
+    if (source) then
+!
+!   Read chloride source file
+!
+      read(40,*) no_srces
+      do nsr = 1, no_srces
+        read(40,*) src_nr,src_seg,tds_inp
+        write(*,*) src_nr,src_seg,tds_inp
+!
+!  Add chloride
+!
+        tds_source(src_nr,src_seg) = tds_inp
+      end do
+!
+!   Read thermal file
+!    
+      read(50,*) no_srces
+      do nsr = 1,no_srces  
+        read(50,*) src_nr,src_seg,temp_inp
+        write(*,*) 'temp ',src_nr,src_seg,temp_inp
+
+!
+! Convert kcal/m**2/sec to deg K/sec
+!
+        temp_inp=temp_inp/rho_Cp
+!
+!  Add thermal
+!
+        temp_source(src_nr,src_seg)  = temp_inp
+      end do  
+!
+    end if 
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
 !
@@ -123,11 +160,11 @@ do nr=1,nreach
 !     Reading Mohseni parameters for each headwaters (UW_JRY_2011/06/18)
 !
   read(90,*) alphaMu(nr),beta(nr) &
-            ,gmma(nr),mu(nr),smooth_param(nr)                                &
+            ,gmma(nr),mu(nr),smooth_param(nr)                                
 !
 ! Initial values for chloride
 !
-            ,tds_head(nr)
+!            ,tds_head(nr)
 !
 !     Reading Reach Element information
 !
@@ -135,44 +172,12 @@ do nr=1,nreach
   first_cell=.true.
   do nc=1,no_cells(nr)
     ncell=ncell+1
+    write(*,*) 'cell number ',ncell
 !
 !   Relate the cell number from the linear list to the local cell number
 !
     reach_cell(nr,nc)=ncell
-!
-!   Read the data for point sources
-!
-    if (source) then
-!
-!   Read chloride source file
-!
-      read(40,*) cell_check_tds,tds_inp,seg_inp
-      if (cell_check_tds .ne. ncell) then
-        write(*,*) 'Chloride input file error. Missmatch with ncell'
-      end if
-!
-!  Add chloride
-!
-      tds_source(nr,seg_inp) = tds_inp
-!
-!   Read thermal file
-!      
-      read(50,*) cell_check_temp,temp_inp,seg_inp
-      write(*,*) cell_check_temp,temp_inp
-      if (cell_check_temp .ne. ncell) then
-        write(*,*) 'Thermal input file error. Missmatch with ncell'
-      end if
 
-!
-! Convert kcal/m**2/sec to deg K/sec
-!
-      temp_inp=temp_inp/rho_Cp
-!
-!  Add thermal
-!
-      temp_source(nr,seg_inp)  = temp_inp
-!
-    end if 
 !
 !     The headwaters index for each cell in this reach is given
 !     in the order the cells are read
@@ -192,18 +197,20 @@ do nr=1,nreach
     if(first_cell) then
       first_cell=.false.
       head_cell(nr)=ncell
+      write(*,*) 'First Cell ',nr,head_cell(nr)
       x_dist(nr,0)=miles_to_ft * rmile0
     end if
 !
 ! Added variable ndelta (UW_JRY_2011/03/15)
 !
     dx(ncell)=miles_to_ft*(rmile0 - rmile1)/ndelta(ncell)
-    write(*,*) 'dx,ncell',ncell,dx(ncell)
     rmile0=rmile1
     nndlta=0
 200 continue
     nndlta=nndlta+1
     nseg=nseg+1
+    if (nndlta .eq. 1) first_seg(ncell) = nseg
+    write(*,*) 'First Segment ',first_seg(ncell),nr,ncell,nseg
 !
 !  Identify tributaries
 ! 

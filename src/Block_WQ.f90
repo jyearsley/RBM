@@ -47,24 +47,24 @@ module block_wq
 ! 
 ! Tributary input
 !
-      real, dimension(:,:), allocatable:: DO_trib
-      real, dimension(:,:), allocatable:: BOD_trib
-      real, dimension(:,:), allocatable:: TEMP_trib
-      real, dimension(:,:), allocatable:: PO4_trib
-      real, dimension(:,:), allocatable:: P_Org_trib
-      real, dimension(:,:), allocatable:: NO2_trib
-      real, dimension(:,:), allocatable:: NO3_trib
-      real, dimension(:,:), allocatable:: NH4_trib
-      real, dimension(:,:), allocatable:: H2CO3_trib
-      real, dimension(:,:), allocatable:: HCO3_trib
-      real, dimension(:,:), allocatable:: CO3_trib
-      real, dimension(:,:), allocatable:: ALK_trib
-      real, dimension(:,:), allocatable:: CHLR_trib
-      real, dimension(:,:), allocatable:: ALGAE_1_trib
-      real, dimension(:,:), allocatable:: ALGAE_2_trib
-      real, dimension(:,:), allocatable:: ZOO_1_trib
-      real, dimension(:,:), allocatable:: ZOO_2_trib
-      real, dimension(:,:), allocatable:: TDS_trib
+      real, dimension(:), allocatable:: DO_trib
+      real, dimension(:), allocatable:: BOD_trib
+      real, dimension(:), allocatable:: TEMP_trib
+      real, dimension(:), allocatable:: PO4_trib
+      real, dimension(:), allocatable:: P_Org_trib
+      real, dimension(:), allocatable:: NO2_trib
+      real, dimension(:), allocatable:: NO3_trib
+      real, dimension(:), allocatable:: NH4_trib
+      real, dimension(:), allocatable:: H2CO3_trib
+      real, dimension(:), allocatable:: HCO3_trib
+      real, dimension(:), allocatable:: CO3_trib
+      real, dimension(:), allocatable:: ALK_trib
+      real, dimension(:), allocatable:: CHLR_trib
+      real, dimension(:), allocatable:: ALGAE_1_trib
+      real, dimension(:), allocatable:: ALGAE_2_trib
+      real, dimension(:), allocatable:: ZOO_1_trib
+      real, dimension(:), allocatable:: ZOO_2_trib
+      real, dimension(:), allocatable:: TDS_trib
 !
 ! Nonpoint source concentrations
 !

@@ -35,7 +35,6 @@ do nr = 1,nreach
       do nntrib  = 1,ntrib
         ncnf = conflnce(nrc,nntrib)
         Q_sum_trib = Q_sum_trib + Q_out(ncnf)
-        write(*,*) Q_out(ncnf),ncnf,nrc,nntrib
       end do
     end if
 !
@@ -74,8 +73,6 @@ do nr = 1,nreach
     nrc_1 = nrc_2
     Q_out_seg(nr,nc) = Q_in_seg(nr,nc) + Q_sum_trib + Q_diff(nrc_2) 
     Q_in_seg(nr,nc+1) = Q_out_seg(nr,nc) 
-    write(28,*) 'Balance for Reach - ',nr,nrc_2,nc,Q_out_seg(nr,nc),Q_in_seg(nr,nc)  &
-                                        ,Q_sum_trib,Q_diff(nrc_2)
   end do
 !
 ! Outflow from the last segment (no_celm(nr)). The distributed flow is not 

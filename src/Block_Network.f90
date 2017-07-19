@@ -2,6 +2,7 @@ Module Block_Network
 !
 ! Module with stream topology variables
 !
+    integer, dimension(:), allocatable  :: first_seg
     integer, dimension(:), allocatable  :: no_celm,no_cells,no_tribs
     integer, dimension(:), allocatable  :: head_cell
 !
@@ -12,7 +13,7 @@ Module Block_Network
 !
     integer           :: flow_cells,heat_cells
     integer           :: ndays,nreach
-    integer,parameter :: ns_max=500
+    integer,parameter :: ns_max=100
     integer           :: start_year,start_month,start_day
     integer           :: end_year,end_month,end_day
 !

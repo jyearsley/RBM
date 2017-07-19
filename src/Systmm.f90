@@ -18,7 +18,7 @@ integer      :: npart,nseg,nx_s,nx_head
 real         :: dt_calc,dt_total,hpd,Q1,Q2
 real         :: q_dot,q_surf,z
 real         :: rminsmooth
-real         :: tds_0,tds_dist,temp_0,temp_dist,tds_00
+real         :: tds_0,tds_dist,temp_0,temp_dist,tds_00,tds_loading
 real(8)      :: time
 real         :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd
 !
@@ -29,6 +29,7 @@ integer:: npndx,ntrp
 integer, dimension(2):: ndltp=(/-1,-2/)
 integer, dimension(2):: nterp=(/2,3/)
 !
+real, dimension(:), allocatable  :: seg_load
 !
 real             :: tntrp
 real, dimension(4):: tdsa,ta,xa
@@ -43,8 +44,9 @@ real             :: QQ_in_mps
 ! Allocate chloride
 !
 allocate (tds(nreach,-2:ns_max,2))
-chlr(:,:,:) = 0.0
+tds(:,:,:) = 0.0
 allocate (tds_trib(nreach))
+allocate (tds_head(nreach))
 !
 !  Allocate water temperature
 !
@@ -154,25 +156,31 @@ do nyear=start_year,end_year
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
-        T_head(nr)=mu(nr)+(alphaMu(nr) &
-                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr)))))  
+        temp_head(nr)=mu(nr)+(alphaMu(nr) &
+                     /(1.+exp(gmma(nr)*(beta(nr)-temp_smth(nr)))))  
 !
 !  Initialize headwaters temperatures
 !
       temp(nr,0,n1)=temp_head(nr)
       temp(nr,1,n1)=temp_head(nr)
-!
       temp_head(nr) = 0.0
 !
 !  Initialize headwaters chlorides
+   
 !
+      tds_head(nr) = 0.0
       tds(nr,0,n1) = tds_head(nr)
       tds(nr,1,n1) = tds_head(nr)
 !
+!
+        SRCES_DONE = .FALSE.
+allocate (seg_load(no_celm(nr)))
+seg_load = tds_source(nr,:)
         do ns=1,no_celm(nr)
+        write(27,*)
 ! 
           TRIBS_DONE=.FALSE.
-          SRCES_DONE=.FALSE.
+
   
 ! Testing new code 8/8/2016
 !
@@ -197,14 +205,15 @@ do nyear=start_year,end_year
 !
 !     Use the headwaters value if particle reaches the upstream boundary
 !
-          if(nx_head .eq. 0) then
+!          if(nx_head .eq. 0) then
+           if (segment_cell(nr,nseg) .eq. head_cell(nr)) then
             tds_0   = tds_head(nr)
             temp_0  = temp_head(nr)
           else 
 !
 !     Interpolation at the upstream or downstream boundary
 !
-            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
+!            if(nseg .gt. 1 .or. nseg .eq. no_celm(nr)) then
 !
             do ntrp=nterp(npndx),1,-1
               npart=nseg+ntrp+ndltp(npndx)
@@ -212,7 +221,7 @@ do nyear=start_year,end_year
 !
 !  Interpolate TDS
 !            
-              tdsa(ntrp) = tds(nr,npart,n1)
+!              tdsa(ntrp) = tds(nr,npart,n1)
 !
 !  Interpolate temperature
 !            
@@ -220,13 +229,13 @@ do nyear=start_year,end_year
             end do
 !
             x=x_part(nx_s)
-
 !
 !     Call the interpolation function
 !
-            temp_0  = tntrp(xa,ta,x,nterp(npndx))
-!            Cl_0 = tntrp(xa,cla,x,nterp(npndx))
-            tds_0 = tds(nr,nseg,n1)  
+!            temp_0  = tntrp(xa,ta,x,nterp(npndx))
+!            tds_0 = tntrp(xa,tdsa,x,nterp(npndx))
+            temp_0 = temp(nr,nseg,n1)
+            tds_0  = tds(nr,ncell-1,n1)
             tds_00 = tds_0          
             end if
 300 continue
@@ -249,8 +258,9 @@ do nyear=start_year,end_year
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
+            dt_total=dt_total+dt_calc
             z=depth(nncell)
-            call energy(T_0,q_surf,nncell)
+            call energy(temp_0,q_surf,nncell)
             q_dot=(q_surf/(z*rfac))
 !
 !    Add distributed flows
@@ -265,9 +275,10 @@ do nyear=start_year,end_year
               temp_dist_load  = Q_dist_mps*temp_dist
               tds_dist_load = Q_dist_mps*tds_dist
             else
-              tds_dist      = tds_0
-              temp_dist     = temp_0
+              tds_dist       = tds_0
+              temp_dist      = temp_0
               temp_dist_load = Q_dist_mps*temp_dist
+              tds_dist_load  = Q_dist_mps*tds_dist
             end if
 !
 !     Look for a tributary.
@@ -277,7 +288,8 @@ do nyear=start_year,end_year
               temp_trib_load = 0.0
               tds_trib_load  = 0.0
 !
-            if(ntribs.gt.0.and..not.TRIBS_DONE) then
+!            if(ntribs.gt.0.and..not.TRIBS_DONE) then
+            if(ntribs.gt.0.and.nseg.eq.first_seg(nncell)) then
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
                 if(Q_trib(nr_trib).gt.0.0) then
@@ -308,32 +320,35 @@ do nyear=start_year,end_year
             tds_point_load   = 0.0
             temp_point_load  = 0.0
 !
-            if (.not. SRCES_DONE) then
+!            if (.not. SRCES_DONE) then
 !
 !  Add chloride loading
 !
-              tds_point_load = tds(nncell)
+!              tds_point_load = tds_source(nr,nseg)
+              tds_point_load = seg_load(nseg)
 !
               if(tds_0 .lt. 0.0) tds_0 = 0.0
 !
 !  Add thermal loading
 !
-              temp_point_load  = thermal(nncell)
+              temp_point_load  = temp_source(nr,nseg)
 !
               if(temp_0 .lt. 0.0) temp_0=0.0
-              SRCES_DONE = .TRUE.
-            end if
+!              SRCES_DONE = .TRUE.
+!            end if
 !
 ! Do the mass/energy balance
 !
-              tds_loading = tds_0*Q_in_mps 
-
-            tds_0 = (tds_0*Q_in_mps                   &
-                  +  tds_point_load                   &
-                  +  tds_dist_load                    &
-                  + tds_trib_load)/Q_out_mps   
-         write(29,*) nd,nr,nm,nseg,nncell,tds_0,tds_loading    &
-                    ,tds_point_load,Q_in_mps,Q_out_mps
+            tds_00 = tds_0
+            tds_0 =  tds_0*Q_ratio                &
+                  + (tds_point_load                         &
+                  +  tds_dist_load                          &
+                  +  tds_trib_load)/Q_out_mps  
+                              tds_loading = tds_0*Q_out_mps  
+ if(nr.eq.2)          &
+ write(27,*) 'Loadings ',ns,nncell,nseg,tds_00,tds_0,tds(nr,nseg,n1) &
+                  ,tds_loading,tds_point_load,tds_dist_load,tds_trib_load
+!
             temp_0  =  temp_0*Q_ratio                 &
                     + (temp_point_load                &
                     +  temp_dist_load                 &
@@ -354,7 +369,7 @@ do nyear=start_year,end_year
 !
 !  Update dt_calc and Q_in_mps
 !
-            dt_total=dt_total+dt_calc
+
             QQ_in_mps = Q_in_mps
             Q_in_mps = Q_out_mps
           end do
@@ -392,6 +407,7 @@ do nyear=start_year,end_year
 !     End of computational element loop
 !
               end do
+deallocate (seg_load)
 !     End of reach loop
 !
             end do
