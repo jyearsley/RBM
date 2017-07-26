@@ -215,7 +215,11 @@ do nyear=start_year,end_year
             call energy(T_0,q_surf,nncell)
 !
             q_dot=(q_surf/(z*rfac))
-            T_0=T_0+q_dot*dt_calc
+!
+! The following update for T_0 is redundant per RJN 7/26/3017
+! and has been commented out for the time being - JRY
+!
+!            T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
 !    Add distributed flows
