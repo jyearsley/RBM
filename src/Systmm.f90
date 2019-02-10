@@ -143,8 +143,8 @@ do nyear=start_year,end_year
 !
 !     Begin cycling through the reaches
 !
+!
       do nr=1,nreach
-
 !
         nc_head=segment_cell(nr,1)
 !
@@ -173,15 +173,11 @@ do nyear=start_year,end_year
       tds(nr,1,n1) = tds_head(nr)
 !
 !
-        SRCES_DONE = .FALSE.
+        
 allocate (seg_load(no_celm(nr)))
 seg_load = tds_source(nr,:)
         do ns=1,no_celm(nr)
-        write(27,*)
 ! 
-          TRIBS_DONE=.FALSE.
-
-  
 ! Testing new code 8/8/2016
 !
 !     Establish particle tracks
@@ -189,6 +185,11 @@ seg_load = tds_source(nr,:)
           call Particle_Track(nr,ns,nx_s,nx_head)
 !
           ncell=segment_cell(nr,ns)
+          if (ns .eq. first_seg(ncell)) then
+            TRIBS_DONE = .FALSE.
+            SRCES_DONE = .FALSE.
+            write(27,*) 'Set SRCES_DONE ',ncell,ns
+          end if
 !
 !     Now do the third-order interpolation to
 !     establish the starting temperature values
@@ -235,7 +236,7 @@ seg_load = tds_source(nr,:)
 !            temp_0  = tntrp(xa,ta,x,nterp(npndx))
 !            tds_0 = tntrp(xa,tdsa,x,nterp(npndx))
             temp_0 = temp(nr,nseg,n1)
-            tds_0  = tds(nr,ncell-1,n1)
+            tds_0  = tds(nr,nseg-1,n1)
             tds_00 = tds_0          
             end if
 300 continue
@@ -245,12 +246,11 @@ seg_load = tds_source(nr,:)
 !
 !    Initialize inflow
 !
-!          Q_in_mps = cuft_cum*Q_in(nncell)
+          Q_in_mps = cuft_cum*Q_in(nncell)
 !
 ! Q_in is the segment flow where the parcel begins
 !
-          Q_in_mps = cuft_cum*Q_in_seg(nr,nstrt_elm(ns))
-
+!          Q_in_mps = cuft_cum*Q_in_seg(nr,nstrt_elm(ns)
 !
 !    Set NCELL0 for purposes of tributary input
 !
@@ -280,6 +280,7 @@ seg_load = tds_source(nr,:)
               temp_dist_load = Q_dist_mps*temp_dist
               tds_dist_load  = Q_dist_mps*tds_dist
             end if
+!              tds_dist =  0.0
 !
 !     Look for a tributary.
 !
@@ -288,8 +289,8 @@ seg_load = tds_source(nr,:)
               temp_trib_load = 0.0
               tds_trib_load  = 0.0
 !
-!            if(ntribs.gt.0.and..not.TRIBS_DONE) then
-            if(ntribs.gt.0.and.nseg.eq.first_seg(nncell)) then
+            if(ntribs.gt.0.and..not.TRIBS_DONE) then
+!            if(ntribs.gt.0.and.nseg.eq.first_seg(nncell)) then
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
                 if(Q_trib(nr_trib).gt.0.0) then
@@ -299,7 +300,7 @@ seg_load = tds_source(nr,:)
 !  Update chloride with tributary input
 !                 
                   tds_trib_load = (Q_trib_mps*tds_trib(nr_trib))    &
-                               + tds_trib_load
+                              + tds_trib_load
 ! 
 !  Update water temperature with tributary input
 !                 
@@ -312,7 +313,7 @@ seg_load = tds_source(nr,:)
             end if
 !
 !  Update inflow and outflow
-
+!
             Q_out_mps = Q_in_mps + cuft_cum*Q_diff(nncell)
             Q_out_mps = Q_out_mps + Q_trib_sum
             Q_ratio   = Q_in_mps/Q_out_mps       
@@ -320,12 +321,13 @@ seg_load = tds_source(nr,:)
             tds_point_load   = 0.0
             temp_point_load  = 0.0
 !
-!            if (.not. SRCES_DONE) then
+            if (.not. SRCES_DONE .and. tds_source(nr,nseg) .gt. 0.01) then
 !
 !  Add chloride loading
 !
-!              tds_point_load = tds_source(nr,nseg)
-              tds_point_load = seg_load(nseg)
+              tds_point_load = tds_source(nr,nseg)
+!              write(27,*) 'Point Load ',nd,ncell,nncell,ns,nseg  &
+!                                       ,tds_00,tds_0,tds_point_load
 !
               if(tds_0 .lt. 0.0) tds_0 = 0.0
 !
@@ -335,19 +337,22 @@ seg_load = tds_source(nr,:)
 !
               if(temp_0 .lt. 0.0) temp_0=0.0
 !              SRCES_DONE = .TRUE.
-!            end if
+            end if
 !
 ! Do the mass/energy balance
 !
             tds_00 = tds_0
-            tds_0 =  tds_0*Q_ratio                &
+            tds_0 =  tds_0*Q_ratio                          &
                   + (tds_point_load                         &
                   +  tds_dist_load                          &
-                  +  tds_trib_load)/Q_out_mps  
-                              tds_loading = tds_0*Q_out_mps  
- if(nr.eq.2)          &
- write(27,*) 'Loadings ',ns,nncell,nseg,tds_00,tds_0,tds(nr,nseg,n1) &
-                  ,tds_loading,tds_point_load,tds_dist_load,tds_trib_load
+                  +  tds_trib_load)/Q_out_mps
+!                    
+            tds_loading = tds_0*Q_out_mps  
+!
+ if(nr.eq.1)          &
+ write(27,*) 'Loadings ',nd,ncell,nncell,ns,nseg,tds_00,tds_0,tds(nr,nseg-1,n1) &
+!                  ,tds_loading,tds_point_load,tds_dist_load,tds_trib_load
+                   ,tds_loading,tds_point_load,tds_dist_load,tds_trib_load
 !
             temp_0  =  temp_0*Q_ratio                 &
                     + (temp_point_load                &
@@ -396,7 +401,7 @@ seg_load = tds_source(nr,:)
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            tds_loading = tds_0*Q_out_mps 
+            tds_loading = tds_0 
 !            if (mod(ns,2) .eq. 0) then
               call WRITE(time,nd,nr,ncell,ns,temp_0,tds_0,    &
                         temp_head(nr),dbt(ncell),tds_loading, &

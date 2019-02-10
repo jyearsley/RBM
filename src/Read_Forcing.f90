@@ -25,7 +25,18 @@ do nr=1,nreach
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
 !
-    if(u(no_heat).lt.0.01) u(no_heat)=0.01
+! Constant flow scenario
+!
+!    u(no_heat) = 1.5
+!    Q_in(no_heat)  = 1000.
+!    Q_out(no_heat) = 1000.
+!    Q_out(15) = 2000.
+!    if (no_heat .ge. 16) then
+!      Q_in(no_heat)  = 2000.
+!      Q_out(no_heat) = 2000.
+!    end if
+!    if(u(no_heat).lt.0.5) u(no_heat)=0.5
+!
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
     read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &

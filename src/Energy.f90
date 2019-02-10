@@ -24,7 +24,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell)
 !
 !     Linear fit over the range of 2.0 deg C.
 !     These results can be used to estimate the "equilibrium" 
-!     temperature and linear rate constant.
+!     temperature
 !
    A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))
    q_surf=0.5*(q_fit(1)+q_fit(2))
