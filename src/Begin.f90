@@ -20,7 +20,7 @@ implicit none
 ! Integer variables
 !
 integer:: cell_check_tds,cell_check_temp,head_name,trib_cell
-integer:: nsr,no_srces,src_nr,src_seg
+integer:: nsr,no_srces,src_nr,src_seg,ndmm
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg,seg_inp
 integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
@@ -71,9 +71,9 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate (smooth_param(nreach))
  allocate(dx(heat_cells))
  allocate(first_seg(heat_cells))
- allocate(no_celm(nreach))
+ allocate(no_celm(heat_cells))
  no_celm=0
- allocate(no_cells(nreach))
+ allocate(no_cells(heat_cells))
  no_cells=0
  allocate(no_tribs(heat_cells))
  no_tribs=0
@@ -85,9 +85,9 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(reach_cell(nreach,ns_max))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- allocate(tds_source(nreach,ns_max))
- tds_source = 0.0
- allocate(temp_source(nreach,ns_max))
+ allocate(tds_source(nreach,0:ns_max))
+ tds_source(:,:) = 0.0
+ allocate(temp_source(nreach,0:ns_max))
  temp_source = 0.0
 !
 ! Check to see if there are sources. If so, read the source files
@@ -98,10 +98,13 @@ read(90,*) nreach,flow_cells,heat_cells,source
 !
       read(40,*) no_srces
       do nsr = 1, no_srces
-        read(40,*) src_nr,src_seg,tds_inp
+        read(40,*) src_nr,ndmm,src_seg,tds_inp
         write(*,*) src_nr,src_seg,tds_inp
 !
 !  Add chloride
+!
+! Apportion load among the four (4) segments, since  the loadings are base on
+! cell loadings per MTHvV
 !
         tds_source(src_nr,src_seg) = tds_inp
       end do
@@ -110,7 +113,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
 !    
       read(50,*) no_srces
       do nsr = 1,no_srces  
-        read(50,*) src_nr,src_seg,temp_inp
+        read(50,*) src_nr,ndmm,src_seg,temp_inp
         write(*,*) 'temp ',src_nr,src_seg,temp_inp
 
 !
@@ -210,7 +213,7 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
     if (nndlta .eq. 1) first_seg(ncell) = nseg
-    write(*,*) 'First Segment ',first_seg(ncell),nr,ncell,nseg
+!    write(*,*) 'First Segment ',first_seg(ncell),nr,ncell,nseg
 !
 !  Identify tributaries
 ! 

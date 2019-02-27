@@ -27,7 +27,7 @@ do nr=1,nreach
 !
 ! Constant flow scenario
 !
-!    u(no_heat) = 1.5
+    u(no_heat) = 2.5
 !    Q_in(no_heat)  = 1000.
 !    Q_out(no_heat) = 1000.
 !    Q_out(15) = 2000.
