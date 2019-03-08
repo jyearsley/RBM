@@ -239,7 +239,12 @@ do nyear=start_year,end_year
             ntribs=no_tribs(nncell)
             Q_trb_sum   = 0.0
             T_trb_load  = 0.0
-            if(ntribs.gt.0.and..not.DONE) then
+!            if(ntribs.gt.0.and..not.DONE) then
+!
+! Uses first segment of the cell to advect tributary thermal energy
+!
+            min_seg = first_seg(nncell)
+            if(ntribs.gt.0.and.nseg.eq.min_seg) then
 !
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
