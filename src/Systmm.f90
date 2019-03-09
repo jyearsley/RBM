@@ -6,42 +6,46 @@ use Block_Network
 !
 Implicit None
 ! 
-!  
+!
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
-integer               :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer               :: nc,nd,ndd,nm,nq,nr,ns
-integer               :: nr_trib,ntribs
-integer               :: nrec_flow,nrec_heat
-integer               :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
-integer               :: npart,nseg
+integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: nr_trib,ntribs
+integer          :: nrec_flow,nrec_heat
+integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: npart,nseg,nx_s,nx_part,nx_head
 !
 ! Indices for lagrangian interpolation
 !
-integer               :: njb,npndx,ntrp
-integer, dimension(3) :: ndltp=(/-2,-3,-3/)
-integer, dimension(3) :: nterp=(/3,4,3/)
+integer              :: njb,npndx,ntrp
+integer, dimension(2):: ndltp=(/-1,-2/)
+integer, dimension(2):: nterp=(/2,3/)
 
 !
-real(sp)              :: dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
-real(sp)              :: rminsmooth
-real(sp)              :: T_0,T_dist
-real(dp)              :: time=0.0_dp
-real(sp)              :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
-real(dp)              :: tntrp=0.0_dp
-real(dp),dimension(4) :: ta,xa
+real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
+real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
+real             :: T_dstrb,T_dstrb_load,T_trb_load
+real             :: rminsmooth
+real             :: T_0,T_dist
+real(8)          :: time
+real             :: x,xd,xdd,xd_year,xwpd,year
+real             :: tntrp
+real             :: dt_ttotal
+real,dimension(4):: ta,xa
 !
-!
-logical               :: DONE
+real,dimension(:),allocatable     :: T_head,T_smth,T_trib
+
+logical:: DONE
 !
 !
 ! Allocate the arrays
 !
-allocate (CONST(NQ_total,nreach,-2:ns_max,2))
-allocate (CONST_head(NQ_total,nreach))
+allocate (temp(nreach,0:ns_max,2))
+allocate (T_head(nreach))
 allocate (T_smth(nreach))
-allocate (CONST_trib(NQ_total,nreach))
+allocate (T_trib(nreach))
 allocate (depth(heat_cells))
 allocate (Q_in(heat_cells))
 allocate (Q_out(heat_cells))
@@ -63,12 +67,10 @@ dt_part=0.
 x_part=0.
 no_dt=0
 nstrt_elm=0
+temp=0.5
+! Initialize headwaters temperatures
 !
-! Initialize headwaters constituents
-!
-do nq=1,NQ_total
-  CONST_head(nq)=?????
-end do
+T_head=4.0
 !
 !
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
@@ -118,7 +120,6 @@ do nyear=start_year,end_year
 ! Read the hydrologic and meteorologic forcings
 !
         call READ_FORCING
-
 !
 !     Begin reach computations
 !
@@ -126,44 +127,34 @@ do nyear=start_year,end_year
 !     Begin cycling through the reaches
 !
       do nr=1,nreach
-
 !
         nc_head=segment_cell(nr,1)
 !
 !     Determine smoothing parameters (UW_JRY_2011/06/21)
 !
-        if (do_TEMP) then
-          rminsmooth=1.0-smooth_param(nr)
-          T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
+        rminsmooth=1.0-smooth_param(nr)
+        T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
-          CONC_init(1,nr)=mu(nr)+(alphaMu(nr) &
+        T_head(nr)=mu(nr)+(alphaMu(nr) &
                   /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr))))) 
-        end if 
 !
-!     Initialize all (NQ_total) water quality constituents
+      temp(nr,0,n1)=T_head(nr)
+      temp(nr,1,n1)=T_head(nr)
 !
-        do nq=1,NQ_total
-          CONC(nq,nr,0,n1)=CONC_init(nq,nr)
-          CONC(nq,nr,-1,n1)=CONC_init(nq,nr)
-          CONC(nq,nr,-2,n1)=CONC_init(nq,nr)
-          CONC(nq,nr,no_celm(nr)+1,n1)=CONC(nq,nr,no_celm(nr),n1)
-        end do
+! Begin cell computational loop
 !
-!     Establish upstream boundary
-!
-        x_head=x_dist(nr,0)
-        x_bndry=x_head-50.0
+        do ns=1,no_celm(nr)
+! 
+        DONE=.FALSE.
+  
+! Testing new code 8/8/2016
 !
 !     Establish particle tracks
 !
-      call Particle_Track(nr,x_head,x_bndry)
+      call Particle_Track(nr,ns,nx_s,nx_head)
 !
-!
-        DONE=.FALSE.
-!
-        do ns=1,no_celm(nr)
           ncell=segment_cell(nr,ns)
 !
 !     Now do the third-order interpolation to
@@ -172,110 +163,129 @@ do nyear=start_year,end_year
 !
           nseg=nstrt_elm(ns)
 !
-!     Perform polynomial interpolationnr_trib
+!     Perform polynomial interpolation
 !
 !
 !     Interpolation inside the domain
 !
           npndx=2
 !
-!     Interpolation at the upstream boundary
+!     Interpolation at the upstream boundary if the
+!     parcel has reached that boundary
 !
-          if(nseg.eq.1) then
-            do nq=1,NQ_total
-              CONC_0(nq) = CONC_init(nq,nr)
-            end do
+          if(nx_head.eq.0) then
+            T_0 = T_head(nr)
           else 
 !
-!     Interpolation at the downstream boundary
 !
-            if(nseg.eq.no_celm(nr)) npndx=3
+!     Interpolation at the upstream or downstream boundary
 !
-! Locate the parcel
+            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
 !
-            x=x_part(ns)
-!
-! Find the Eulerian distances first
-!
-            do ntrp=1,nterp(npndx)
+            do ntrp=nterp(npndx),1,-1
               npart=nseg+ntrp+ndltp(npndx)
               xa(ntrp)=x_dist(nr,npart)
+              ta(ntrp)=temp(nr,npart,n1)
             end do
 !
-! Interpolate all water quality variables here
+! Start the cell counter for nx_s
 !
-            do nq=1,NQ_total
-              do ntrp=1,nterp(npndx)
-                npart=nseg+ntrp+ndltp(npndx)
-                ta(ntrp)=CONC(nq,nr,npart,n1)
-              end do
+            x=x_part(nx_s)
 !
 !     Call the interpolation function
 !
-              CONC_0(nq)=tntrp(xa,ta,x,nterp(npndx))
-            end do
-!
-!     End interpolation section
-!    
+            T_0=tntrp(xa,ta,x,nterp(npndx))
           end if
 !
-300 continue
-350 continue
-!               dt_calc=dt_part(ns)
+!
           nncell=segment_cell(nr,nstrt_elm(ns))
+!
+!    Initialize inflow
+!
+          Q_inflow = Q_in(nncell)
+          Q_outflow = Q_out(nncell)
 !
 !    Set NCELL0 for purposes of tributary input
 !
           ncell0=nncell
-          dt_total=dt_calc
+          dt_total=0.0
           do nm=no_dt(ns),1,-1
+            dt_calc=dt_part(nm)
             z=depth(nncell)
+            call energy(T_0,q_surf,nncell)
 !
-! HERE IS WHERE THE WATER QUALITY CONSTITUENTS WILL BE SIMULATED
-! THERE WILL NEED TO BE SOME CHECKING TO ENSURE NO INSTABILITIES DUE
-! TO TIME CONSTANTS THAT ARE GREATER THAN THE COMPUTATIONAL INTERVAL
-! MAKE SURE THE CELL NUMBER IS CORRECT
-!
-            call WQ(No_Const,nncell)
-!            call energy(T_0,q_surf,nncell)
             q_dot=(q_surf/(z*rfac))
             T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
+!    Add distributed flows
+!    
+            T_dstrb_load  = 0.0
+!
+            Q_dstrb = Q_diff(nncell)
+!
+! Temperature of distributed inflow assumed = 10.0 deg C
+!
+            if(Q_dstrb.gt.0.001) then
+              T_dstrb  = 10.0
+            else
+              T_dstrb  = 10.0
+            end if
+              T_dstrb_load  = Q_dstrb*T_dstrb
+
+!
 !     Look for a tributary.
 !
-            Q1=Q_in(nncell)
             ntribs=no_tribs(nncell)
-            if(ntribs.gt.0.and..not.DONE) then
+            Q_trb_sum   = 0.0
+            T_trb_load  = 0.0
+!            if(ntribs.gt.0.and..not.DONE) then
+!
+! Uses first segment of the cell to advect tributary thermal energy
+!
+            min_seg = first_seg(nncell)
+            if(ntribs.gt.0.and.nseg.eq.min_seg) then
+!
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
                 if(Q_trib(nr_trib).gt.0.0) then
-                  Q2=Q1+Q_trib(nr_trib)
-                  T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2
+                  Q_trb        = Q_trib(nr_trib)
+                  Q_trb_sum    = Q_trb_sum + Q_trb
+!
+!  Update water temperature with tributary input
+!
+                  T_trb_load   = (Q_trb*T_trib(nr_trib))       &
+                               +  T_trb_load
                 end if
-!
-                Q1=Q_out(nncell)
-!
               end do
+!
               DONE=.TRUE.
             end if
-            if(ntribs.eq.0.and.Q_diff(nncell).gt.0) then
-              Q2=Q1+Q_diff(nncell)
-              T_dist=T_init(nr)
-              T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
-              Q1=Q2
-            end if
-500 continue
+!
+!  Update inflow and outflow
+!
+            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
+            Q_ratio = Q_inflow/Q_outflow       
+!
+! Do the mass/energy balance
+!
+            T_0  = T_0*Q_ratio                              &
+                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
+                 + q_dot*dt_calc              
+!
+            if (T_0.lt.0.5) T_0 =0.5
+            Q_inflow = Q_outflow
+!
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
-!     Reset tributary flag if this is a new celln_write
+!     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
               ncell0=nncell
-              DONE=.FALSE.
+              Q_inflow = Q_in(nncell)
+               DONE=.FALSE.
             end if
-            dt_calc=dt(nncell)
             dt_total=dt_total+dt_calc
           end do
           if (T_0.lt.0.5) T_0=0.5
@@ -288,7 +298,7 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_init(nr),dbt(ncell))
+            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
 !
 !     End of computational element loop
 !
