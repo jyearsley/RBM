@@ -3,6 +3,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 use Block_Energy
 use Block_Hydro
 use Block_Network
+use Block_WQ
 !
 Implicit None
 ! 
@@ -10,6 +11,7 @@ Implicit None
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
+integer          :: min_seg
 integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
@@ -24,11 +26,12 @@ integer, dimension(2):: ndltp=(/-1,-2/)
 integer, dimension(2):: nterp=(/2,3/)
 
 !
+real,parameter   :: cum_cuft = (3.2808*3.2808*3.2808)
 real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-real             :: T_dstrb,T_dstrb_load,T_trb_load
+real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum,Q_mps
+real             :: T_dstrb,T_dstrb_load,T_point_load,T_trb_load
 real             :: rminsmooth
-real             :: T_0,T_dist
+real             :: T_0,T_dist,T_load_sum
 real(8)          :: time
 real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
@@ -36,7 +39,7 @@ real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
 real,dimension(:),allocatable     :: T_head,T_smth,T_trib
-
+!
 logical:: DONE
 !
 !
@@ -46,6 +49,7 @@ allocate (temp(nreach,0:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
 allocate (T_trib(nreach))
+!
 allocate (depth(heat_cells))
 allocate (Q_in(heat_cells))
 allocate (Q_out(heat_cells))
@@ -115,7 +119,6 @@ do nyear=start_year,end_year
       DO ndd=1,nwpd
       xdd = ndd
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
-
 !
 ! Read the hydrologic and meteorologic forcings
 !
@@ -262,6 +265,14 @@ do nyear=start_year,end_year
               DONE=.TRUE.
             end if
 !
+! Account for point sources
+!!  if (nr .eq. 36 .and. ns .eq. 13) then
+!!    write(27,*) ' Point source', nd,nr,ncell,nncell,nstrt_elm(ns),nseg
+!
+              T_point_load  = cum_cuft*temp_source(nr,nseg)
+!!  end if
+
+!
 !  Update inflow and outflow
 !
             Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
@@ -269,13 +280,18 @@ do nyear=start_year,end_year
 !
 ! Do the mass/energy balance
 !
-            T_0  = T_0*Q_ratio                              &
-                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
+            T_0  = T_0*Q_ratio + (T_point_load                  &
+                 + T_dstrb_load + T_trb_load)/Q_outflow         &
                  + q_dot*dt_calc              
+!
+            T_load_sum = T_0*Q_outflow
+!
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
+            Q_mps = Q_inflow/cum_cuft
 !
+! write(29,*) nr,nseg,Q_ratio,T_point_load,T_dstrb_load,T_trb_load,Q_outflow,q_dot
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
@@ -298,7 +314,8 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell)    &
+                      ,T_point_load,T_load_sum,Q_mps)
 !
 !     End of computational element loop
 !

@@ -51,7 +51,15 @@ character (len=200 ):: net_file
 character (len=200 ):: param_file
 character (len=200 ):: temp_file
 character (len=200 ):: spatial_file
-character (len=8)   :: start_data,end_data     
+character (len=8)   :: start_data,end_data 
+!
+! Source file
+!
+character (len=200 ):: chloride_file
+character (len=200 ):: thermal_file
+character (len=200 ):: cl_background
+character (len=200 ):: cl_headwaters
+!   
 integer iargc
 integer numarg
 
@@ -102,6 +110,13 @@ read(90,'(A)') heat_file
 !     Open file with meteorologic data
 !     
 open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STATUS='old')
+
+! Thermal file
+!
+thermal_file  = TRIM(inPrefix)//'_T_PointSource'
+!
+open(50,file=TRIM(thermal_file),status='old')
+write(*,*) 'Thermal File ',thermal_file
 !
 !     Call systems programs to get started
 !

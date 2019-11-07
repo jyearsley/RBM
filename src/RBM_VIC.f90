@@ -46,7 +46,8 @@ implicit none
 
 integer(i2b) iargc
 integer(i2b) numarg
-
+!
+logical     :: do_TEMP = .TRUE.
 !
 ! Command line input
 !
@@ -64,7 +65,6 @@ if (numarg .lt. 2) then
 end if
  call getarg ( 1, inPrefix )
  call getarg ( 2, outPrefix )
-e
 !
 !     Open file with hydrologic data
 !
@@ -78,7 +78,18 @@ if (do_TEMP) then
 !     Open file with meteorologic data
 !     
   open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STATUS='old')
+!
+!      File with thermal sources
+!
+! Thermal file
+!
+thermal_file  = TRIM(inPrefix)//'_T_PointSource'
+!
+  open(50,file=TRIM(thermal_file),status='old')
+  write(*,*) 'Thermal File ',thermal_file
+!
 end if
+!
 !
 !     Call systems programs to get started
 !

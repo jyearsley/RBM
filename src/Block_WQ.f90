@@ -2,22 +2,25 @@ module block_wq
 !
 ! Dimensioned and allocated water quality variables 
 !
-      real, dimension(:,:), allocatable:: DO
-      real, dimension(:,:), allocatable:: BOD
-      real, dimension(:,:), allocatable:: PO4
-      real, dimension(:,:), allocatable:: P_Org
-      real, dimension(:,:), allocatable:: NO2
-      real, dimension(:,:), allocatable:: NO3
-      real, dimension(:,:), allocatable:: NH4
-      real, dimension(:,:), allocatable:: pH
-      real, dimension(:,:), allocatable:: H2CO3
-      real, dimension(:,:), allocatable:: HCO3
-      real, dimension(:,:), allocatable:: CO3
-      real, dimension(:,:), allocatable:: ALK
-      real, dimension(:,:), allocatable:: ALGAE_1
-      real, dimension(:,:), allocatable:: ALGAE_2
-      real, dimension(:,:), allocatable:: ZOO_1
-      real, dimension(:,:), allocatable:: ZOO_2
+      real, dimension(:,:,:), allocatable:: DO
+      real, dimension(:,:,:), allocatable:: BOD
+      real, dimension(:,:,:), allocatable:: TEMP
+      real, dimension(:,:,:), allocatable:: PO4
+      real, dimension(:,:,:), allocatable:: P_Org
+      real, dimension(:,:,:), allocatable:: NO2
+      real, dimension(:,:,:), allocatable:: NO3
+      real, dimension(:,:,:), allocatable:: NH4
+      real, dimension(:,:,:), allocatable:: pH
+      real, dimension(:,:,:), allocatable:: H2CO3
+      real, dimension(:,:,:), allocatable:: HCO3
+      real, dimension(:,:,:), allocatable:: CO3
+      real, dimension(:,:,:), allocatable:: ALK
+      real, dimension(:,:,:), allocatable:: CHLRE
+      real, dimension(:,:,:), allocatable:: ALGAE_1
+      real, dimension(:,:,:), allocatable:: ALGAE_2
+      real, dimension(:,:,:), allocatable:: ZOO_1
+      real, dimension(:,:,:), allocatable:: ZOO_2
+      real, dimension(:,:,:), allocatable:: TDS
 ! 
       real, dimension(:,:), allocatable:: DO_trib
       real, dimension(:,:), allocatable:: BOD_trib
@@ -51,4 +54,16 @@ module block_wq
       real, dimension(:,:), allocatable:: ZOO_1_nps
       real, dimension(:,:), allocatable:: ZOO_2_nps
 !
+! Point sources
+!
+      real, dimension(:,:), allocatable:: DO_source
+      real, dimension(:,:), allocatable:: BOD_source
+      real, dimension(:,:), allocatable:: TEMP_source
+      real, dimension(:,:), allocatable:: PO4_source
+      real, dimension(:,:), allocatable:: P_Org_source
+      real, dimension(:,:), allocatable:: NO2_source
+      real, dimension(:,:), allocatable:: NO3_source
+      real, dimension(:,:), allocatable:: NH4_source
+      real, dimension(:,:), allocatable:: TDS_source
+
 end module block_wq

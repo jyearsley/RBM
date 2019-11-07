@@ -3,6 +3,7 @@ Subroutine BEGIN(param_file,spatial_file)
 use Block_Energy
 use Block_Hydro
 use Block_Network
+use Block_WQ
 !
 implicit none
 !    
@@ -14,14 +15,19 @@ implicit none
     integer:: Julian
     integer:: head_name,trib_cell
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-    integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+    integer:: ndmm,ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+    integer:: nsr,no_srces
+    integer:: src_nr,src_seg
 !
     logical:: first_cell,source
 !
     real :: nndlta
     real :: rmile0,rmile1,xwpd
+    real :: temp_inp
+    
 !
     real,parameter   :: miles_to_ft=5280.
+    real,parameter    :: rho_CP = 1000.
 !
 !   Mohseni parameters, if used
 !
@@ -29,7 +35,7 @@ implicit none
 !
 !     Card Group I
 !
-read(90,*) start_date,end_date
+read(90,*) start_date,end_date,source
 read(start_date,'(i4,2i2)') start_year,start_month,start_day
 read(end_date,  '(i4,2i2)') end_year,end_month,end_day
 nyear1=start_year
@@ -67,6 +73,8 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
+allocate(temp_source(nreach,0:ns_max))
+temp_source(:,:) = 0.0
 !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -74,6 +82,31 @@ read(90,*) nreach,flow_cells,heat_cells,source
 ncell=0
 !
 ns_max_test=-1
+!
+!
+!   Read the data for point sources
+!
+    if (source) then
+!
+!
+!   Read thermal file
+!    
+      read(50,*) no_srces
+      do nsr = 1,no_srces  
+        read(50,*) src_nr,ndmm,src_seg,temp_inp
+
+!
+! Convert kcal/m**2/sec to deg K/sec
+!
+        temp_inp=temp_inp/rho_Cp
+!
+!  Add thermal
+!
+        temp_source(src_nr,src_seg)  = temp_inp
+        write(*,*) 'temp ',src_nr,src_seg,temp_source(src_nr,src_seg)
+      end do  
+!
+    end if 
 !
 !     Card Group IIb. Reach characteristics
 !
@@ -119,14 +152,6 @@ do nr=1,nreach
 !   Relate the cell number from the linear list to the local cell number
 !
     reach_cell(nr,nc)=ncell
-!
-!   Read the data for point sources
-!
-    if (source) then
-!
-!  Place holder for point source input
-!
-    end if 
 !
 !     The headwaters index for each cell in this reach is given
 !     in the order the cells are read
