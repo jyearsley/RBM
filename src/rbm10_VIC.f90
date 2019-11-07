@@ -65,6 +65,8 @@ character (len=200 ):: cl_out_file
 !
 integer iargc
 integer numarg
+!
+logical             :: do_TEMP = .TRUE.
 
 !
 ! Command line input

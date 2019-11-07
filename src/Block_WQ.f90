@@ -44,6 +44,22 @@ module block_wq
       real, dimension(:,:,:), allocatable:: ZOO_1
       real, dimension(:,:,:), allocatable:: ZOO_2
       real, dimension(:,:,:), allocatable:: TDS
+!
+! Dimensioned and allocated water quality loading variables 
+!
+      real, dimension(:,:,:), allocatable:: TEMP_LOAD
+      real, dimension(:), allocatable:: TEMP_TRIB_LOAD
+!
+      real, dimension(:,:,:), allocatable:: DO_LOAD
+      real, dimension(:), allocatable:: DO_TRIB_LOAD
+!
+      real, dimension(:,:,:), allocatable:: BOD_LOAD
+      real, dimension(:), allocatable:: BOD_TRIB_LOAD
+!
+      real, dimension(:,:,:), allocatable:: TDS_LOAD
+      real, dimension(:), allocatable:: TDS_TRIB_LOAD
+      
+      
 ! 
 ! Tributary input
 !

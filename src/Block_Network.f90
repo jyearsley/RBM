@@ -13,7 +13,7 @@ Module Block_Network
 !
     integer           :: flow_cells,heat_cells
     integer           :: ndays,nreach
-    integer,parameter :: ns_max=200
+    integer,parameter :: ns_max=500
     integer           :: start_year,start_month,start_day
     integer           :: end_year,end_month,end_day
 !

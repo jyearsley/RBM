@@ -20,8 +20,9 @@ real         :: dt_calc,dt_total,hpd,Q1,Q2
 real         :: q_dot,q_surf,z
 real         :: Mw_kcal = 1.e06/4186.8
 real         :: rminsmooth
-real         :: tds_0,tds_dist,temp_0,temp_dist,tds_00,tds_loading
-real(8)      :: time
+real         :: tds_0,tdsload_0,tds_dist,tds_00,tds_loading
+real         :: temp_0,tempload_0,temp_dist
+real(8)      :: time,seg_vol
 real         :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,xkm
 !
 ! Indices for lagrangian interpolation
@@ -37,27 +38,35 @@ real             :: tntrp
 real, dimension(4):: tdsa,ta,xa
 real, dimension(:), allocatable :: temp_smth
 !
-real             :: tds_dist_load,tds_point_load,tds_trib_load
-real             :: temp_dist_load,temp_point_load,temp_trib_load
+real             :: tds_dist_load,tds_point_load,tds_trb_ld
+real             :: temp_dist_load,temp_point_load,temp_trb_ld
 real             :: Q_in_mps,Q_out_mps,Q_dist_mps,Q_trib_mps,Q_trib_sum,Q_ratio
 real             :: Cl_loading  !Temporary variable for testing
 real             :: QQ_in_mps
 !
-! Allocate chloride
+! Allocate chloride and chloride load
 !
 allocate (tds(nreach,-2:ns_max,2))
 tds(:,:,:) = 0.0
+allocate (tds_load(nreach,0:ns_max,2))
+tds_load(:,:,:) = 0.0
 allocate (tds_trib(nreach))
 allocate (tds_head(nreach))
+allocate(tds_trib_load(nreach))
 !
-!  Allocate water temperature
+!  Allocate water temperature and heat load
 !
 allocate (temp(nreach,-2:ns_max,2))
 temp(:,:,:) = 0.0
+allocate (temp_load(nreach,0:ns_max,2))
+temp_load(:,:,:) = 0.0
+!
+! Allocate headwaters temperature and tds
+!
 allocate (temp_head(nreach))
 allocate (temp_smth(nreach))
 allocate (temp_trib(nreach))
-!
+allocate(temp_trib_load(nreach))!
 !  Allocate hydrologic input
 !
 allocate (depth(heat_cells))
@@ -152,28 +161,28 @@ do nyear=start_year,end_year
 !
 !     Determine smoothing parameters (UW_JRY_2011/06/21)
 !
-!        rminsmooth=1.0-smooth_param(nr)
-!        temp_smth(nr)=rminsmooth*temp_smth(nr)         &
-!                     +smooth_param(nr)*dbt(nc_head)
+        rminsmooth = 1.0-smooth_param(nr)
+        temp_smth(nr) = rminsmooth*temp_smth(nr)         &
+                      + smooth_param(nr)*dbt(nc_head)
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
-!        temp_head(nr)=mu(nr)+(alphaMu(nr) &
-!                     /(1.+exp(gmma(nr)*(beta(nr)-temp_smth(nr)))))  
+        temp_head(nr) = mu(nr)+(alphaMu(nr) &
+                      /(1.+exp(gmma(nr)*(beta(nr)-temp_smth(nr)))))  
 !
 !  Initialize headwaters temperatures
 !
-!      temp_head(nr) = 20.0*q_in(nc_head)
-      temp_head(nr) = 0.0*q_in(nc_head)
       temp(nr,0,n1)=temp_head(nr)
-!      temp(nr,1,n1)=temp_head(nr)
+      temp(nr,1,n1)=temp_head(nr)
+      temp_load(nr,0,n1) = temp_head(nr)*q_in(nc_head)
+!      temp_load(nr,0,n1) = 0.0
 !
 !  Initialize headwaters chlorides
    
 !
       tds_head(nr) = 0.0
-      tds(nr,0,n1) = 0.0
-!      tds(nr,1,n1) = tds_head(nr)
+      tds_load(nr,0,n1) = 0.0
+      tds(nr,1,n1) = tds_head(nr)
 
 !
 !
@@ -243,7 +252,10 @@ seg_load = tds_source(nr,:)
 !            temp_0  = tntrp(xa,ta,x,nterp(npndx))
 !            tds_0 = tntrp(xa,tdsa,x,nterp(npndx))
             temp_0 = temp(nr,nseg,n1)
+            tempload_0 = temp_load(nr,nseg,n1)
+!
             tds_0  = tds(nr,nseg,n1)
+            tdsload_0  = tds_load(nr,nseg,n1)
             tds_00 = tds_0          
             end if
 300 continue
@@ -268,7 +280,7 @@ seg_load = tds_source(nr,:)
             dt_total=dt_total+dt_calc
             z=depth(nncell)
             call energy(temp_0,q_surf,nncell)
-            q_surf = 0.0
+!            q_surf = 0.0
             q_dot=(q_surf/(z*rfac))
 !
 !    Add distributed flows
@@ -299,8 +311,8 @@ seg_load = tds_source(nr,:)
 !
             ntribs=no_tribs(nncell)
               Q_trib_sum     = 0.0
-              temp_trib_load = 0.0
-              tds_trib_load  = 0.0
+              temp_trb_ld    = 0.0
+              tds_trb_ld     = 0.0
 !
 !if (nr.eq.1) write(27,*) nd,ncell,nncell,ns,nseg,ntribs,TRIBS_DONE
             min_seg = first_seg(nncell)
@@ -318,14 +330,13 @@ seg_load = tds_source(nr,:)
 ! 
 !  Update chloride with tributary input
 !                 
-!                  tds_trib_load = (Q_trib_mps*tds_trib(nr_trib))    &
-                  tds_trib_load = tds_trib(nr_trib)    &
-                              + tds_trib_load
+!                 tds_trib_load = (Q_trib_mps*tds_trib(nr_trib))    &
+                  tds_trb_ld = tds_trib_load(nr_trib)    &
+                              + tds_trb_ld
 !                 
-!                  temp_trib_load = (Q_trib_mps*temp_trib(nr_trib))  &
-                  temp_trib_load = temp_trib(nr_trib)  &
-                                 + temp_trib_load
-!if (nr.eq.36) write(28,*) 'tds_trib_load', ns,nseg,nr_trib,tds_trib_load
+                  temp_trb_ld = (Q_trib_mps*temp_trib(nr_trib))  &
+!                  temp_trb_ld = temp_trib_load(nr_trib)  &
+                                 + temp_trb_ld
                 end if
 !
               end do
@@ -337,7 +348,8 @@ seg_load = tds_source(nr,:)
 !
             Q_out_mps = Q_in_mps + cuft_cum*Q_diff(nncell)
             Q_out_mps = Q_out_mps + Q_trib_sum
-            Q_ratio   = Q_in_mps/Q_out_mps       
+            Q_ratio   = Q_in_mps/Q_out_mps 
+            seg_vol   = Q_out_mps*dt_calc      
 !
             tds_point_load   = 0.0
             temp_point_load  = 0.0
@@ -353,35 +365,46 @@ seg_load = tds_source(nr,:)
 !
 !  Add thermal loading
 !
-              temp_point_load  = temp_source(nr,nseg)
+!              temp_point_load  = temp_source(nr,nseg)
 !
               if(temp_0 .lt. 0.0) temp_0=0.0
 !              SRCES_DONE = .TRUE.
 !            end if
-              if(nr.eq.1) write(28,*) 'Point Load ',nd,ncell,nncell,ns,nseg  &
-                                       ,temp_0,temp_point_load,temp_trib_load
-                        if(nr.eq.1.and.nseg.eq.ns) write(28,*) 'Parcel Ends'
+!              if(nr.eq.1) write(28,*) 'Point Load ',nd,ncell,nncell,ns,nseg  &
+!                                       ,temp_0,temp_point_load,temp_trib_load
+!                        if(nr.eq.1.and.nseg.eq.ns) write(28,*) 'Parcel Ends'
 
 !
 ! Do the mass/energy balance
 !
 !            tds_00 = tds_0
-            tds_0 =  tds(nr,nseg-1,n1)                        &
-                  +  tds_point_load                         &
-                  +  tds_dist_load                          &
-                  +  tds_trib_load
+               tds_0 =  (tds_load(nr,nseg-1,n1)                      &
+                      +  tds_point_load                              &
+                      +  tds_dist_load                               &
+                      +  tds_trb_ld)/Q_out_mps
+!                      
+            tdsload_0 =  tds_load(nr,nseg-1,n1)                      &
+                      +  tds_point_load                              &
+                      +  tds_dist_load                               &
+                      +  tds_trb_ld
 !
 ! if(nr.eq.1) then
 ! write(27,*) 'Loadings ',nd,ncell,nncell,ns,nseg,temp_0 &
 !                   ,temp_point_load,temp_dist_load,temp_trib_load      &
 !                   ,Q_in_mps,Q_out_mps
 !            temp_0  =  temp_0*Q_ratio                 
-            temp_0  =  temp(nr,nseg-1,n1)                         &
-                    +  temp_point_load                &
-                    +  temp_dist_load                 &
-                    +  temp_trib_load                 &
+            temp_0  =   temp_0*Q_ratio                                &
+                    +  (temp_point_load                               &
+                    +   temp_dist_load                                &
+                    +   temp_trb_ld)/Q_out_mps                        &
+                    +   q_dot*dt_calc              
+
+            tempload_0  =  temp_load(nr,nseg-1,n1)                    &
+                        +  temp_point_load                            &
+                        +  temp_dist_load                             &
+                        +  temp_trb_ld                                &
 !                    +  temp_trib_load)/Q_out_mps      &
-                    +  q_dot*dt_calc              
+                        +  q_dot*dt_calc              
 !
 !end if
             if (temp_0.lt.0.5) temp_0 =0.5
@@ -411,11 +434,15 @@ seg_load = tds_source(nr,:)
           end do
 
 !
-!  Update chloride and water temperture
+!  Update chloride and water temperature
 !        
-            tds(nr,ns,n2)  = tds_0
+            tds(nr,ns,n2)       = tds_0
+            tds_load(nr,ns,n2)  = tdsload_0
+            tds_trib_load(nr)   = tdsload_0
 !
-            temp(nr,ns,n2) = temp_0
+            temp(nr,ns,n2)      = temp_0
+            temp_load(nr,ns,n2) = tempload_0
+            temp_trib_load(nr)  = tempload_0
 !
 !
 !  Update tributary chloride
@@ -435,8 +462,10 @@ seg_load = tds_source(nr,:)
 !
 !            if (mod(ns,2) .eq. 0) then
  xkm = x_dist(nr,ns)*1.6093/5280.
-              call WRITE(time,nd,nr,ncell,ns,temp_0,tds_source(nr,ns),    &
-                        tds_0,tds_point_load,tds_trib_load, &
+              call WRITE(time,nd,nr,ncell,ns,                        &
+!                        temp_0,temp_load(nr,ns,n2),temp_point_load,   &
+                        temp_0,temp_load(nr,ns,n2),temp_point_load,  &
+                        tempload_0,temp_dist_load,                   &
                         Q_in_mps,Q_out_mps,xkm)
 !                        Q_in(ncell),Q_out(ncell))
 !            end if
