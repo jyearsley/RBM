@@ -16,7 +16,7 @@ integer      :: nr_trib,ntrb,ntribs
 integer      :: nrec_flow,nrec_heat
 integer      :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
 integer      :: npart,nseg,nx_s,nx_head 
-real         :: dt_calc,dt_total,hpd,Q1,Q2
+real         :: day_fctr,dt_calc,dt_total,hpd,Q1,Q2
 real         :: q_dot,q_surf,z
 real         :: Mw_kcal = 1.e06/4186.8
 real         :: rminsmooth
@@ -133,6 +133,10 @@ do nyear=start_year,end_year
     year=nyear
     xd=nd
     xd_year=nd_year
+!
+! Calculate DAY_FCTR
+!
+    day_fctr = 1.0 + sin(2.*PI*xd/xd_year)
 !     
 !     Start the numbers of days-to-date counter
 !
@@ -359,7 +363,7 @@ seg_load = tds_source(nr,:)
 !  Add chloride loading
 !
 !              if (ns.ne.nseg) tds_point_load = tds_source(nr,nseg)
-              tds_point_load  = tds_source(nr,nseg)
+              tds_point_load  = tds_source(nr,nseg)*day_fctr
 !
               if(tds_0 .lt. 0.0) tds_0 = 0.0
 !
@@ -462,12 +466,11 @@ seg_load = tds_source(nr,:)
 !
 !            if (mod(ns,2) .eq. 0) then
  xkm = x_dist(nr,ns)*1.6093/5280.
-              call WRITE(time,nd,nr,ncell,ns,                        &
-!                        temp_0,temp_load(nr,ns,n2),temp_point_load,   &
-                        temp_0,temp_load(nr,ns,n2),temp_point_load,  &
-                        tempload_0,temp_dist_load,                   &
-                        Q_in_mps,Q_out_mps,xkm)
-!                        Q_in(ncell),Q_out(ncell))
+              call WRITE(time,nd,nr,ncell,ns,                 &
+                 temp_0,tempload_0,temp_point_load,           &
+                 tds_0,tdsload_0,tds_point_load,              &
+                 Q_in_mps,Q_out_mps,xkm)
+
 !            end if
 !
 !     End of computational element loop
