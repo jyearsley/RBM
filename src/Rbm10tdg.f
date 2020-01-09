@@ -16,7 +16,7 @@ C     Seattle, WA      98101
 C     (206) 553-1532
 C
       character*30 NAMEI
-      INCLUDE 'rbm10.fi'
+      INCLUDE 'rbm10tdg.fi'
 C
 C     Open file containing reach data
 C
@@ -68,7 +68,7 @@ C
       integer start_date,end_date
 	logical param(5)
       real*4 lat,long
-      INCLUDE 'rbm10.fi'
+      INCLUDE 'rbm10tdg.fi'
 	equivalence (param(1),Temp)
       data nplot/200*0/,rm_trib/50*-99./,rm_plot/100*-99./
 C
@@ -304,7 +304,7 @@ c
             read(90,1851) end_mark
  1851       format(a10)
             write(*,2851) end_mark
-            if(end_mark(1:3).ne.'End') pause 
+c            if(end_mark(1:3).ne.'End') pause 
  2851       format(' end_mark: ',a10)
 C     
          end do
@@ -326,7 +326,7 @@ c
          NWTAPE=10+nw
          read(90,1030) namei,evrate(nw)
          write(*,*) 'evrate = ',evrate(nw),' nw = ',nw
-         pause
+c         pause
          write(*,2700) 
 c     
 c     Open file with heat budget information
@@ -409,7 +409,7 @@ C
       integer no_dt(600),simyr,strt_elem(600)
      .     ,ndltp(4),nterp(4)
       real*4 plot_data(200,2)
-      INCLUDE 'rbm10.fi'
+      INCLUDE 'rbm10tdg.fi'
       EQUIVALENCE (EDATA(1),QNS)
       data ndltp/-2,-1,-2,-2/,nterp/4,3,2,3/
       data pi/3.14159/,rfac/304.8/
@@ -816,7 +816,7 @@ c
   950 return
       end
       subroutine balance
-      include 'rbm10.fi'
+      include 'rbm10tdg.fi'
       dt_max=-10000.
       do nr=1,no_rch
          do nc=1,no_celm(nr)
@@ -854,7 +854,7 @@ c
       SUBROUTINE ENERGY(TSURF,QSURF,A,B,NW)
       REAL*4 LVP
       real*4 q_fit(2),T_fit(2)
-      INCLUDE 'rbm10.fi'
+      INCLUDE 'rbm10tdg.fi'
       T_fit(1)=tsurf-1.0
       T_fit(2)=tsurf+1.0
       do i=1,2
