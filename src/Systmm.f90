@@ -143,12 +143,12 @@ do nyear=start_year,end_year
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
 !
+      DONE=.FALSE.
+!
 ! Begin cell computational loop
 !
         do ns=1,no_celm(nr)
 ! 
-        DONE=.FALSE.
-  
 ! Testing new code 8/8/2016
 !
 !     Establish particle tracks
@@ -207,7 +207,6 @@ do nyear=start_year,end_year
 !
 !    Set NCELL0 for purposes of tributary input
 !
-          ncell0=nncell
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
@@ -275,6 +274,7 @@ do nyear=start_year,end_year
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
 !
+            ncell0=nncell
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
