@@ -4,7 +4,7 @@ Module Block_Network
 !
     integer, dimension(:), allocatable  ::no_celm,no_cells,no_tribs
     integer, dimension(:), allocatable  ::head_cell
-    integer, dimension(:), allocatable  :: first_seg
+!
     integer, dimension(:,:), allocatable::conflnce,reach_cell,segment_cell,trib
 !
 !

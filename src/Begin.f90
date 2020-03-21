@@ -52,7 +52,6 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(gmma(nreach))
  allocate (smooth_param(nreach))
  allocate(dx(heat_cells))
- allocate(first_seg(heat_cells))
  allocate(no_celm(nreach))
  no_celm=0
  allocate(no_cells(nreach))
@@ -156,12 +155,6 @@ do nr=1,nreach
 200 continue
     nndlta=nndlta+1
     nseg=nseg+1
-!
-! Establish the number of the first segment in each cell
-! for later use to control tributary inflow
-!
-    if (nndlta .eq. 1) first_seg(ncell) = nseg
-!
     segment_cell(nr,nseg)=ncell
     write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)

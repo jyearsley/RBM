@@ -1,57 +1,37 @@
-      SUBROUTINE ENERGY (Tsurf,qsurf,wind_fctr,A,B,ncell)
+SUBROUTINE Energy(T_surf,q_surf,ncell)
+   use Block_Energy
+   implicit none
+   integer::i,ncell,nd
+   real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
+   real, dimension(2):: q_fit, T_fit
 !
-      use Block_Energy
-      implicit none
-      integer                       :: i,ncell,nd
-      real                          :: Tsurf,qsurf,wind_fctr,A,B
-      real                          :: T_kelvin
-      real, dimension(2)            :: q_fit,T_fit
-      real                          :: evap_rate
-      real                          :: e0,q_evap,q_conv,q_ws
-      real, dimension(2), parameter :: evrte =(/1.5e-11,0.75e-11/)
-      real, parameter               :: RHO=1000.,EVRATE=1.5e-11
+   td=nd
+   T_fit(1)=T_surf-1.0
+   T_fit(2)=T_surf+1.0
+   do i=1,2
+      e0=2.1718E8*EXP(-4157.0/(T_fit(i)+239.09))
+      rb=pf*(dbt(ncell)-T_fit(i))
+      lvp=597.0-0.57*T_fit(i)
+      q_evap=1000.*lvp*evap_coeff*wind(ncell)
+      if(q_evap.lt.0.0) q_evap=0.0
+      q_conv=rb*q_evap
+      q_evap=q_evap*(e0-ea(ncell))
+      q_ws=6.693E-2+1.471E-3*T_fit(i)
+      q_fit(i)=q_ns(ncell)+q_na(ncell)-q_ws-q_evap+q_conv
+   end do
 !
-! Testing effect of hysteresis
+!     q=AT+B
 !
-      evap_rate=evrte(1)
-      if (nd > 180) evap_rate=evrte(2)
-      T_fit(1) = Tsurf-1.0
-      T_fit(2) = Tsurf+1.0
-      if (T_fit(1) .lt. 0.50) T_fit(1) = 0.50
-      if (T_fit(2) .lt. 0.50) T_fit(2) = 1.00
-      do i=1,2
-         T_kelvin = T_fit(i) + 273.0
+!     Linear fit over the range of 2.0 deg C.
+!     These results can be used to estimate the "equilibrium" 
+!     temperature and linear rate constant.
 !
-! Vapor pressure at water surface
-         e0=2.1718E10*EXP(-4157.0/(T_kelvin-33.91))
+   A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))
+   q_surf=0.5*(q_fit(1)+q_fit(2))
+   B=(q_surf/A)-(T_fit(1)+T_fit(2))/2.
 !
-! Bowen ratio
-         rb=PF*(DBT(ncell)-T_fit(i))
+!     ******************************************************
+!               Return to Subroutine RIVMOD
+!     ******************************************************
 !
-! Latent heat of vaporization
-         lvp=1.91846e06*(T_kelvin/(T_kelvin-33.91))**2
-!
-! Evaporative heat flux
-         Q_EVAP=wind_fctr*rho*lvp*evap_rate*WIND(ncell)
-         if(q_evap.lt.0.0) q_evap=0.0
-!
-! Convective heat flux
-         Q_CONV=rb*Q_EVAP
-         Q_EVAP=Q_EVAP*(E0-EA(ncell))
-! 
-! Back radiation from the water surface
-         Q_WS=280.23+6.1589*T_fit(i)
-!
-! Thermal energy budget for i = 1,2
-         q_fit(i)=Q_NS(ncell)+0.97*Q_NA(ncell)-Q_WS-Q_EVAP+Q_CONV
-      end do
-!
-! Linear relationship for equilibrium temperature and rate constant
-!
-      A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))
-      B=(T_fit(1)*q_fit(2)-T_fit(2)*q_fit(1))                  &
-       /(T_fit(1)-T_fit(2))
-!
-      qsurf=0.5*(q_fit(1)+q_fit(2))
-      RETURN
-      END
+END Subroutine Energy
