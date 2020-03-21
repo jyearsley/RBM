@@ -10,6 +10,7 @@ Implicit None
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
+integer          :: min_seg
 integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
@@ -24,6 +25,7 @@ integer, dimension(2):: ndltp=(/-1,-2/)
 integer, dimension(2):: nterp=(/2,3/)
 
 !
+real             :: A,B,wind_fctr
 real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
 real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
 real             :: T_dstrb,T_dstrb_load,T_trb_load
@@ -156,7 +158,7 @@ do nyear=start_year,end_year
       call Particle_Track(nr,ns,nx_s,nx_head)
 !
           ncell=segment_cell(nr,ns)
-!
+
 !     Now do the third-order interpolation to
 !     establish the starting temperature values
 !     for each parcel
@@ -212,13 +214,10 @@ do nyear=start_year,end_year
             dt_calc=dt_part(nm)
             z=depth(nncell)
             call energy(T_0,q_surf,nncell)
+            call energy(T_0,q_surf,wind_fctr,A,B,ncell)
 !
             q_dot=(q_surf/(z*rfac))
-!
-! The following update for T_0 is redundant per RJN 7/26/3017
-! and has been commented out for the time being - JRY
-!
-!            T_0=T_0+q_dot*dt_calc
+            T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
 !    Add distributed flows
@@ -242,7 +241,12 @@ do nyear=start_year,end_year
             ntribs=no_tribs(nncell)
             Q_trb_sum   = 0.0
             T_trb_load  = 0.0
-            if(ntribs.gt.0.and..not.DONE) then
+!            if(ntribs.gt.0.and..not.DONE) then
+!
+! Uses first segment of the cell to advect tributary thermal energy
+!
+            min_seg = first_seg(nncell)
+            if(ntribs.gt.0.and.nseg.eq.min_seg) then
 !
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
