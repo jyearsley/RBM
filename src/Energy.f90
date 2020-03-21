@@ -3,7 +3,7 @@
       use Block_Energy
       implicit none
       integer                       :: i,ncell,nd
-      real                          :: Tsurf,Qsurf,wind_fctr,A,B
+      real                          :: Tsurf,qsurf,wind_fctr,A,B
       real                          :: T_kelvin
       real, dimension(2)            :: q_fit,T_fit
       real                          :: evap_rate
@@ -36,7 +36,7 @@
          if(q_evap.lt.0.0) q_evap=0.0
 !
 ! Convective heat flux
-         Q_CONV=rb*QEVAP
+         Q_CONV=rb*Q_EVAP
          Q_EVAP=Q_EVAP*(E0-EA(ncell))
 ! 
 ! Back radiation from the water surface
@@ -52,6 +52,6 @@
       B=(T_fit(1)*q_fit(2)-T_fit(2)*q_fit(1))                  &
        /(T_fit(1)-T_fit(2))
 !
-      qurf=0.5*(q_fit(1)+q_fit(2))
+      qsurf=0.5*(q_fit(1)+q_fit(2))
       RETURN
       END

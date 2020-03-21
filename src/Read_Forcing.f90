@@ -7,7 +7,7 @@ USE Block_Network
 IMPLICIT NONE
 !
 integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
-real    :: Q_avg,Q_dmmy
+real    :: Q_avg,Q_dmmy,rho
 
 
 no_flow=0
