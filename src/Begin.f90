@@ -103,7 +103,8 @@ read(90,*) nreach,flow_cells,heat_cells,source
 !
 !  Add chloride
 !
-! Temp
+! Apportion load among the four (4) segments, since  the loadings are base on
+! cell loadings per MTHvV
 !
         tds_source(src_nr,src_seg) = tds_inp
       end do
