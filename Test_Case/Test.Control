@@ -1,0 +1,27 @@
+Test Example for Input to RBM10_VIC modeling system: Test system
+#
+#Temperature Simulation
+Starting Date:            20000101
+Ending Data:              20011231
+Time Steps per Day:       1
+Input directory:          ./
+Output directory:         ./
+Topology File:            ./Test.topology
+#
+#
+Network File:             ./Test_Network
+#
+#
+Flow File:                ./Test_DA_flow
+#
+#
+Heat  File:               .//Test_DA_heat
+#
+#
+Mohseni Parameters:       .//Test.Mohseni:nogrid 
+#
+#
+Heat Dump:                FALSE
+#
+#
+Ndelta:                   2

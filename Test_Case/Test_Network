@@ -1,0 +1,27 @@
+Test Example for Input to RBM10_VIC modeling system: Test system
+./Test_DA_flow
+./Test_DA_heat
+  20000101  20001231         1
+         2        16               18                TRUE
+    5 Headwaters   1 TribCell    12  Headwaters       2         R.M. =    174.28
+   23.00    12.10   0.2500     0.50   0.1000 0.0
+Node     1 Row     2 Column     8  Lat    44.25 Long    -114.25 R.M. =    139.42    5
+Node     2 Row     3 Column     8  Lat    44.75 Long    -114.25 R.M. =    104.57    5
+Node     3 Row     4 Column     8  Lat    45.25 Long    -114.25 R.M. =     69.71    5
+Node     4 Row     5 Column     8  Lat    45.75 Long    -114.25 R.M. =     34.86    5
+Node     5 Row     6 Column     8  Lat    46.25 Long    -114.25 R.M. =      0.00    5
+   13 Headwaters   2 TribCell     0  Headwaters       0         R.M. =    313.34
+   23.00    12.10   0.2500     0.50   0.1000 0.0
+Node     6 Row     6 Column    14  Lat    46.25 Long    -111.25 R.M. =    289.24    5
+Node     7 Row     6 Column    13  Lat    46.25 Long    -111.75 R.M. =    265.14    5
+Node     8 Row     6 Column    12  Lat    46.25 Long    -112.25 R.M. =    241.03    5
+Node     9 Row     6 Column    11  Lat    46.25 Long    -112.75 R.M. =    216.93    5
+Node    10 Row     6 Column    10  Lat    46.25 Long    -113.25 R.M. =    192.83    5
+Node    11 Row     6 Column     9  Lat    46.25 Long    -113.75 R.M. =    168.72    5
+Node    12 Row     6 Column     8  Lat    46.25 Long    -114.25 R.M. =    144.62    5
+Node    13 Row     6 Column     7  Lat    46.25 Long    -114.75 R.M. =    120.52    5
+Node    14 Row     6 Column     6  Lat    46.25 Long    -115.25 R.M. =     96.41    5
+Node    15 Row     6 Column     5  Lat    46.25 Long    -115.75 R.M. =     72.31    5
+Node    16 Row     6 Column     4  Lat    46.25 Long    -116.25 R.M. =     48.21    5
+Node    17 Row     6 Column     3  Lat    46.25 Long    -116.75 R.M. =     24.10    5
+Node    18 Row     6 Column     2  Lat    46.25 Long    -117.25 R.M. =      0.00    5
