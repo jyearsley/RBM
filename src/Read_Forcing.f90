@@ -24,6 +24,9 @@ do nr=1,nreach
            ,rec=nrec_flow) nnd,ncell &
            ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
+!    
+    if (Q_out(no_heat) < 5.0) Q_out(no_heat) = 5.0   !JRY 06/18/2021      
+    Q_in(no_heat) = Q_out(no_heat)                   !JRY 06/18/2021       
 !
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
