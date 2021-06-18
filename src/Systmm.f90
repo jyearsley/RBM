@@ -10,7 +10,7 @@ Implicit None
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
-integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: min_seg,ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
