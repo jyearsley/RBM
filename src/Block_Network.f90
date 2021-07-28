@@ -4,7 +4,7 @@ Module Block_Network
 !
     integer, dimension(:), allocatable  ::no_celm,no_cells,no_tribs
     integer, dimension(:), allocatable  ::head_cell
-    integer, dimension(:), allocatable  :: first_seg
+!
     integer, dimension(:,:), allocatable::conflnce,reach_cell,segment_cell,trib
 !
 !
@@ -12,7 +12,7 @@ Module Block_Network
 !
     integer:: flow_cells,heat_cells
     integer:: ndays,nreach,ntrb,nwpd
-    integer,parameter::ns_max=200
+    integer,parameter::ns_max=1000
     integer:: start_year,start_month,start_day
     integer:: end_year,end_month,end_day
 !
