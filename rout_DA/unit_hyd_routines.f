@@ -78,6 +78,7 @@ c     Solve for
       CHARACTER*24  NAME5          !was 5 
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
         open(98, file=TRIM(UH_DRCTRY)//UH_STRING, status='old') 
+c
         DO N = 1,NOB
           READ(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
         END DO        
@@ -95,7 +96,6 @@ c
 
         open(98, file = TRIM(UH_DRCTRY)//TRIM(NAME5)//'.uh_s',
      &           status='new')     
-
         DO N = 1, NOB
           DO K = 1,UH_DAY
             UH_DAILY(N,K) = 0.0
