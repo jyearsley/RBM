@@ -25,6 +25,16 @@ do nr=1,nreach
            ,Q_out(no_heat),run_off(no_heat),base_flow(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
 !
+    write(*,*) 'NND -', nnd
+    Q_out(no_heat) = MAX1(Q_out(no_heat),1.0)
+!
+    Q_in(no_heat) = run_off(no_heat) + base_flow(no_heat)
+    Q_in(no_heat) = MAX1(Q_in(no_heat),1.0)
+!
+  if (nnd .eq. 1) write(80,*) 'Read_Forcing ',no_heat,Q_in(no_heat) &
+                                               ,Q_out(no_heat) 
+    Q_diff(no_heat) = Q_out(no_heat) - Q_in(no_heat)
+!
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !

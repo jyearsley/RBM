@@ -20,6 +20,7 @@ real:: dt_total,dt_xcess
        nx_s=nx_s+1
        x_part(nx_s)=x_dist(nr,nx_part-1)
        ncell=segment_cell(nr,nx_part)       
+      if (ncell .eq. 0) write(*,*) 'ncell - 0 ',nr,nx_part,ncell
        dt_part(nx_s)=dt(ncell)
        dt_total=dt_total+dt_part(nx_s)
 !

@@ -29,7 +29,7 @@ real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
 
 real             :: T_dstrb,T_dstrb_load,T_trb_load
 real             :: rminsmooth
-real             :: T_0,T_dist
+real             :: Qload1,T_0,T_dist
 real(8)          :: time
 real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
@@ -214,19 +214,21 @@ do nyear=start_year,end_year
 !
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
+!    Set NCELL0
+!
+          ncell0 = nncell
+!
 !    Initialize inflow
 !
           Q_inflow = Q_in(nncell)
-!          Q_outflow = Q_out(nncell)
-          Q_outflow = Q_in(nncell) +Q_diff(nncell)
+          Q_outflow = Q_out(nncell)
+!          Q_outflow = Q_in(nncell) +Q_diff(nncell)
           
-!
-!    Set NCELL0 for purposes of tributary input
-!
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
+!
             call energy(T_0,q_surf,nncell,nrr_tmp)
 !
             q_dot=(q_surf/(z*rfac))
@@ -279,27 +281,29 @@ do nyear=start_year,end_year
 !  Update inflow and outflow
 !
             Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-            Q_ratio = Q_inflow/(Q_outflow + 0.5)          ! Temporary fix JRY 06/24/2021      
+            Q_ratio = Q_inflow/(Q_outflow + 0.1)          ! Temporary fix JRY 06/24/2021      
 !
 ! Do the mass/energy balance
 !
             T_0  = T_0*Q_ratio                              &
-                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
-                 + q_dot*dt_calc              
+                 + (T_dstrb_load + T_trb_load)/(Q_outflow + 0.1)    &
+                 + q_dot*dt_calc  
+                 
+   Qload1 = q_dot*dt_calc
 
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
 !
-            ncell0=nncell
+!            ncell0=nncell
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
 !     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
-              ncell0=nncell
-              Q_inflow = Q_in(nncell)
+              ncell0=max(nncell,ncell0)
+              Q_inflow = Q_in(ncell0)
                DONE=.FALSE.
             end if
             dt_total=dt_total+dt_calc
@@ -314,7 +318,8 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell) &
+            
+  call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell) &
                       ,Q_inflow,Q_outflow)
 !
 !     End of computational element loop

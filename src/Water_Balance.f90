@@ -36,16 +36,7 @@ do nr = 1,nreach
 !
 !  Nonpoint flow is distributed evenly among all segments in the grid cell
 !
-    Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
-!
-! Only half the cell at the confluence contributes flow and we'll assume that the 
-! contribution from that cell is similar to that of the previous cell (nrc-1)
-!
-    if (nc .eq. no_cells(nr)) then
-      Q_out(nrc) = Q_out(nrc) + Q_diff(nrc-1)
-      Q_diff(nrc) = Q_diff(nrc-1)
-      Q_trib(nr) = Q_out(nrc)
-    end if
+!    Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
 !
   end do
 !  
