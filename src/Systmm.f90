@@ -14,7 +14,7 @@ integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
-integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp,nrr_tmp
 integer          :: npart,nseg,nx_s,nx_part,nx_head
 !
 ! Indices for lagrangian interpolation
@@ -26,9 +26,10 @@ integer, dimension(2):: nterp=(/2,3/)
 !
 real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
 real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
+
 real             :: T_dstrb,T_dstrb_load,T_trb_load
 real             :: rminsmooth
-real             :: T_0,T_dist
+real             :: Qload1,T_0,T_dist
 real(8)          :: time
 real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
@@ -39,6 +40,7 @@ real,dimension(:),allocatable     :: T_head,T_smth,T_trib
 
 logical:: DONE
 !
+logical Leap_Year
 !
 ! Allocate the arrays
 !
@@ -50,6 +52,8 @@ allocate (depth(heat_cells))
 allocate (Q_in(heat_cells))
 allocate (Q_out(heat_cells))
 allocate (Q_diff(heat_cells))
+allocate (base_flow(heat_cells))
+allocate (run_off(heat_cells))
 allocate (Q_trib(nreach))
 allocate (width(heat_cells))
 allocate (u(heat_cells))
@@ -98,7 +102,8 @@ hpd=1./xwpd
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-  if (mod(nyear,4).eq.0) nd_year=366
+!  if (mod(nyear,4).eq.0) nd_year=366
+  if (Leap_Year(nyear)) nd_year = 366
 !
 !     Day loop starts
 !
@@ -114,12 +119,19 @@ do nyear=start_year,end_year
 !
       DO ndd=1,nwpd
       xdd = ndd
-      time=year+(xd+(xdd-0.5)*hpd)/xd_year 
+      time=year+(xd+(xdd-1.5)*hpd)/xd_year 
 
 !
 ! Read the hydrologic and meteorologic forcings
 !
         call READ_FORCING
+        nrr_tmp = 0
+        do nr = 1,nreach
+            do nc=1,no_cells(nr)
+            nrr_tmp = nrr_tmp + 1
+            end do
+        end do
+
 !
 !     Begin reach computations
 !
@@ -127,6 +139,8 @@ do nyear=start_year,end_year
 !     Begin cycling through the reaches
 !
       do nr=1,nreach
+!
+      nrr_tmp = nr
 !
         nc_head=segment_cell(nr,1)
 !
@@ -143,12 +157,12 @@ do nyear=start_year,end_year
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
 !
+      DONE=.FALSE.
+!
 ! Begin cell computational loop
 !
         do ns=1,no_celm(nr)
 ! 
-        DONE=.FALSE.
-  
 ! Testing new code 8/8/2016
 !
 !     Establish particle tracks
@@ -200,22 +214,29 @@ do nyear=start_year,end_year
 !
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
+!    Set NCELL0
+!
+          ncell0 = nncell
+!
 !    Initialize inflow
 !
           Q_inflow = Q_in(nncell)
           Q_outflow = Q_out(nncell)
-!
-!    Set NCELL0 for purposes of tributary input
-!
-          ncell0=nncell
+!          Q_outflow = Q_in(nncell) +Q_diff(nncell)
+          
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-            call energy(T_0,q_surf,nncell)
+!
+            call energy(T_0,q_surf,nncell,nrr_tmp)
 !
             q_dot=(q_surf/(z*rfac))
-            T_0=T_0+q_dot*dt_calc
+!
+! The following update for T_0 is redundant per RJN 7/26/2017
+! and has been commented out for the time being - JRY
+!
+!            T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
 !    Add distributed flows
@@ -239,12 +260,7 @@ do nyear=start_year,end_year
             ntribs=no_tribs(nncell)
             Q_trb_sum   = 0.0
             T_trb_load  = 0.0
-!            if(ntribs.gt.0.and..not.DONE) then
-!
-! Uses first segment of the cell to advect tributary thermal energy
-!
-            min_seg = first_seg(nncell)
-            if(ntribs.gt.0.and.nseg.eq.min_seg) then
+            if(ntribs.gt.0.and..not.DONE) then
 !
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
@@ -265,25 +281,29 @@ do nyear=start_year,end_year
 !  Update inflow and outflow
 !
             Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-            Q_ratio = Q_inflow/Q_outflow       
+            Q_ratio = Q_inflow/(Q_outflow + 0.1)          ! Temporary fix JRY 06/24/2021      
 !
 ! Do the mass/energy balance
 !
             T_0  = T_0*Q_ratio                              &
-                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
-                 + q_dot*dt_calc              
+                 + (T_dstrb_load + T_trb_load)/(Q_outflow + 0.1)    &
+                 + q_dot*dt_calc  
+                 
+   Qload1 = q_dot*dt_calc
+
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
 !
+!            ncell0=nncell
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
 !     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
-              ncell0=nncell
-              Q_inflow = Q_in(nncell)
+              ncell0=max(nncell,ncell0)
+              Q_inflow = Q_in(ncell0)
                DONE=.FALSE.
             end if
             dt_total=dt_total+dt_calc
@@ -298,7 +318,9 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+            
+  call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell) &
+                      ,Q_inflow,Q_outflow)
 !
 !     End of computational element loop
 !

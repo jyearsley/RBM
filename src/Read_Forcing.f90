@@ -22,10 +22,16 @@ do nr=1,nreach
 !
     read(35,'(2i5,2f10.1,2f6.1,f7.1,f6.2)' &
            ,rec=nrec_flow) nnd,ncell &
-           ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
-           ,depth(no_heat),width(no_heat),u(no_heat)
+           ,Q_out(no_heat),Q_dmmy &  
+           ,Q_diff(no_heat),depth(no_heat),u(no_heat)
+!    
+    Q_out(no_heat) = MAX1(Q_out(no_heat),1.0)
 !
-    if(u(no_heat).lt.0.01) u(no_heat)=0.01
+!    Q_in(no_heat) = run_off(no_heat) + base_flow(no_heat)
+    Q_in(no_heat) = Q_out(no_heat)
+!
+    Q_diff(no_heat) = Q_out(no_heat) - Q_in(no_heat)
+!    
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
     read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
@@ -33,7 +39,9 @@ do nr=1,nreach
            ,dbt(no_heat),ea(no_heat) &
            ,Q_ns(no_heat),Q_na(no_heat),rho &
            ,press(no_heat),wind(no_heat)
-!   
+!           
+        wind(no_heat) = 3.0
+   
   if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat
 !
 !  Added variable ndelta (UW_JRY_2011/03/15
@@ -85,6 +93,6 @@ end do
 !
 ! Call the water balance subroutine
 !
-  call Water_Balance
+!  call Water_Balance
 !
 END SUBROUTINE Read_Forcing
