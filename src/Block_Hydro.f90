@@ -13,6 +13,8 @@ module Block_Hydro
     real, dimension(:),   allocatable  :: Q_in
     real, dimension(:),   allocatable  :: Q_trib
     real, dimension(:),   allocatable  :: Q_out
+    real, dimension(:),   allocatable  :: base_flow
+    real, dimension(:),   allocatable  :: run_off
     real, dimension(:),   allocatable  :: Q_diff
     real, dimension(:,:), allocatable  :: Q_nps
     real, dimension(:,:), allocatable  :: temp_trib

@@ -88,6 +88,7 @@ do nr=1,nreach
 !     the headwater number of the next higher order stream it enters, and
 !     the river mile of the headwaters.
 !
+  write(41,*)
   read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
       ,head_name,trib_cell,main_stem,rmile0
 !
@@ -156,8 +157,9 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
     segment_cell(nr,nseg)=ncell
-!    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
+    rmile1 = x_dist(nr,nseg)/5280.
+    write(41,*) nr,nseg,rmile1,x_dist(nr,nseg)
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
 !

@@ -2,38 +2,42 @@ module Block_Energy
 !
 !   Energy budget variables
 !
-!   Incoming short wave radiation, kcal/m**2/sec
+!   Incoming short wave radiation, Watts/meter**2
 !
-    real, dimension(:), allocatable::q_ns
+    real, dimension(:), allocatable    :: qns
 !
-!   Incoming atmospheric radiation, kcal/m**2/sec
+!   Incoming atmospheric radiation, Watts/meter**2
 !
-    real, dimension(:), allocatable::q_na
+    real, dimension(:), allocatable    :: qna
 !
 !   Air temperature at surface, deg. C
 !
-    real, dimension(:), allocatable::dbt
+    real, dimension(:), allocatable    :: dbt
 !  
 !   Wind speed, m/sec
 !
-    real, dimension(:), allocatable::wind
+    real, dimension(:), allocatable    :: wind
 !
-!   Vapor pressure of air at surface, mb
+!   Vapor pressure of air at surface, kPa
 !
-    real, dimension(:), allocatable::ea
+    real, dimension(:), allocatable    :: ea
 !
-!   Air pressure at surface, mb
+!   Air pressure at surface, kPa
 !
-    real, dimension(:), allocatable::press 
+    real, dimension(:), allocatable    :: press 
 
 !
-    real, dimension (:), allocatable::mu,alphamu,beta,gmma,smooth_param
-
+    real, dimension (:), allocatable   :: mu,alphamu,beta,gmma,smooth_param
+!
+    real, dimension (:,:), allocatable :: f1_tilde
 !   Some important constants
 !
-      real             :: lvp,rb,rho
-      real,parameter   :: evap_coeff=1.5e-9 !Lake Hefner coefficient, 1/meters
-      real,parameter   :: pf=0.640,pi=3.14159
-      real,parameter   :: rfac=304.8 !rho/Cp kg/meter**3/Kilocalories/kg/Deg K       
+      real             :: kcal_Wsec = 4184.0
+      real             :: lvp                    ! Wikipedia - joules(W sec)/kg
+      real             :: rb                 
+      real,parameter   :: rho = 1000.0           ! Kg/meter**3
+      real,parameter   :: wind_fctr = 1.0        ! dimensionless
+      real,parameter   :: rho_Cp = 1000.0*4184.0 ! (Kg/m**3)*(Joules/(Kg*degK)
+      real,dimension(2),parameter :: evrate = (/1.5e-8,0.75e-8/) ! 1/kPa
 !
 end module Block_Energy  

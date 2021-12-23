@@ -22,17 +22,19 @@ integer          :: npart,nseg,nx_s,nx_part,nx_head
 integer              :: njb,npndx,ntrp
 integer, dimension(2):: ndltp=(/-1,-2/)
 integer, dimension(2):: nterp=(/2,3/)
-
+!
+logical          :: ICE = .FALSE.
+!
 !
 real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
 real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-
 real             :: T_dstrb,T_dstrb_load,T_trb_load
 real             :: rminsmooth
-real             :: Qload1,T_0,T_dist
+real             :: T_0,T_dist
 real(8)          :: time
 real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
+real             :: xprt 
 real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
@@ -44,6 +46,7 @@ logical Leap_Year
 !
 ! Allocate the arrays
 !
+allocate (f1_tilde(nreach,0:ns_max))
 allocate (temp(nreach,0:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
@@ -60,26 +63,33 @@ allocate (u(heat_cells))
 allocate (dt(2*heat_cells))
 allocate (dbt(heat_cells))
 allocate (ea(heat_cells))
-allocate (Q_ns(heat_cells))
-allocate (Q_na(heat_cells))
+allocate (QNS(heat_cells))
+allocate (QNA(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
 !
+! Initialize some constants
+!
+  ns      = 0
+  nx_s    = 0
+  nx_head = 0
+  xprt    = 0.0
+!
 ! Initialize some arrays
 !
-dt_part=0.
-x_part=0.
-no_dt=0
-nstrt_elm=0
-temp=0.5
+dt_part   = 0.
+x_part    = 0.
+no_dt     = 0
+nstrt_elm = 0
+temp      = 0.5
 ! Initialize headwaters temperatures
 !
-T_head=4.0
+T_head    = 4.0
 !
 !
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
-T_smth=4.0
+T_smth    = 4.0
 
 !
 !     open the output file
@@ -125,6 +135,7 @@ do nyear=start_year,end_year
 ! Read the hydrologic and meteorologic forcings
 !
         call READ_FORCING
+!
         nrr_tmp = 0
         do nr = 1,nreach
             do nc=1,no_cells(nr)
@@ -154,6 +165,7 @@ do nyear=start_year,end_year
         T_head(nr)=mu(nr)+(alphaMu(nr) &
                   /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr))))) 
 !
+
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
 !
@@ -162,12 +174,10 @@ do nyear=start_year,end_year
 ! Begin cell computational loop
 !
         do ns=1,no_celm(nr)
-! 
-! Testing new code 8/8/2016
 !
 !     Establish particle tracks
 !
-      call Particle_Track(nr,ns,nx_s,nx_head)
+      call Particle_Track(nr,ns,nx_s,nx_head,xprt)
 !
           ncell=segment_cell(nr,ns)
 !
@@ -176,7 +186,6 @@ do nyear=start_year,end_year
 !     for each parcel
 !
           nseg=nstrt_elm(ns)
-!
 !     Perform polynomial interpolation
 !
 !
@@ -204,7 +213,7 @@ do nyear=start_year,end_year
 !
 ! Start the cell counter for nx_s
 !
-            x=x_part(nx_s)
+            x=xprt
 !
 !     Call the interpolation function
 !
@@ -220,23 +229,26 @@ do nyear=start_year,end_year
 !
 !    Initialize inflow
 !
-          Q_inflow = Q_in(nncell)
-          Q_outflow = Q_out(nncell)
-!          Q_outflow = Q_in(nncell) +Q_diff(nncell)
-          
+!          Q_inflow = Q_in(nncell)      JRY 12/08/2021
+!          Q_outflow = Q_out(nncell)    JRY 12/08/2021
+!
+          f1_tilde(nr,ns) = 0.0
           dt_total=0.0
+!
           do nm=no_dt(ns),1,-1
+!
             dt_calc=dt_part(nm)
+            dt_total = dt_total + dt_calc
             z=depth(nncell)
 !
-            call energy(T_0,q_surf,nncell,nrr_tmp)
+            call energy(T_0,q_surf,nd,nncell,ICE)
 !
-            q_dot=(q_surf/(z*rfac))
+
+            q_dot=(q_surf/(z*rho_Cp))
 !
-! The following update for T_0 is redundant per RJN 7/26/2017
-! and has been commented out for the time being - JRY
+            Q_inflow = Q_in(nncell)           ! JRY 12/08/2021 
+            Q_outflow = Q_out(nncell)         ! JRY 12/08/2021
 !
-!            T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
 !    Add distributed flows
@@ -278,39 +290,30 @@ do nyear=start_year,end_year
               DONE=.TRUE.
             end if
 !
-!  Update inflow and outflow
-!
-            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-            Q_ratio = Q_inflow/(Q_outflow + 0.1)          ! Temporary fix JRY 06/24/2021      
-!
 ! Do the mass/energy balance
 !
-            T_0  = T_0*Q_ratio                              &
+            T_0  = T_0                              &
                  + (T_dstrb_load + T_trb_load)/(Q_outflow + 0.1)    &
                  + q_dot*dt_calc  
-                 
-   Qload1 = q_dot*dt_calc
-
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
 !
-!            ncell0=nncell
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
 !     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
-              ncell0=max(nncell,ncell0)
-              Q_inflow = Q_in(ncell0)
-               DONE=.FALSE.
+!              ncell0=max(nncell,ncell0)
+              ncell0=nncell
+              DONE=.FALSE.
             end if
-            dt_total=dt_total+dt_calc
           end do
+!
           if (T_0.lt.0.5) T_0=0.5
-            temp(nr,ns,n2)=T_0
-	    T_trib(nr)=T_0
+          temp(nr,ns,n2)=T_0
+	      T_trib(nr)=T_0
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
