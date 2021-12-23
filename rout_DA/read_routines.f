@@ -74,6 +74,7 @@ c      PRINT*, 'HARDCODED FRACTION FILE'
       INTEGER N, K
       REAL    JUNK
       CHARACTER*72 FILENAME
+      write(*,*) 'Filename - ',FILENAME
       DO N = 1,NOB
          OPEN(14,FILE = FILENAME)
          DO K = 1,KE

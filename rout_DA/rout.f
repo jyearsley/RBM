@@ -68,7 +68,7 @@ c     ndd,Nout,nrec,nseg added by JRY - 10/30/2009
 c      
       INTEGER Flow_Cells,Force_Cells,NR,ndd,Nout,nrec,nseg
       INTEGER IROW, ICOL
-      INTEGER LP,M,Y
+      INTEGER LP,D,M,Y
       INTEGER J
 
       CHARACTER*80 UH_STRING,UH_DRCTRY         ! new, AW
@@ -243,7 +243,7 @@ c     Direct access file opened for writing results used by RBM10 - JRY 10/30/20
 c
 
         open (15,FILE=FLOWOUT(1:fdleno),FORM='FORMATTED'
-     &          ,ACCESS='DIRECT',RECL=60)
+     &          ,ACCESS='DIRECT',RECL=52)
 c
 c    Output pathname for heat flux
 c
@@ -253,7 +253,7 @@ c
      &             ,heatout(1:hdleno)                  
 c        
       open(16,FILE=HEATOUT(1:hdleno),FORM='FORMATTED'
-     &          ,ACCESS='DIRECT',RECL=50)
+     &          ,ACCESS='DIRECT',RECL=54)
       end if      
         
 c
@@ -272,17 +272,18 @@ c
       write(*,*) 'VIC flow Julian,#days -',FLO_strt,nday
   
 c     calculate number of days & months in simulation
+      D = START_DAY
       M=START_MO
       Y=START_YEAR
       NMONTHS = 0
-      NDAY=0
+c      NDAY=0
       DO J=START_MO,12*(STOP_YEAR-START_YEAR)+STOP_MO
         IF(M.EQ.2) THEN
            LP=isaleap(Y)
         ELSE 
            LP=0
         ENDIF
-        NDAY = NDAY+DAYS_IN_MONTH(M)+LP
+c        NDAY = NDAY+DAYS_IN_MONTH(M)+LP
         NMONTHS = NMONTHS + 1
         MO(NMONTHS) = M
         YR(NMONTHS) = Y
