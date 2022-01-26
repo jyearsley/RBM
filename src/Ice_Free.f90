@@ -5,7 +5,10 @@ use Block_Hydro
 use Block_Network
 !
 Implicit None
-! 
+!
+real                              :: T_0,T_dist
+real,dimension(4)                 :: ta,xa 
+real,dimension(:),allocatable     :: T_head,T_smth,T_trib
 !
 !     Establish particle tracks
 !
@@ -145,7 +148,8 @@ Implicit None
             dt_total=dt_total+dt_calc
           end do
           if (T_0.lt.0.5) T_0=0.5
-            temp(nr,ns,n2)=T_0
-	    T_trib(nr)=T_0
+          temp(nr,ns,n2)=T_0
+	      T_trib(nr)=T_0
 !
+       
 END SUBROUTINE ICE_FREE

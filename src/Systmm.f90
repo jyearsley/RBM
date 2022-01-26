@@ -35,10 +35,6 @@ real             :: tntrp
 real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
-real,dimension(:),allocatable     :: T_head,T_smth,T_trib
-
-logical:: DONE
-!
 !
 ! Allocate the arrays
 !
@@ -56,8 +52,8 @@ allocate (u(heat_cells))
 allocate (dt(2*heat_cells))
 allocate (dbt(heat_cells))
 allocate (ea(heat_cells))
-allocate (Q_ns(heat_cells))
-allocate (Q_na(heat_cells))
+allocate (Qns(heat_cells))
+allocate (Qna(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
 !
@@ -145,10 +141,7 @@ do nyear=start_year,end_year
 !
 ! Begin cell computational loop
 !
-        do ns=1,no_celm(nr)
-! 
-        DONE=.FALSE.
-  
+        do ns=1,no_celm(nr)  
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 

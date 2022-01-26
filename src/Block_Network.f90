@@ -16,9 +16,12 @@ Module Block_Network
     integer:: start_year,start_month,start_day
     integer:: end_year,end_month,end_day
 !
+    logical:: DONE
+!
 ! Real variables
 !
     real   :: delta_n,n_default=2
     real   :: dt_comp
     real, dimension(:), allocatable  :: ndelta
+!    
 end module Block_Network

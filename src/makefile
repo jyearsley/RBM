@@ -7,6 +7,7 @@
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
           Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
+          Ice_Free.o  \
           Block_Energy.o Block_Hydro.o Block_Network.o\
 	  Water_Balance.o Write.o	  
 f90comp = gfortran
@@ -33,6 +34,8 @@ Systmm.o: block_network.mod block_energy.mod block_hydro.mod Systmm.f90
 	$(f90comp) -c Systmm.f90
 Energy.o: block_energy.mod Energy.f90
 	$(f90comp) -c Energy.f90
+Ice_Free.o: block_energy.mod block_hydro.mod  block_network.mod Ice_Free.f90
+	$(f90comp) -c Ice_Free.f90
 Particle_Track.o: block_hydro.mod block_network.mod Particle_Track.f90
 	$(f90comp) -c Particle_Track.f90
 Write.o: Write.f90
