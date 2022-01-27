@@ -6,10 +6,10 @@
 # Defining variables
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
-          Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
-          Ice_Free.o  \
-          Block_Energy.o Block_Hydro.o Block_Network.o\
-	  Water_Balance.o Write.o	  
+	Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
+    Ice_Free.o  \
+    Block_Energy.o Block_Hydro.o Block_Ice_Snow.o Block_Network.o\
+	Water_Balance.o Write.o	  
 f90comp = gfortran
 # Makefile
 rbm10_VIC: $(objects)
@@ -22,6 +22,10 @@ Block_Hydro.o: Block_Hydro.f90
 	$(f90comp) -c Block_Hydro.f90
 block_hydro.mod: Block_Hydro.o Block_Hydro.f90
 	$(f90comp) -c Block_Hydro.f90
+Block_Ice_Snow.o: Block_Ice_Snow.f90
+	$(f90comp) -c Block_Ice_Snow.f90
+block_ice_snow.mod: Block_Ice_Snow.o Block_Ice_Snow.f90
+	$(f90comp) -c Block_Ice_Snow.f90
 Block_Network.o: Block_Network.f90
 	$(f90comp) -c Block_Network.f90
 block_network.mod: Block_Network.o Block_Network.f90
