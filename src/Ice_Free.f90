@@ -3,19 +3,37 @@ SUBROUTINE ICE_FREE(T_0)
 use Block_Energy
 use Block_Hydro
 use Block_Ice_Snow
-!
-integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer          :: nc,nd,ndd,nm,nr,ns
-integer          :: nr_trib,ntribs
-integer          :: nrec_flow,nrec_heat
-integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
-integer          :: npart,nseg,nx_s,nx_part,nx_head
 use Block_Network
 !
 Implicit None
 !
-real                              :: T_0,T_dist
-real,dimension(4)                 :: ta,xa 
+integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: min_seg,nr_trib,ntribs
+integer          :: nrec_flow,nrec_heat
+integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: npart,nseg,nx_s,nx_part,nx_head
+
+!
+!
+! Indices for lagrangian interpolation
+!
+integer              :: njb,npndx,ntrp
+integer, dimension(2):: ndltp=(/-1,-2/)
+integer, dimension(2):: nterp=(/2,3/)
+
+!
+real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
+real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
+real             :: T_dstrb,T_dstrb_load,T_trb_load
+real             :: rminsmooth
+real             :: T_0,T_dist
+real(8)          :: time
+real             :: x,xd,xdd,xd_year,xwpd,year
+real             :: tntrp
+real             :: dt_ttotal
+!
+real,dimension(4):: ta,xa
 !
 !     Establish particle tracks
 !
@@ -80,7 +98,7 @@ real,dimension(4)                 :: ta,xa
             z=depth(nncell)
             call energy(T_0,q_surf,nncell)
 !
-            q_dot=(q_surf/(z*rfac))
+            q_dot=(q_surf/(z*rho_Cp))
             T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !

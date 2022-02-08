@@ -11,28 +11,12 @@ Implicit None
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
-integer          :: ncell,nncell,nc_head
-integer          :: nc,nd,ndd,nm,nr,ns
-integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: ncell, nncell, nc_head
+integer          :: nc, nd, ndd, nm, nr, ns
+integer          :: n1, n2, nnd, nobs, nyear, nd_year, ntmp
 !
-! Indices for lagrangian interpolation
-!
-integer              :: njb,npndx,ntrp
-integer, dimension(2):: ndltp=(/-1,-2/)
-integer, dimension(2):: nterp=(/2,3/)
-
-!
-real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-real             :: T_dstrb,T_dstrb_load,T_trb_load
-real             :: rminsmooth
-real             :: T_0,T_dist
-real(8)          :: time
-real             :: x,xd,xdd,xd_year,xwpd,year
-real             :: tntrp
-real             :: dt_ttotal
-real,dimension(4):: ta,xa
-!
+real             :: hpd, time, xd, xdd, xwpd, xd_year, year
+real             :: T_0, q_inflow, q_outflow, rminsmooth
 !
 ! Allocate the arrays
 !
