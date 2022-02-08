@@ -1,14 +1,21 @@
-SUBROUTINE ICE_FREE(  )
+SUBROUTINE ICE_FREE(T_0)
 
 use Block_Energy
 use Block_Hydro
+use Block_Ice_Snow
+!
+integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: nr_trib,ntribs
+integer          :: nrec_flow,nrec_heat
+integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: npart,nseg,nx_s,nx_part,nx_head
 use Block_Network
 !
 Implicit None
 !
 real                              :: T_0,T_dist
 real,dimension(4)                 :: ta,xa 
-real,dimension(:),allocatable     :: T_head,T_smth,T_trib
 !
 !     Establish particle tracks
 !

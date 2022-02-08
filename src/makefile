@@ -1,5 +1,6 @@
 #
-# Makefile for the grid-based semi-Lagrangian water temperature model, RBM10_VIC
+# Makefile for the grid-based semi-Lagrangian water 
+# temperature model, RBM10_VIC, modified to predict freezing and thawing
 #
 # Start of the makefile
 #

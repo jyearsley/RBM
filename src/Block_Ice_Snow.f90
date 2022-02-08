@@ -7,7 +7,7 @@ Module Block_Ice_Snow
 !
 ! Logical variables 
 !
-    logical,dimension(:,:),allocatable :: Ice, Snow
+    logical :: ICE(1000), SNOW(1000), SUB_ZERO(1000)
 !
 ! Real variables
 !
@@ -21,7 +21,7 @@ Module Block_Ice_Snow
     real, parameter                 :: ltnt_ice_air = 0.840e-03 !Saucier et al
     real, parameter, dimension(2)   :: sens_ice_air = (/0.69e-03,1.12e-03/)       
 !
-    real, dimension(:,:,:), allocatable) :: ice_temp, ice_thick
+    real, dimension(:,:,:), allocatable :: ice_temp, ice_thick
 !
     real, parameter, dimension(2)   :: snow_albedo = (/0.85,0.60/)
     real, parameter, dimension(2)   :: ice_extnct  = (/1.5,20.0/) ! 1/meters

@@ -2,6 +2,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 !
 use Block_Energy
 use Block_Hydro
+use Block_Ice_Snow
 use Block_Network
 !
 Implicit None
@@ -10,12 +11,9 @@ Implicit None
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
-integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: ncell,nncell,nc_head
 integer          :: nc,nd,ndd,nm,nr,ns
-integer          :: nr_trib,ntribs
-integer          :: nrec_flow,nrec_heat
 integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
-integer          :: npart,nseg,nx_s,nx_part,nx_head
 !
 ! Indices for lagrangian interpolation
 !
@@ -38,6 +36,9 @@ real,dimension(4):: ta,xa
 !
 ! Allocate the arrays
 !
+!allocate (ICE(heat_cells))
+!allocate (SNOW(heat_cells))
+!allocate (SUB_ZERO(heat_cells))
 allocate (temp(nreach,0:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
@@ -142,6 +143,14 @@ do nyear=start_year,end_year
 ! Begin cell computational loop
 !
         do ns=1,no_celm(nr)  
+!
+          ncell = segment_cell(nr,ns)
+!        
+          if (.not.SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
+            call Ice_Free (T_0)
+          else
+!            call Frozen (  )
+          end if
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
