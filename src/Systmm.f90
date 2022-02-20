@@ -1,4 +1,4 @@
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM
 !
 use Block_Energy
 use Block_Hydro
@@ -8,15 +8,13 @@ use Block_Network
 Implicit None
 ! 
 !
-character (len=200):: temp_file
-character (len=200):: param_file
-! 
-integer          :: ncell, nncell, nc_head
-integer          :: nc, nd, ndd, nm, nr, ns
-integer          :: n1, n2, nnd, nobs, nyear, nd_year, ntmp
+integer          :: ncell, nc_head
+integer          :: nd, ndd, nr, ns
+integer          :: nobs, nyear, nd_year, ntmp
 !
-real             :: hpd, time, xd, xdd, xwpd, xd_year, year
-real             :: T_0, q_inflow, q_outflow, rminsmooth
+real             :: hpd, xd, xdd, xwpd, xd_year, year
+real             :: rminsmooth
+real(8)          :: time
 !
 ! Allocate the arrays
 !
@@ -57,12 +55,7 @@ T_head=4.0
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
 T_smth=4.0
-
 !
-!     open the output file
-!
-
-open(20,file=TRIM(temp_file),status='unknown')
 !
 !
 ! Initialize dummy counters that facilitate updating simulated values
@@ -96,7 +89,6 @@ do nyear=start_year,end_year
       DO ndd=1,nwpd
       xdd = ndd
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
-
 !
 ! Read the hydrologic and meteorologic forcings
 !
@@ -129,9 +121,9 @@ do nyear=start_year,end_year
         do ns=1,no_celm(nr)  
 !
           ncell = segment_cell(nr,ns)
-!        
+!    
           if (.not.SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
-            call Ice_Free (T_0)
+             call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
 !            call Frozen (  )
           end if
@@ -142,6 +134,7 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
+
         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
 !
 !     End of computational element loop
@@ -156,9 +149,6 @@ do nyear=start_year,end_year
 !
 !     End of weather period loop (NDD=1,NWPD)
 !
-4650 format(16x,12(6x,f6.0,6x))
-4700 format(f10.4,f6.0,15(f6.1,f8.3))
-4750 format(f10.4,10(i4,f8.0))
           end do
 !
 !     End of main loop (ND=1,365/366)
@@ -174,5 +164,4 @@ do nyear=start_year,end_year
 !                        return to rmain
 !     ******************************************************
 !
-950 return
 end SUBROUTINE SYSTMM

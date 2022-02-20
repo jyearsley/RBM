@@ -8,7 +8,7 @@
    real                :: T_Kelvin, T_rb, Tsurf, vpr_diff
    real, dimension(2)  :: q_fit, T_fit
 !
-! Testing effect of hysteresis with output as Farmington_3  4/2/2018
+! Testing effect of hysteresis 
 !
       evap_rate=evrate(1)
       if (nd > 180) evap_rate=evrate(2)
@@ -25,7 +25,7 @@
 !
 ! Bowen ratio - Andreas_et_al JGR Oceans(2013) Fig 1 
 !
-         if (.not. Ice) then
+         if (T_fit(i) .gt. 0.01) then
            rb = -0.47305*LOG(T_fit(i)) + 1.87629 
          else
            T_rb = T_fit(i) + 40.0
@@ -48,6 +48,8 @@
 !
 ! Thermal energy budget for i = 1,2
          q_fit(i)=QNS(ncell)+0.97*QNA(ncell)-QWS-QEVAP+QCONV
+!if (nd .le.5) write(*,*) 'Heat ',i,nd,ncell,T_fit(i),vpr_diff,lvp &
+!                                 ,rb
       end do
 !
 ! Linear relationship for equilibrium temperature and rate constant

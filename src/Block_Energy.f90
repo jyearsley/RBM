@@ -4,27 +4,36 @@ module Block_Energy
 !
 !   Incoming short wave radiation, Watts/meter**2
 !
-    real, dimension(:), allocatable    :: qns
+    real, dimension(:), allocatable     :: qns
 !
 !   Incoming atmospheric radiation, Watts/meter**2
 !
-    real, dimension(:), allocatable    :: qna
+    real, dimension(:), allocatable     :: qna
 !
 !   Air temperature at surface, deg. C
 !
-    real, dimension(:), allocatable    :: dbt
+    real, dimension(:), allocatable     :: dbt
 !  
 !   Wind speed, m/sec
 !
-    real, dimension(:), allocatable    :: wind
+    real, dimension(:), allocatable     :: wind
 !
 !   Vapor pressure of air at surface, kPa
 !
-    real, dimension(:), allocatable    :: ea
+    real, dimension(:), allocatable     :: ea
 !
 !   Air pressure at surface, kPa
 !
-    real, dimension(:), allocatable    :: press 
+    real, dimension(:), allocatable     :: press 
+!
+! Simulated water temperatures 
+!   
+    real, dimension(:),   allocatable   :: T_head,T_smth,T_trib 
+    real, dimension(:,:), allocatable   :: Q_nps
+    real, dimension(:,:), allocatable   :: temp_trib
+    real, dimension(:,:), allocatable   :: temp_nps,thermal
+    !
+    real, dimension(:,:,:), allocatable :: temp
 
 !
     real, dimension (:), allocatable   :: mu,alphamu,beta,gmma,smooth_param
@@ -32,6 +41,7 @@ module Block_Energy
     real, dimension (:,:), allocatable :: f1_tilde
 !   Some important constants
 !
+      real             :: T_0
       real             :: kcal_Wsec = 4184.0
       real             :: lvp                    ! Wikipedia - joules(W sec)/kg
       real             :: rb                 

@@ -26,13 +26,13 @@ do nr=1,nreach
            ,depth(no_heat),u(no_heat)
            
 !    
-    if (nnd .le. 2) write(*,*) nnd,ncell,Q_in(no_heat)
     Q_in(no_heat) = MAX1(Q_in(no_heat),1.0)
 !
 !    Q_in(no_heat) = run_off(no_heat) + base_flow(no_heat)
     Q_out(no_heat) = Q_in(no_heat)
 !
     Q_diff(no_heat) = Q_out(no_heat) - Q_in(no_heat)
+    Q_diff(no_heat) = MAX1(Q_diff(no_heat),0.1)
 !    
 !    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !

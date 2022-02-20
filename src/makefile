@@ -11,7 +11,7 @@ objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
     Ice_Free.o  \
     Block_Energy.o Block_Hydro.o Block_Ice_Snow.o Block_Network.o\
 	Water_Balance.o Write.o	  
-f90comp = gfortran
+f90comp = gfortran -Wall -g3 -fbounds-check
 # Makefile
 rbm10_VIC: $(objects)
 	$(f90comp) -o rbm10_VIC $(objects)

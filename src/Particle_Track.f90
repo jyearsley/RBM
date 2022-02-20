@@ -3,9 +3,9 @@ USE Block_Hydro
 USE Block_Network
 IMPLICIT NONE
 integer, intent(IN) :: nr,ns
-integer             :: ncell, nx_head, nx_part, nx_s,count_steps
+integer             :: ncell, nx_head, nx_part, nx_s
 real                :: dtt, dttl, dt_total, dt_xcess
-real                :: xcess,xprt
+real                :: xprt
 !
 !     First do the reverse particle tracking
 !
@@ -25,6 +25,7 @@ real                :: xcess,xprt
 !
        ncell = segment_cell(nr,nx_part)       
        xprt = x_dist(nr,nx_part)
+
 !
        if (xprt .gt. x_dist(nr,0)) xprt = x_dist(nr,0)
 !

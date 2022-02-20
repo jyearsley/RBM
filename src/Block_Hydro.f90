@@ -6,6 +6,7 @@ module Block_Hydro
     integer, dimension(2000):: no_dt,nstrt_elm
 !
 !
+    real                    :: Q_inflow, Q_outflow
     real, dimension(2000)   :: dt_part,x_part
 !
     real, dimension(:),   allocatable  :: depth
@@ -19,13 +20,8 @@ module Block_Hydro
     real, dimension(:),   allocatable  :: base_flow
     real, dimension(:),   allocatable  :: run_off
     real, dimension(:),   allocatable  :: Q_diff
-    real, dimension(:),   allocatable  :: T_head,T_smth,T_trib 
-!
-    real, dimension(:,:), allocatable  :: Q_nps
-    real, dimension(:,:), allocatable  :: temp_trib
-    real, dimension(:,:), allocatable  :: temp_nps,thermal
+
     real, dimension(:,:), allocatable  :: x_dist
-!
-    real, dimension(:,:,:), allocatable :: temp
+
 
 end module Block_Hydro

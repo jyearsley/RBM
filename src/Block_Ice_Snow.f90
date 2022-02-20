@@ -7,7 +7,7 @@ Module Block_Ice_Snow
 !
 ! Logical variables 
 !
-    logical :: ICE(1000), SNOW(1000), SUB_ZERO(1000)
+    logical :: ICE(5000), SNOW(5000), SUB_ZERO(5000)
 !
 ! Real variables
 !

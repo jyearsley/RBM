@@ -1,4 +1,4 @@
-SUBROUTINE ICE_FREE(T_0)
+SUBROUTINE ICE_FREE(nd,nr,ns,ncell,nx_head)
 
 use Block_Energy
 use Block_Hydro
@@ -7,37 +7,35 @@ use Block_Network
 !
 Implicit None
 !
-integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: nd,ncell,nncell,ncell0
+integer          :: nm,nr,ns
 integer          :: min_seg,nr_trib,ntribs
-integer          :: nrec_flow,nrec_heat
-integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
-integer          :: npart,nseg,nx_s,nx_part,nx_head
+integer          :: npart,nseg,nx_s,nx_head
+
 
 !
 !
 ! Indices for lagrangian interpolation
 !
-integer              :: njb,npndx,ntrp
+integer              :: npndx,ntrp
 integer, dimension(2):: ndltp=(/-1,-2/)
 integer, dimension(2):: nterp=(/2,3/)
 
 !
-real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
+real             :: dt_calc,dt_total,q_dot,q_surf,z
+real             :: Q_dstrb,Q_ratio,Q_trb,Q_trb_sum
 real             :: T_dstrb,T_dstrb_load,T_trb_load
-real             :: rminsmooth
-real             :: T_0,T_dist
-real(8)          :: time
-real             :: x,xd,xdd,xd_year,xwpd,year
+real             :: x,xprt
 real             :: tntrp
-real             :: dt_ttotal
+!
 !
 real,dimension(4):: ta,xa
 !
 !     Establish particle tracks
 !
-      call Particle_Track(nr,ns,nx_s,nx_head)
+nx_s = 0
+!  
+      call Particle_Track(nr,ns,nx_s,nx_head,xprt)
 !
           ncell=segment_cell(nr,ns)
 !
@@ -45,6 +43,7 @@ real,dimension(4):: ta,xa
 !     establish the starting temperature values
 !     for each parcel
 !
+
           nseg=nstrt_elm(ns)
 !
 !     Perform polynomial interpolation
@@ -63,27 +62,33 @@ real,dimension(4):: ta,xa
 !
 !
 !     Interpolation at the upstream or downstream boundary
-!
+!        
+
+
             if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
 !
             do ntrp=nterp(npndx),1,-1
               npart=nseg+ntrp+ndltp(npndx)
               xa(ntrp)=x_dist(nr,npart)
               ta(ntrp)=temp(nr,npart,n1)
+
             end do
 !
 ! Start the cell counter for nx_s
 !
-            x=x_part(nx_s)
+!            x=x_part(nx_s)
+            x=xprt
 !
 !     Call the interpolation function
 !
             T_0=tntrp(xa,ta,x,nterp(npndx))
+!
           end if
 !
 !
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
+
 !    Initialize inflow
 !
           Q_inflow = Q_in(nncell)
@@ -96,7 +101,8 @@ real,dimension(4):: ta,xa
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-            call energy(T_0,q_surf,nncell)
+            call energy(T_0,q_surf,nd,nncell,ICE)
+
 !
             q_dot=(q_surf/(z*rho_Cp))
             T_0=T_0+q_dot*dt_calc
@@ -108,6 +114,7 @@ real,dimension(4):: ta,xa
 !
             Q_dstrb = Q_diff(nncell)
 !
+
 ! Temperature of distributed inflow assumed = 10.0 deg C
 !
             if(Q_dstrb.gt.0.001) then
@@ -148,14 +155,14 @@ real,dimension(4):: ta,xa
 !
 !  Update inflow and outflow
 !
-            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
+            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum + 0.0001
             Q_ratio = Q_inflow/Q_outflow       
 !
 ! Do the mass/energy balance
 !
             T_0  = T_0*Q_ratio                              &
                  + (T_dstrb_load + T_trb_load)/Q_outflow    &
-                 + q_dot*dt_calc              
+                 + q_dot*dt_calc                           
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
@@ -165,7 +172,7 @@ real,dimension(4):: ta,xa
 !
 !     Reset tributary flag if this is a new cell
 !
-            if(ncell0.ne.nncell) then
+            if(ncell0.ne.nncell .and. nncell .gt.0) then
               ncell0=nncell
               Q_inflow = Q_in(nncell)
                DONE=.FALSE.
@@ -174,7 +181,7 @@ real,dimension(4):: ta,xa
           end do
           if (T_0.lt.0.5) T_0=0.5
           temp(nr,ns,n2)=T_0
-	      T_trib(nr)=T_0
+          T_trib(nr)=T_0
 !
        
 END SUBROUTINE ICE_FREE

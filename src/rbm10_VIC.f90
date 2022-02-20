@@ -43,15 +43,14 @@
 implicit none
 !
 !
-character (len=200 ):: inPrefix
-character (len=200 ):: outPrefix
-character (len=200 ):: flow_file
-character (len=200 ):: heat_file
-character (len=200 ):: net_file
-character (len=200 ):: param_file
-character (len=200 ):: temp_file
-character (len=200 ):: spatial_file
-character (len=8)   :: start_data,end_data     
+character (len=200 )           :: inPrefix
+character (len=200 )           :: outPrefix
+character (len=200 )           :: flow_file
+character (len=200 )           :: heat_file
+character (len=200 )           :: net_file
+character (len=200 )           :: param_file
+character (len=200 )           :: temp_file
+character (len=200 )           :: spatial_file    
 integer iargc
 integer numarg
 
@@ -78,12 +77,16 @@ call getarg ( 2, outPrefix )
 net_file      = TRIM(inPrefix)//'_Network'
 param_file    = TRIM(inPrefix)//'_Parameters'
 spatial_file  = TRIM(outPrefix)//'.Spat'
-temp_file     = TRIM(outPrefix)//'.Temp'
 !
-write(*,*) 'Spatial file: ',spatial_file         
+write(*,*) 'Spatial file: ',spatial_file 
+open(22,file=TRIM(spatial_file),status='unknown') ! (changed by JRY 02/09/2022)
+!        
+temp_file     = TRIM(outPrefix)//'.Temp'
 write(*,*) 'Network file    : ',net_file
 write(*,*) 'Parameter file  : ',param_file!
 write(*,*) 'Temperature file: ',temp_file
+!
+OPEN(UNIT=20,FILE=TRIM(temp_file),STATUS='UNKNOWN')
 !
 OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
 !
@@ -112,11 +115,11 @@ write(*,*) 'Calling BEGIN'
 !
 !     SUBROUTINE BEGIN reads in river system information from the NETWORK file
 !
-CALL BEGIN(param_file, spatial_file)
+CALL BEGIN
 !
 !     SUBROUTINE SYSTMM performs the simulations
 !
-CALL SYSTMM(temp_file,param_file) ! (WUR_WF_MvV_2011/01/05)
+CALL SYSTMM ! (WUR_WF_MvV_2011/01/05)
 !
 !     Close files after simulation is complete
 !
