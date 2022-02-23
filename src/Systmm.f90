@@ -8,7 +8,7 @@ use Block_Network
 Implicit None
 ! 
 !
-integer          :: ncell, nc_head
+integer          :: ncase,ncell, nc_head
 integer          :: nd, ndd, nr, ns
 integer          :: nobs, nyear, nd_year, ntmp
 !
@@ -121,11 +121,19 @@ do nyear=start_year,end_year
         do ns=1,no_celm(nr)  
 !
           ncell = segment_cell(nr,ns)
+!
+! Check to see if air temperature is above freezing (0.0 deg C)
+! 
 !    
-          if (.not.SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
+          ICE(ncell) = .FALSE.
+!
+          if (dbt(ncell) .lt. 0.01) SUB_ZERO(ncell) = .TRUE.
+        
+!
+          if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
              call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
-!            call Frozen (  )
+             call Frozen (nd,nr,ns,ncell,nc_head)
           end if
 !
 !   Write all temperature output UW_JRY_11/08/2013
