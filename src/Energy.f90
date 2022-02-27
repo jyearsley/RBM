@@ -1,10 +1,11 @@
-      SUBROUTINE ENERGY   (Tsurf, qsurf, nd, ncell, ICE)
+      SUBROUTINE ENERGY   (Tsurf, qsurf, nd, ncell)
 !
-    use Block_Energy
+   use Block_Energy
+   use Block_Ice_Snow
    implicit none
    integer             ::i, ncell, nd
-   logical             :: Ice
-   real                :: A, B, e0, evap_rate, qsurf, QCONV, QEVAP, QWS
+   real                :: A, B, e0, evap_rate,ltnt_heat,rb
+   real                :: qsurf, QCONV, QEVAP, QWS
    real                :: T_Kelvin, T_rb, Tsurf, vpr_diff
    real, dimension(2)  :: q_fit, T_fit
 !
@@ -14,8 +15,7 @@
       if (nd > 180) evap_rate=evrate(2)
       T_fit(1) = Tsurf-1.0
       T_fit(2) = Tsurf+1.0
-      if (T_fit(1) .lt. 0.50) T_fit(1) = 0.50
-      if (T_fit(2) .lt. 0.50) T_fit(2) = 1.00
+!
       do i=1,2
          T_kelvin = T_fit(i) + 273.0
 !
@@ -32,8 +32,16 @@
            rb = -5.85894*LOG(T_rb) - 23.3993
          end if
 !
-! Latent heat of vaporization - joules (Wsec)/kg
-         lvp = kcal_Wsec * (597.0 - T_fit(i))
+! Latent heat of vaporization/sublimation - joules (Wsec)/kg
+!
+         
+         if (ICE(ncell)) then
+           ltnt_heat = lvs                       ! Sublimation
+           
+           
+         else 
+           ltnt_heat = kcal_Wsec * (597.0 - T_fit(i))
+         end if
 !
 ! Evaporative heat flux
          QEVAP=wind_fctr*rho*lvp*evap_rate*WIND(ncell)

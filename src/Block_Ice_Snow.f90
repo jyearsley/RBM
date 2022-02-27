@@ -14,7 +14,7 @@ Module Block_Ice_Snow
     real, parameter                 :: ice_albedo = 0.25
     real, parameter                 :: ice_cndctvy = 2.17   ! W/m/deg K  
     real, parameter                 :: h2o_dnsty = 1000.0  ! Kg/m**3
-    real, parameter                 :: ice_dnsty = 917.0   ! Kg/m**3
+    real, parameter                 :: h_ice_min = 0.025   ! meters
     real, parameter                 :: ice_min_thck = 0.01 ! meters
     real, parameter                 :: sno_dnsty = 330.0   ! Kg/m**3
     real, parameter                 :: sens_h2o_ice = 0.280e-03 !Saucier et al

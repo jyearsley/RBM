@@ -31,13 +31,15 @@ Block_Network.o: Block_Network.f90
 	$(f90comp) -c Block_Network.f90
 block_network.mod: Block_Network.o Block_Network.f90
 	$(f90comp) -c Block_Network.f90
-Begin.o: block_energy.mod block_network.mod block_hydro.mod Begin.f90
+Begin.o: block_energy.mod block_network.mod block_hydro.mod \
+	block_ice_snow.mod Begin.f90
 	$(f90comp) -c Begin.f90
 Read_Forcing.o: block_energy.mod block_hydro.mod block_network.mod Read_Forcing.f90
 	$(f90comp) -c Read_Forcing.f90 
-Systmm.o: block_network.mod block_energy.mod block_hydro.mod Systmm.f90
+Systmm.o: block_network.mod block_energy.mod block_hydro.mod \
+	block_ice_snow.mod Systmm.f90
 	$(f90comp) -c Systmm.f90
-Energy.o: block_energy.mod Energy.f90
+Energy.o: block_energy.mod block_ice_snow.mod Energy.f90
 	$(f90comp) -c Energy.f90
 Ice_Free.o: block_energy.mod block_hydro.mod  block_network.mod Ice_Free.f90
 	$(f90comp) -c Ice_Free.f90

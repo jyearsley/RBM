@@ -131,6 +131,7 @@ do nyear=start_year,end_year
         
 !
           if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
+!
              call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
              call Frozen (nd,nr,ns,ncell,nc_head)

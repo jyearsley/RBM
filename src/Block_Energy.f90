@@ -43,8 +43,8 @@ module Block_Energy
 !
       real             :: T_0
       real             :: kcal_Wsec = 4184.0
-      real             :: lvp                    ! Wikipedia - joules(W sec)/kg
-      real             :: rb                 
+      real             :: lvp                    ! Latent heat of vaorization - J(W sec)/kg
+      real,parameter   :: lvs = 2.834e06         ! Latent heat of sublimation                    
       real,parameter   :: rho = 1000.0           ! Kg/meter**3
       real,parameter   :: wind_fctr = 1.0        ! dimensionless
       real,parameter   :: rho_Cp = 1000.0*4184.0 ! (Kg/m**3)*(Joules/(Kg*degK)
