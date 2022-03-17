@@ -21,6 +21,8 @@ Module Block_Ice_Snow
     real, parameter                 :: ltnt_ice_air = 0.840e-03 !Saucier et al
     real, parameter, dimension(2)   :: sens_ice_air = (/0.69e-03,1.12e-03/)       
 !
+    real                            :: Ice_Trnsfr
+!
     real, dimension(:,:,:), allocatable :: ice_temp, ice_thick
 !
     real, parameter, dimension(2)   :: snow_albedo = (/0.85,0.60/)

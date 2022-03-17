@@ -61,6 +61,12 @@ read(90,*) nreach,flow_cells,heat_cells,source
  trib=0
  allocate (conflnce(heat_cells,10))
  conflnce=0
+ !
+ ! Ice state variables
+ !
+ allocate(ice_temp(nreach,ns_max))
+ allocate(ice_thick(nreach,ns_max))
+ !
  allocate(reach_cell(nreach,ns_max)) 
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))

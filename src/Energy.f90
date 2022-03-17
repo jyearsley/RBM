@@ -1,13 +1,14 @@
-      SUBROUTINE ENERGY   (Tsurf, qsurf, nd, ncell)
+      SUBROUTINE ENERGY   (Tsurf, q_rslt, nd, ncell)
 !
    use Block_Energy
    use Block_Ice_Snow
    implicit none
    integer             ::i, ncell, nd
-   real                :: A, B, e0, evap_rate,ltnt_heat,rb
-   real                :: qsurf, QCONV, QEVAP, QWS
-   real                :: T_Kelvin, T_rb, Tsurf, vpr_diff
-   real, dimension(2)  :: q_fit, T_fit
+   real                :: A, B, e0, evap_rate,rb,vpr_diff
+   real                :: Denom,LE_in,H_in,SW_in,LW_in,LW_back,Ice_Trnsfr
+   real                :: q_rslt, QCONV, QEVAP, QWS
+   real                :: T_Kelvin,T_p,T_p_cubed,T_rb, Tsurf, T_tetens
+   real, dimension(2)  :: q10,q_ice,q_fit, T_fit
 !
 ! Testing effect of hysteresis 
 !
@@ -18,10 +19,10 @@
 !
       do i=1,2
          T_kelvin = T_fit(i) + 273.0
+         T_tetens = T_fit(i) + 237.3
 !
 ! Vapor pressure at water surface - kPa (Tetens)
-         e0=0.61078*exp((17.27*T_fit(i))/T_Kelvin)
-         vpr_diff = e0 - ea(ncell)
+         e0=0.61078*exp((17.27*T_fit(i))/T_tetens)
 !
 ! Bowen ratio - Andreas_et_al JGR Oceans(2013) Fig 1 
 !
@@ -33,29 +34,51 @@
          end if
 !
 ! Latent heat of vaporization/sublimation - joules (Wsec)/kg
-!
-         
+!         
          if (ICE(ncell)) then
-           ltnt_heat = lvs                       ! Sublimation
-           
-           
+           T_p = ice_temp(nr,ns,1) + 273.0 ! Notation after Parkinson-Washington
+           T_p_cubed = T_p*T_p*T_p
+! Sensible heat with ice cover
+           H_in  = rho_air*cp_air*Ch_Cg*WIND(ncell)*(DBT(ncell)-T_p)           
+! Latent heat heat
+           q10 = eps_air_h2o*ea(ncell)/(press(ncell)-comp_eps*ea(ncell))
+           q_ice = eps_air_h2o*e0/(press(ncell)-comp_eps*e0) 
+           LE_in = rho_air*lvs*Ch_Cg*WIND(ncell)*(q10 - q_ice)
+! Shortwave radiation
+           SW_in = (1.-alpha_ice)*QNS(ncell)
+! Longwave radiation 
+           LW_in = epsilon     *QNA(ncell) 
+! Back radiation
+           LW_back = epsilon*Stf_Bltz*T_p*T_p_cubed
+! Heat transfer through ice                   
+           Ice_Trnsfr = (kappa_ice/ice_thick(nr,ns,1))*(273.0-T_p)
+! Denominator
+           Denom = 4.0*epsilon*Stfn_Bltz*T_p_cubed + kappa_ice/ice_thick(nr,ns,1)
+!
+           q_fit(i) = (H_in + LE_in + LW_in + SW_in - LW_back)/Denom
          else 
-           ltnt_heat = kcal_Wsec * (597.0 - T_fit(i))
-         end if
+           lvp = kcal_Wsec * (597.0 - T_fit(i))
+           vpr_diff = e0 - ea(ncell)
 !
 ! Evaporative heat flux
-         QEVAP=wind_fctr*rho*lvp*evap_rate*WIND(ncell)
-         if(QEVAP.lt.0.0) QEVAP=0.0
+         LE_in=wind_fctr*rho*lvp*evap_rate*WIND(ncell)
+         if(LE_in.lt.0.0) LE_in=0.0
 !
 ! Convective heat flux
-         QCONV=rb*QEVAP
-         QEVAP=QEVAP*vpr_diff
-! 
+         H_in=rb*LE_in
+! Evaporative heat flux
+         LE_in=LE_in*vpr_diff
+! Shortwave radiation
+         SW_in = QNS(ncell)
+!Longwave radiaton
+         LW_in  
 ! Back radiation from the water surface - W/m**2
-         QWS=280.23+6.1589*T_fit(i)
+         LW_back=280.23+6.1589*T_fit(i)
 !
 ! Thermal energy budget for i = 1,2
-         q_fit(i)=QNS(ncell)+0.97*QNA(ncell)-QWS-QEVAP+QCONV
+!         q_fit(i)=QNS(ncell)+0.97*QNA(ncell)-QWS-QEVAP+QCONV
+         q_fit(i)=SW_in + LW_in - LW_back - LE_in + H_in
+         
 !if (nd .le.5) write(*,*) 'Heat ',i,nd,ncell,T_fit(i),vpr_diff,lvp &
 !                                 ,rb
       end do
@@ -66,6 +89,6 @@
       B=(T_fit(1)*q_fit(2)-T_fit(2)*q_fit(1))         &
           /(T_fit(1)-T_fit(2))
 !
-      qsurf=0.5*(q_fit(1)+q_fit(2))
+      q_rslt=0.5*(q_fit(1)+q_fit(2))
       RETURN
       END
