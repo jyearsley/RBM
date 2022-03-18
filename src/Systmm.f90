@@ -318,7 +318,6 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            
   call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell) &
                       ,Q_inflow,Q_outflow)
 !
