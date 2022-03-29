@@ -101,7 +101,7 @@ nx_s = 0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-            call energy(T_0,q_surf,nd,nncell,ICE)
+            call energy(T_0,q_surf,nd,nr,nncell,ns)
 
 !
             q_dot=(q_surf/(z*rho_Cp))

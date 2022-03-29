@@ -36,8 +36,8 @@ do nr=1,nreach
 !    
 !    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
-    read(36,'(2i5,f6.1,f6.3,2f7.1,f6.3,f7.1,f5.1)' &
-           ,rec=nrec_heat) nnd,ncell &
+    read(36,'(i5,f6.1,f6.3,2f7.1,f6.3,f7.1,f5.1)' &
+           ,rec=nrec_heat) ncell &
            ,dbt(no_heat),ea(no_heat) &
            ,QNS(no_heat),QNA(no_heat),ddmmy &
            ,press(no_heat),wind(no_heat)
@@ -76,8 +76,8 @@ do nr=1,nreach
   Q_out(no_heat)=Q_out(no_heat-1)
 !  Q_trib(nr)=Q_out(no_heat)    
   nrec_heat=heat_cells*(ndays-1)+no_heat
-  read(36,'(2i5,f6.1,f6.3,2f7.1,f6.3,f7.1,f5.1)' &
-         ,rec=nrec_heat) nnd,ncell &
+  read(36,'(i5,f6.1,f6.3,2f7.1,f6.3,f7.1,f5.1)' &
+         ,rec=nrec_heat) ncell &
          ,dbt(no_heat),ea(no_heat) &   
          ,QNS(no_heat),QNA(no_heat),ddmmy &
          ,press(no_heat),wind(no_heat)

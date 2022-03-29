@@ -1,14 +1,14 @@
-      SUBROUTINE ENERGY   (Tsurf, q_rslt, nd, ncell)
+      SUBROUTINE ENERGY   (Tsurf, q_rslt, nd, nr, ncell, ns)
 !
    use Block_Energy
    use Block_Ice_Snow
    implicit none
-   integer             ::i, ncell, nd
+   integer             ::i, ncell, nd, nr, ns
    real                :: A, B, e0, evap_rate,rb,vpr_diff
-   real                :: Denom,LE_in,H_in,SW_in,LW_in,LW_back,Ice_Trnsfr
-   real                :: q_rslt, QCONV, QEVAP, QWS
+   real                :: Denom,LV_in,H_in,SW_in,LW_in,LW_back
+   real                :: q10,q_ice,q_rslt, QCONV, QEVAP, QWS
    real                :: T_Kelvin,T_p,T_p_cubed,T_rb, Tsurf, T_tetens
-   real, dimension(2)  :: q10,q_ice,q_fit, T_fit
+   real, dimension(2)  :: q_fit, T_fit
 !
 ! Testing effect of hysteresis 
 !
@@ -43,41 +43,43 @@
 ! Latent heat heat
            q10 = eps_air_h2o*ea(ncell)/(press(ncell)-comp_eps*ea(ncell))
            q_ice = eps_air_h2o*e0/(press(ncell)-comp_eps*e0) 
-           LE_in = rho_air*lvs*Ch_Cg*WIND(ncell)*(q10 - q_ice)
+           LV_in = rho_air*lvs*Ch_Cg*WIND(ncell)*(q10 - q_ice)
 ! Shortwave radiation
            SW_in = (1.-alpha_ice)*QNS(ncell)
 ! Longwave radiation 
-           LW_in = epsilon     *QNA(ncell) 
+           LW_in = epsilon*QNA(ncell) 
 ! Back radiation
-           LW_back = epsilon*Stf_Bltz*T_p*T_p_cubed
+           LW_back = epsilon*Stfn_Bltz*T_p*T_p_cubed
 ! Heat transfer through ice                   
            Ice_Trnsfr = (kappa_ice/ice_thick(nr,ns,1))*(273.0-T_p)
 ! Denominator
            Denom = 4.0*epsilon*Stfn_Bltz*T_p_cubed + kappa_ice/ice_thick(nr,ns,1)
 !
-           q_fit(i) = (H_in + LE_in + LW_in + SW_in - LW_back)/Denom
+           q_fit(i) = (H_in + LV_in + LW_in + SW_in - LW_back)/Denom
          else 
            lvp = kcal_Wsec * (597.0 - T_fit(i))
            vpr_diff = e0 - ea(ncell)
 !
 ! Evaporative heat flux
-         LE_in=wind_fctr*rho*lvp*evap_rate*WIND(ncell)
-         if(LE_in.lt.0.0) LE_in=0.0
+         LV_in=wind_fctr*rho*lvp*evap_rate*WIND(ncell)
+         if(LV_in.lt.0.0) LV_in=0.0
 !
 ! Convective heat flux
-         H_in=rb*LE_in
+         H_in=rb*LV_in
 ! Evaporative heat flux
-         LE_in=LE_in*vpr_diff
+         LV_in=LV_in*vpr_diff
 ! Shortwave radiation
          SW_in = QNS(ncell)
 !Longwave radiaton
-         LW_in  
+         LW_in = QNA(ncell) 
 ! Back radiation from the water surface - W/m**2
          LW_back=280.23+6.1589*T_fit(i)
 !
+        end if
+!
 ! Thermal energy budget for i = 1,2
 !         q_fit(i)=QNS(ncell)+0.97*QNA(ncell)-QWS-QEVAP+QCONV
-         q_fit(i)=SW_in + LW_in - LW_back - LE_in + H_in
+         q_fit(i)=SW_in + LW_in - LW_back - LV_in + H_in
          
 !if (nd .le.5) write(*,*) 'Heat ',i,nd,ncell,T_fit(i),vpr_diff,lvp &
 !                                 ,rb
