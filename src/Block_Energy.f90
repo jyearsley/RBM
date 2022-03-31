@@ -31,6 +31,7 @@ module Block_Energy
 !   Some important constants
 !
       real             :: lvp,rb,rho
+      real             :: dlta,dlta1,dlta2,t0,t1,t2,x1,x2
       real,parameter   :: evap_coeff=1.5e-9 !Lake Hefner coefficient, 1/meters
       real,parameter   :: pf=0.640,pi=3.14159
       real,parameter   :: rfac=304.8 !rho/Cp kg/meter**3/Kilocalories/kg/Deg K       

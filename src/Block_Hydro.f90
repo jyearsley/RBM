@@ -4,8 +4,6 @@
 module Block_Hydro
     integer, dimension(2000):: no_dt,nstrt_elm
 !
-    real             :: t1,t2,x1,x2
-!
     real, dimension(:),   allocatable  :: depth
     real, dimension(:),   allocatable  :: x_part
     real, dimension(:),   allocatable  :: width

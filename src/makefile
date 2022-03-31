@@ -9,7 +9,7 @@ objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
           Energy.o Julian.o tntrp.o Read_Forcing.o \
           Block_Energy.o Block_Hydro.o Block_Network.o\
 	  Water_Balance.o Write.o	  
-f90comp = gfortran
+f90comp = gfortran -g
 # Makefile
 rbm10_VIC: $(objects)
 	$(f90comp) -o rbm10_VIC $(objects)

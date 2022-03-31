@@ -15,7 +15,7 @@ integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
 integer          :: nnd,nobs,nyear,nd_year,ntmp
-integer          :: npart,nseg,nx_s,nx_part,nx_head
+integer          :: npart,nseg,nx_s,nx_part
 !
 ! Indices for lagrangian interpolation
 !
@@ -155,48 +155,31 @@ do nyear=start_year,end_year
 !
 !     Establish particle tracks
 !
-      call Particle_Track(nr,ns,nx_s,nx_head)
+      nx_s = 0
+      call Particle_Track(nr,ns,nx_s)
 !
           ncell=segment_cell(nr,ns)
 !
-!     Now do the third-order interpolation to
-!     establish the starting temperature values
-!     for each parcel
 !
+!
+! Start the cell counter for nseg
+!          
           nseg=nstrt_elm(ns)
 !
-!     Perform polynomial interpolation
+! Check if particle is at x_bndry
 !
-!
-!     Interpolation inside the domain
-!
-          npndx=2
-!
-!     Interpolation at the upstream boundary if the
-!     parcel has reached that boundary
-!
-          if(nx_head.eq.0) then
+          if(x_part(ns).gt.x_bndry) then
             T_0 = T_head(nr)
           else 
 !
+! Do the interpolation
 !
-!     Interpolation at the upstream or downstream boundary
-!
-            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
-!
-            do ntrp=nterp(npndx),1,-1
-              npart=nseg+ntrp+ndltp(npndx)
-              xa(ntrp)=x_dist(nr,npart)
-              ta(ntrp)=temp(nr,npart,n1)
-            end do
-!
-! Start the cell counter for nx_s
-!
-            x=x_part(nx_s)
-!
-!     Call the interpolation function
-!
-            T_0=tntrp(xa,ta,x,nterp(npndx))
+            dlta1 = x2 - x_part(ns)
+            dlta2 = x_part(ns) - x1
+            dlta = x2 - x1           
+            x=x_part(ns)
+            t0 = (dlta1*t1 + dlta2*t2)/dlta
+
           end if
 !
 !
