@@ -24,10 +24,9 @@ module Block_Energy
 !
 !   Air pressure at surface, mb
 !
-    real, dimension(:), allocatable::press 
-
+    real, dimension(:),allocatable :: press 
 !
-    real, dimension (:), allocatable::mu,alphamu,beta,gmma,smooth_param
+    real, dimension(:),allocatable :: mu,alphamu,beta,gmma,smooth_param
 
 !   Some important constants
 !

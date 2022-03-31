@@ -14,7 +14,7 @@ integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
-integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: nnd,nobs,nyear,nd_year,ntmp
 integer          :: npart,nseg,nx_s,nx_part,nx_head
 !
 ! Indices for lagrangian interpolation
@@ -42,7 +42,8 @@ logical:: DONE
 !
 ! Allocate the arrays
 !
-allocate (temp(nreach,0:ns_max,2))
+allocate (dt_part(ns_max))
+allocate (x_part(ns_max))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
 allocate (T_trib(nreach))
@@ -142,6 +143,7 @@ do nyear=start_year,end_year
 !
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
+      x_bndry=x_dist(nr,0) - 1.0      
 !
       DONE=.FALSE.
 !
