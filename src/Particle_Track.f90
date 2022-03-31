@@ -1,10 +1,11 @@
-SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head)
+SUBROUTINE Particle_Track(nr,ns,nx_s)
+use Block_Energy
 USE Block_Hydro
 USE Block_Network
 IMPLICIT NONE
 integer                     :: nr,ns
 integer                     :: jtrp1,jtrp2
-integer                     :: ncell, nx_head, nx_part
+integer                     :: ncell, nx_part
 integer                     :: nss,nssdmm,nx_s,count_step
 logical                     :: DONE_PART
 !
