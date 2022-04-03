@@ -17,10 +17,13 @@ integer          :: nrec_flow,nrec_heat
 <<<<<<< HEAD
 integer          :: nnd,nobs,nyear,nd_year,ntmp
 integer          :: npart,nseg,nx_s,nx_part
+<<<<<<< HEAD
 =======
 integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp,nrr_tmp
 integer          :: npart,nseg,nx_s,nx_part,nx_head
 >>>>>>> origin
+=======
+>>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
 !
 ! Indices for lagrangian interpolation
 !
@@ -181,7 +184,11 @@ do nyear=start_year,end_year
 !     Establish particle tracks
 !
       nx_s = 0
+<<<<<<< HEAD
 
+=======
+      call Particle_Track(nr,ns,nx_s)
+>>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
 !
 <<<<<<< HEAD
       call Particle_Track(nr,ns,nx_s)
@@ -189,6 +196,7 @@ do nyear=start_year,end_year
 =======
           ncell=segment_cell(nr,ns)
 !
+<<<<<<< HEAD
 !     Now do the third-order interpolation to
 !     establish the starting temperature values
 !     for each parcel
@@ -200,6 +208,16 @@ do nyear=start_year,end_year
 !
 ! Check if particle is at x_bndry
 !
+=======
+!
+!
+! Start the cell counter for nseg
+!          
+          nseg=nstrt_elm(ns)
+!
+! Check if particle is at x_bndry
+!
+>>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
           if(x_part(ns).gt.x_bndry) then
             T_0 = T_head(nr)
 !write(26,*) 'Headwaters',nr,nseg,T_0
@@ -208,10 +226,14 @@ do nyear=start_year,end_year
 ! Do the interpolation
 !
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
             dlta1 = x2 - x_part(ns)
             dlta2 = x_part(ns) - x1
             dlta = x2 - x1           
             x=x_part(ns)
+<<<<<<< HEAD
             T_0 = (dlta1*t1 + dlta2*t2)/dlta
 !if (nr.eq.1) write(26 ,*) 'Interp ',T_0,t1,t2
 
@@ -234,6 +256,10 @@ do nyear=start_year,end_year
 !
             T_0=tntrp(xa,ta,x,nterp(npndx))
 >>>>>>> origin
+=======
+            t0 = (dlta1*t1 + dlta2*t2)/dlta
+
+>>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
           end if
 !
 !
