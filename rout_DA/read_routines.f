@@ -63,24 +63,30 @@ c      PRINT*, 'HARDCODED FRACTION FILE'
 
 
       SUBROUTINE READ_GRID_UH
-     &    (UH_BOX, KE, PMAX, NOB, CATCHIJ,FILENAME)
+     &    (UH_BOX, KE, PMAX, NOB, CATCHIJ,UH_IMPLSE)
 
      
       IMPLICIT NONE
 
       INTEGER KE, PMAX, NOB
       INTEGER CATCHIJ(PMAX,2)
-      REAL    UH_BOX(PMAX,KE)
+      REAL    UH_DATA(KE),UH_BOX(PMAX,KE)
       INTEGER N, K
       REAL    JUNK
-      CHARACTER*72 FILENAME
-      write(*,*) 'Filename - ',FILENAME
+      CHARACTER*80 UH_IMPLSE
+c
+c  Open the file with the grid cell impulse response function.
+c  One set of unit responses is used for all grid cells
+c 
+      OPEN(14,FILE = TRIM(UH_IMPLSE),status='old')
+      DO K = 1,KE
+            READ(14,*) JUNK, UH_DATA(K)       
+      END DO
+      CLOSE(14)
       DO N = 1,NOB
-         OPEN(14,FILE = FILENAME)
          DO K = 1,KE
-            READ(14,*) JUNK, UH_BOX(N,K)       
+           UH_BOX(N,K)=UH_DATA(K)       
          END DO
-         CLOSE(14)
       END DO
       RETURN
       END
@@ -214,13 +220,13 @@ c  reads the flow direction file.
      $  FILENAME
       STOP
       END
-      SUBROUTINE READ_LEOPOLD(A_D,B_D,A_W,B_W,NCOL,NROW,FILENAME,
+      SUBROUTINE READ_LEOPOLD(D_a,D_b,U_a,U_b,NCOL,NROW,FILENAME,
      $        IROW,ICOL)
 c
 c     Subroutine added by UW_JRY_2010/12/14
 c
       INTEGER NCOL,NROW,ICOL,IROW,I,J
-      REAL a_d(ncol,nrow),b_d(ncol,nrow),a_w(ncol,nrow),b_w(ncol,nrow)
+      REAL D_a(ncol,nrow),D_b(ncol,nrow),U_a(ncol,nrow),U_b(ncol,nrow)
       CHARACTER*72 FILENAME
 
       OPEN(22, FILE = FILENAME,
@@ -231,10 +237,10 @@ c
       END DO
 
       DO J = IROW,1,-1
-         READ(22,*) (a_d(I,J), I=1,ICOL) 
-         READ(22,*) (b_d(I,J), I=1,ICOL) 
-         READ(22,*) (a_w(I,J), I=1,ICOL) 
-         READ(22,*) (b_w(I,J), I=1,ICOL) 
+         READ(22,*) (D_a(I,J), I=1,ICOL) 
+         READ(22,*) (D_b(I,J), I=1,ICOL) 
+         READ(22,*) (U_a(I,J), I=1,ICOL) 
+         READ(22,*) (U_b(I,J), I=1,ICOL) 
       END DO      
 
       CLOSE(22)

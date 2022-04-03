@@ -7,7 +7,7 @@ USE Block_Network
 IMPLICIT NONE
 !
 integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
-real    :: ddmmy,Q_avg,Q_dmmy
+real    :: Q_avg,Q_dmmy
 
 
 no_flow=0
@@ -20,28 +20,21 @@ do nr=1,nreach
     nrec_flow=flow_cells*(ndays-1)+no_flow
     nrec_heat=heat_cells*(ndays-1)+no_heat
 !
-    read(35,'(2i5,3f10.1,f6.1,f6.2)' &
+    read(35,'(2i5,3f10.1,2f6.1)' &
            ,rec=nrec_flow) nnd,ncell &
-           ,Q_dmmy,Q_in(no_heat),Q_dmmy &  
+           ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
            ,depth(no_heat),u(no_heat)
-           
-!    
-    Q_in(no_heat) = MAX1(Q_in(no_heat),1.0)
+write(26,*)  'Depth ',nnd,ncell,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
+                     ,depth(no_heat),u(no_heat)
 !
-!    Q_in(no_heat) = run_off(no_heat) + base_flow(no_heat)
-    Q_out(no_heat) = Q_in(no_heat)
+    if(u(no_heat).lt.0.01) u(no_heat)=0.01
+    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
-    Q_diff(no_heat) = Q_out(no_heat) - Q_in(no_heat)
-    Q_diff(no_heat) = MAX1(Q_diff(no_heat),0.1)
-!    
-!    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
-!
-    read(36,'(i5,f6.1,f6.3,2f7.1,f6.3,f7.1,f5.1)' &
+    read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
            ,rec=nrec_heat) ncell &
            ,dbt(no_heat),ea(no_heat) &
-           ,QNS(no_heat),QNA(no_heat),ddmmy &
+           ,Q_ns(no_heat),Q_na(no_heat),rho &
            ,press(no_heat),wind(no_heat)
-!           
 !   
   if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat
 !
@@ -62,8 +55,6 @@ do nr=1,nreach
            'Travel time=',dt(no_heat) &
             , '> dt_comp at node -',no_heat
   end do
-    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
-
 !
 ! Tributary flow is Q_out from the next to the last cell
 ! However, it will be updated in Water_Balance to account
@@ -74,12 +65,15 @@ do nr=1,nreach
 !
   no_heat=no_heat+1 
   Q_out(no_heat)=Q_out(no_heat-1)
-!  Q_trib(nr)=Q_out(no_heat)    
+!
+! Tributary flow from this reach equals Q_out for this cell
+!
+  Q_trib(nr)=Q_out(no_heat)    
   nrec_heat=heat_cells*(ndays-1)+no_heat
-  read(36,'(i5,f6.1,f6.3,2f7.1,f6.3,f7.1,f5.1)' &
+  read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
          ,rec=nrec_heat) ncell &
          ,dbt(no_heat),ea(no_heat) &   
-         ,QNS(no_heat),QNA(no_heat),ddmmy &
+         ,Q_ns(no_heat),Q_na(no_heat),rho &
          ,press(no_heat),wind(no_heat)
 !
 !  The flow and hydraulics for the last cell has to be 
@@ -96,6 +90,6 @@ end do
 !
 ! Call the water balance subroutine
 !
-!  call Water_Balance
+  call Water_Balance
 !
 END SUBROUTINE Read_Forcing

@@ -1,8 +1,7 @@
-Subroutine BEGIN
+Subroutine BEGIN(param_file,spatial_file)
 !
 use Block_Energy
 use Block_Hydro
-use Block_Ice_Snow
 use Block_Network
 !
 implicit none
@@ -10,11 +9,12 @@ implicit none
     character (len=8) :: end_date,start_date     
     character (len=8) :: lat
     character (len=10):: long
+    character (len=200):: param_file,source_file,spatial_file
 !
     integer:: Julian
     integer:: head_name,trib_cell
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-    integer:: ns_max_test,node,ncol,nrow,nr
+    integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
     logical:: first_cell,source
 !
@@ -22,6 +22,8 @@ implicit none
     real :: rmile0,rmile1,xwpd
 !
     real,parameter   :: miles_to_ft=5280.
+!
+!   Mohseni parameters, if used
 !
 !
 !
@@ -50,7 +52,6 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(gmma(nreach))
  allocate (smooth_param(nreach))
  allocate(dx(heat_cells))
- allocate(first_seg(heat_cells))
  allocate(no_celm(nreach))
  no_celm=0
  allocate(no_cells(nreach))
@@ -61,22 +62,12 @@ read(90,*) nreach,flow_cells,heat_cells,source
  trib=0
  allocate (conflnce(heat_cells,10))
  conflnce=0
- !
- ! Ice state variables
- !
- allocate(ice_temp(nreach,ns_max,2))
- allocate(ice_thick(nreach,ns_max,2))
- !
  allocate(reach_cell(nreach,ns_max)) 
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
- 
-x_dist = 0.0
+ allocate(temp(nreach,-2:ns_max,2))
 !
-ICE      = .FALSE.
-SNOW     = .FALSE.
-SUB_ZERO = .FALSE.
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
 !
@@ -122,7 +113,6 @@ do nr=1,nreach
 !     Reading Reach Element information
 !
   first_cell=.true.
-!
   do nc=1,no_cells(nr)
     ncell=ncell+1
 !
@@ -167,19 +157,18 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
     segment_cell(nr,nseg)=ncell
+    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
-    x_dist(nr,nseg) = AMAX1(0.0,x_dist(nr,nseg))
-    rmile1 = x_dist(nr,nseg)/5280.
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
 !
-!    write(*,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
+    open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
+    write(22,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
 !
 ! 
 !
 !  Added variable ndelta  (UW_JRY_2011/03/15)
 !
-!    write(*,*) nr,nseg,ndelta(ncell),nndlta
     if(nndlta.lt.ndelta(ncell)) go to 200  
     no_celm(nr)=nseg
     segment_cell(nr,nseg)=ncell
@@ -199,7 +188,6 @@ if (trib_cell .gt. 0) then
 end if
 
 if(ns_max_test.lt.nseg) ns_max_test=nseg
-write(*,*) 'ns_max_test',ns_max,ns_max_test,nseg
 !
 ! End of reach loop
 !
@@ -217,6 +205,8 @@ dt_comp=86400./xwpd
 !     ******************************************************
 !                         Return to RMAIN
 !     ******************************************************
+!
+900 continue
 !
 !
 end subroutine BEGIN
