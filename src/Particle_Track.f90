@@ -40,6 +40,7 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !     Determine if the total elapsed travel time is equal to the
 !     computational interval
 !
+<<<<<<< HEAD
                     if (.not. DONE_PART) then
                       dt_dummy = 0.0
                       dt_total = 0.0
@@ -62,6 +63,15 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                         end if
 
                        end do
+=======
+    do while(dt_total.lt.dt_comp.and.nx_part.gt.0)
+       nx_s=nx_s+1
+       x_part(nx_s)=x_dist(nr,nx_part-1)
+       ncell=segment_cell(nr,nx_part)       
+      if (ncell .eq. 0) write(*,*) 'ncell - 0 ',nr,nx_part,ncell
+       dt_part(nx_s)=dt(ncell)
+       dt_total=dt_total+dt_part(nx_s)
+>>>>>>> origin
 !
                        if (nstrt_elm(ns) .eq.1 .and.                 &
                           dt_total.lt.dt_comp) then          

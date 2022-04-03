@@ -76,11 +76,16 @@ c     Solve for
       character*80 GRID_CELL,UH_DRCTRY
       CHARACTER*80 UH_FILE,UH_STRING       !new, AW
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
+<<<<<<< HEAD
         write(*,*), 'reading UH_S grid from file'
         UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
         UH_STRING=TRIM(UH_DRCTRY)//UH_STRING  
         write(*,*) 'UH_S File ',UH_FILE
         open(98, file=UH_FILE, status='old') 
+=======
+        open(98, file=TRIM(UH_DRCTRY)//UH_STRING, status='old') 
+c
+>>>>>>> origin
         DO N = 1,NOB
           READ(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
         END DO        
@@ -94,9 +99,17 @@ c     Solve for
         print*, '       save this file and specify it in your station'
         print*, '       location file to avoid this step in the future'
 c
+<<<<<<< HEAD
         open(98, file = UH_FILE
      &         , status='unknown')     
 
+=======
+c       added FLEN by JRY 10/22/2009
+c
+
+        open(98, file = TRIM(UH_DRCTRY)//TRIM(NAME5)//'.uh_s',
+     &           status='new')     
+>>>>>>> origin
         DO N = 1, NOB
           print*, 'grid cell', N,' out of', NOB
           DO K = 1,UH_DAY

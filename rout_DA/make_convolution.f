@@ -3,7 +3,7 @@
      & (NCOL, NROW, NOB, PMAX, DAYS, CATCHIJ, 
      &  BASE, RUNO, FLOW, KE, UH_DAY, UH_S, FRACTION, FACTOR_SUM,
      &  XC, YC, SIZE, DPREC, FLOWPATH,ICOL,NDAY,IDAY,IMONTH,IYEAR,
-     &  MO, YR, NYR)
+     &  MO, YR, NYR,base_flow,run_off)
 
       IMPLICIT NONE
 
@@ -13,7 +13,9 @@
       INTEGER     NYR
       REAL        UH_S(PMAX,KE+UH_DAY-1)
       REAL        BASE(DAYS), RUNO(DAYS), FLOW(DAYS) 
+      real        base_flow(days),run_off(days)
       REAL        FRACTION(NCOL,NROW)
+      real        b_flow,r_off
 
       REAL        PI, RERD, FACTOR, FACTOR_SUM
 
@@ -53,12 +55,15 @@ C *** K_CONST smaller 1.0 makes it a simple linear storage
       DO I = 1,NDAY
          FLOW(I) = 0.0
       END DO
-
+c      write(95,*) 'Starting convolution'
+c      write(95,*) 'NOB = ',NOB
       DO N = 1,NOB       !is this the gridcell loop?
          STORAGE = 0.0
          DO I = 1,NDAY
             RUNO(I) = 0.0
+            run_off(i) = 0.0
             BASE(I) = 0.0
+            base_flow(i) = 0.0
          END DO
          II = CATCHIJ(N,1)
          JJ = CATCHIJ(N,2)
@@ -121,8 +126,8 @@ c     in input file
              IYEAR(I)=9999
              IMONTH(I)=99
              IDAY(I)=99
-	     runo(i)=0
-	     base(i)=0
+	     runo(i)=0.0
+	     base(i)=0.0
 	   end do
 	 endif
 
@@ -134,8 +139,17 @@ c     in input file
             DO J = 1,KE+UH_DAY-1
                IF ((I-J+1) .GE. 1) THEN
                   FLOW(I) = FLOW(I)+UH_S(N,J)*(BASE(I-J+1)+RUNO(I-J+1))
+!
+! Adding baseflow and runoff values at each cell
+!
+                  b_flow = b_flow + uh_s(n,j)*base(i-j+1)
+                  r_off   = r_off + uh_s(n,j)*runo(i-j+1)                  
                END IF
             END DO
+            base_flow(i) = b_flow
+            run_off(i)   = r_off
+            r_off = 0.0
+            b_flow = 0.0
          END DO
  9000 continue
          CLOSE(20)

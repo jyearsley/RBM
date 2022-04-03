@@ -11,8 +11,13 @@ c
      & ,FLOWOUT,HEATPATH,clen
      & ,Flow_Cells,Force_Cells,Nflow,Nflow_pd,Nheat,Nheat_pd 
      & ,nday,IDAY,IMONTH,IYEAR,skip_MET
+<<<<<<< HEAD
      & ,aD_a,bD_b,aU_a,bU_b)
 c 
+=======
+     & ,aa_d,bb_d,aa_w,bb_w,base_flow,run_off)
+
+>>>>>>> origin
       IMPLICIT NONE
 
       INTEGER DAYS
@@ -20,6 +25,7 @@ c
 c  Add Qin - JRY - 9/30/2009
 c
       REAL    FLOW(DAYS),Qin(days),Dmmy(7),Heat_data(7)
+     &       ,base_flow(days),run_off(days) 
       INTEGER IDAY(DAYS), IMONTH(DAYS), IYEAR(DAYS)
       INTEGER I, ii, CLEN, FLEN, Flow_Cells, Force_Cells
      &       ,nday,Nflow,Nflow_pd, navg, Nheat, Nheat_pd, nrec
@@ -65,9 +71,20 @@ c     Skip records if necessary
               vel=aU_a*(flowavg**bU_b)
 c      
 c     Write the flow for this grid cell to the RBM direct access file
+<<<<<<< HEAD
 c 
              write(15,'(2i5,3f10.1,2f6.1)',rec=nrec)
      &              i,Nheat,flowin,flow(i),Qin(i),depth,vel
+=======
+c
+c             write(15,'(2i5,2f10.1,2f6.1,f7.1,f6.2)',rec=nrec)
+c     &              i,Nheat,flowin,flow(i),Qin(i),depth,width,vel
+             write(15,'(2i5,3f10.1,2f6.1,f6.2)',rec=nrec)
+     &              i,Nheat,flow(i),base_flow(i),run_off(i)
+     &             ,depth,width,vel
+
+c
+>>>>>>> origin
            end if
              do navg=1,7
                 Heat_data(navg)=0.0
