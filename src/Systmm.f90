@@ -156,11 +156,10 @@ do nyear=start_year,end_year
 !     Establish particle tracks
 !
       nx_s = 0
+
+!
       call Particle_Track(nr,ns,nx_s)
-!
-          ncell=segment_cell(nr,ns)
-!
-!
+      ncell=segment_cell(nr,ns)  
 !
 ! Start the cell counter for nseg
 !          
@@ -170,6 +169,7 @@ do nyear=start_year,end_year
 !
           if(x_part(ns).gt.x_bndry) then
             T_0 = T_head(nr)
+!write(26,*) 'Headwaters',nr,nseg,T_0
           else 
 !
 ! Do the interpolation
@@ -178,7 +178,8 @@ do nyear=start_year,end_year
             dlta2 = x_part(ns) - x1
             dlta = x2 - x1           
             x=x_part(ns)
-            t0 = (dlta1*t1 + dlta2*t2)/dlta
+            T_0 = (dlta1*t1 + dlta2*t2)/dlta
+!if (nr.eq.1) write(26 ,*) 'Interp ',T_0,t1,t2
 
           end if
 !
@@ -196,7 +197,8 @@ do nyear=start_year,end_year
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-            call energy(T_0,q_surf,nncell)
+!if (nr.eq.1) write(26,*) 'Heat',nr,ns,nm,nncell,T_0,z
+            call energy(T_0,q_surf,nncell,nr)
 !
             q_dot=(q_surf/(z*rfac))
 !

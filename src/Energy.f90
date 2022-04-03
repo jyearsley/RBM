@@ -1,7 +1,7 @@
-SUBROUTINE Energy(T_surf,q_surf,ncell)
+SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
    use Block_Energy
    implicit none
-   integer::i,ncell,nd
+   integer::i,ncell,nd,nr
    real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
    real, dimension(2):: q_fit, T_fit
 !
@@ -18,6 +18,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell)
       q_evap=q_evap*(e0-ea(ncell))
       q_ws=6.693E-2+1.471E-3*T_fit(i)
       q_fit(i)=q_ns(ncell)+q_na(ncell)-q_ws-q_evap+q_conv
+!if (nr .eq. 1) write(26,*) 'energy',ncell,T_surf,q_ws
    end do
 !
 !     q=AT+B

@@ -16,9 +16,11 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !     Segment is in cell SEGMENT_CELL(NC)
 !
 !
+                    write(*,*) 'Starting here'
+                    ncell = segment_cell(nr,ns)
                     if (dt(ncell) .gt. dt_comp) then
                       nstrt_elm(ns) = ns
-                      x_part(ns) = x_part(ns) + u(ncell)*dt_comp
+                      x_part(ns) = x_dist(nr,ns) + u(ncell)*dt_comp
                       nx_s = nx_s + 1
                       jtrp1 = ns
                       jtrp2 = ns-1
@@ -29,6 +31,7 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                        no_dt(ns) = 1
                       dt_part(nx_s) = dt_comp
                       DONE_PART = .TRUE.
+!if (nr.eq.1) write(26,*) '0',nr,ns,x_part(ns),x1,x2
                     end if 
 !
 !                     
@@ -39,6 +42,7 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !
                     if (.not. DONE_PART) then
                       dt_dummy = 0.0
+                      dt_total = 0.0
                       x_dummy = x_dist(nr,ns)
                       do nss = ns,1,-1
                         nssdmm = nss
@@ -51,7 +55,8 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                         nstrt_elm(ns) = nss
                         x_dummy = x_dummy + u(ncell)                 &                      
                                 * dt(ncell)
-                        xpprt(nssdmm) = x_dummy
+!if (nr.eq.1) write(26,*) '2',ns,nss,dt_part(nx_s) 
+                       xpprt(nssdmm) = x_dummy
                         if (dt_total .gt. dt_comp)  then
                           exit
                         end if
@@ -70,9 +75,9 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                          x_part(ns) = xpprt(nssdmm+1)+u(ncell)*dt_left
                        end if
                       if (x_part(ns) .gt. x_bndry) then
-                         x_part(ns)=x_bndry+0.5    
-                      end if
-! 
+                         x_part(ns)=x_dist(nr,0)     
+                      end if   
+!   
                       jtrp1 = nssdmm
                       jtrp2 = nssdmm-1
                       x1 = x_dist(nr,jtrp1)
@@ -83,6 +88,7 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !                      
                     end if
                       DONE_PART = .TRUE.
+!if (nr.eq.1) write(26,*) '*****************************'
 !
 !     For the last segment of particle travel, adjust the particle location
 !     such that the total particle travel time is equal to the computational

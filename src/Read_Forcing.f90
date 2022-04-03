@@ -20,10 +20,12 @@ do nr=1,nreach
     nrec_flow=flow_cells*(ndays-1)+no_flow
     nrec_heat=heat_cells*(ndays-1)+no_heat
 !
-    read(35,'(2i5,2f10.1,2f6.1,f7.1,f6.2)' &
+    read(35,'(2i5,3f10.1,2f6.1)' &
            ,rec=nrec_flow) nnd,ncell &
            ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
-           ,depth(no_heat),width(no_heat),u(no_heat)
+           ,depth(no_heat),u(no_heat)
+write(26,*)  'Depth ',nnd,ncell,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
+                     ,depth(no_heat),u(no_heat)
 !
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
