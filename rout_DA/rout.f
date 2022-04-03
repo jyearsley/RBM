@@ -1,19 +1,15 @@
 
       PROGRAM rout
 c
-c     Routing algorithm developed by D. Lohmann.
+c     Routing algorithm developed originally by D. Lohmann and
+c     modified by J. Yearsley for purposes of creating the forcing
+C     files for the semi-Lagrangian stream temperature model, RBM
 c
 c     Modified to allow more flexible array dimensions and
 c     the removal of harcoded file names.
 c
-c     Code maintained by G. O'Donnell (tempgd@hydro.washington.edu)
-c     See WA Hydrology Homepage for operational details.
-
-c     Modified 5/99 to read in the uh_s array if it has already
-c     been generated in a previous run. 
-
-c     Modified 2/2001 by edm to include month and year in output
-c     and also check dates in VIC output files and calculate NDAYS
+c     Code maintained by J. Yearsley (yearsley@hydro.washington.edu)
+c     See www.hydro.washington.edu for operational details.
 c
       IMPLICIT NONE
       integer IARGC
@@ -25,7 +21,7 @@ c     change dimensions here
 c     nrow and ncol should be larger than the grid
 c     nyr should equal run length yrs+1
       INTEGER NROW, NCOL, DAYS, NYR, Nflow, Nheat
-      PARAMETER (NROW = 205, NCOL = 245)
+      PARAMETER (NROW = 195, NCOL = 245)
       PARAMETER (NYR = 100)
 
 c     no changes after here
@@ -44,10 +40,11 @@ c     no changes after here
       REAL    XMASK(NCOL,NROW), FRACTION(NCOL,NROW)
       REAL    UH_BOX(PMAX,KE), UHM(NCOL,NROW,LE)
       REAL    UH_S(PMAX,KE+UH_DAY-1)
-      real    a_d(ncol,nrow),b_d(ncol,nrow)
-     $       ,a_w(ncol,nrow),b_w(ncol,nrow)
+      real    U_a(ncol,nrow),U_b(ncol,nrow)
+     $       ,D_a(ncol,nrow),D_b(ncol,nrow)
      $       ,aa_d,bb_d,aa_w,bb_w
-     $       ,a_ddum,b_ddum,a_wdum,b_wdum
+     $       ,U_adum,U_bdum,D_adum,D_bdum
+     $       ,aD_a,bD_b,aU_a,bU_b
 c
 c
 c  Add Qin - JRY- 9/30/2009
@@ -71,19 +68,13 @@ c
       INTEGER LP,M,Y
       INTEGER J
 
-      CHARACTER*80 UH_STRING,UH_DRCTRY         ! new, AW
-      CHARACTER*25 loc,NAME5,NAME         !was 21
-c      CHARACTER*24  NAME5       !was  5 6/25/2009
-      CHARACTER*72 FILE_INPUT, FILENAME
-      character*10 lake10
-c
-c     Deleted by JRY -11/4/2009
-c
-c      CHARACTER*72 INPATH, OUTPATH
-      CHARACTER*72 FLOWPATH, HEATPATH
-      CHARACTER*72 FLOWOUT, HEATOUT
+      CHARACTER*80 GRID_CELL,UH_DRCTRY,UH_IMPLSE,UH_STRING 
+      CHARACTER*80 FILE_INPUT, FILENAME
+c 
+      CHARACTER*80 FLOWPATH, HEATPATH
+      CHARACTER*80 FLOWOUT, HEATOUT
 
-      INTEGER DPREC,clen,fdleni,fdleno,hdleni,hdleno
+      INTEGER DPREC,clen
      &       ,Nflow_pd, Nheat_pd,Ntest
       REAL    AREA, FACTOR_SUM
 
@@ -116,10 +107,10 @@ C     OPEN NECESSARY FILES
 C***********************************************************
       fraction(ncol,nrow)=9999.
       fraction(ncol-1,nrow-1)=8888.
-c      write(*,*) 'Ntest'
-c      read(*,*) Ntest
+c
 c     INPUT FILE READ
 c     process commandline args
+c
       IF(IARGC().NE.1)THEN
          PRINT*, 'USAGE:  rout <infile>'
          STOP
@@ -149,6 +140,7 @@ c     diff file
      $        IROW,ICOL)
       ELSE
          READ(1,*) FDUM
+      OPEN(10,FILE=FILENAME)
          CALL INIT_ARRAY(DIFF,NCOL,NROW,FDUM)
       ENDIF
 c     xmask file
@@ -178,33 +170,29 @@ c
 c     read file with Leopold relationships
 c     (UW_JRY_2010/12/14)
 c
-      READ(1,*) lake10
-      write(*,*) 'FDUM = ',lake10
+      READ(1,*)
       READ(1,*)TORF
       IF(TORF)THEN
 c
-c   Reading the Leopold coefficients from a file (e.g. Impound.Out
-c   Note to Michelle/Wietse: This can be modified without too much
-c   effort to read each of the four coefficients from a separate
-c   file. If you do, you must also modify the subroutine 
-c   READ_LEOPOLD in the read_routines.f file.   (JRY 3/15/2011)
-c
+c   Reading the Leopold coefficients from a file (e.g. Salmon.Leopold
+c   SUBROUTINE READ_LEOPOLD in the read_routines.f file.   (JRY 3/15/2011)
+c 
          READ(1,'(A)') FILENAME
-         CALL READ_LEOPOLD(a_d,b_d,a_w,b_w,NCOL,NROW,FILENAME,
+         CALL READ_LEOPOLD(U_a,U_b,D_a,D_b,NCOL,NROW,FILENAME,
      $        IROW,ICOL)
       ELSE
-         READ(1,*) a_ddum,b_ddum,a_wdum,b_wdum
-         CALL INIT_ARRAY(a_d,NCOL,NROW,a_ddum)
-         CALL INIT_ARRAY(b_d,NCOL,NROW,b_ddum)
-         CALL INIT_ARRAY(a_w,NCOL,NROW,a_wdum)
-         CALL INIT_ARRAY(b_w,NCOL,NROW,b_wdum)
+         READ(1,*) U_adum,U_bdum,D_adum,D_bdum
+         CALL INIT_ARRAY(D_a,NCOL,NROW,D_adum)
+         CALL INIT_ARRAY(D_b,NCOL,NROW,D_bdum)
+         CALL INIT_ARRAY(U_a,NCOL,NROW,U_adum)
+         CALL INIT_ARRAY(U_b,NCOL,NROW,U_bdum)
       ENDIF
 c
 c     station file
 c
       READ(1,'(/A)')FILENAME
-      write(*,*) 'Station file',FILENAME
-      OPEN(10,FILE=FILENAME)
+      write(*,*) 'Station file',TRIM(FILENAME)
+      OPEN(10,FILE=TRIM(FILENAME),status='old')
 c     read input path and precision of VIC filenames
 c      READ(1,'(/A)')INPATH
 c
@@ -217,42 +205,36 @@ c     Input files for flow
 c
       READ(1,'(/A)') FLOWPATH
       write(*,*) 'Flowpath',FLOWPATH
-      fdleni=index(FLOWPATH,' ')-1
-      write(*,*) 'fdleni',fdleni
 c
 c     Input files for heat flux
 c
       if (rbm10) READ(1,'(A)')HEATPATH
-      hdleni=index(HEATPATH,' ')-1
-      write(*,*) 'hdleni ',hdleni
 c
 c     Read precision of file extension
-c
+c 
       READ(1,*)DPREC,Nflow_pd,Nheat_pd
 c
 c     output pathname for flows
 c
 c      READ(1,'(/A)')OUTPATH
       READ(1,'(/A)') FLOWOUT
-      fdleno=index(FLOWOUT,' ')-1
       if (rbm10) then
       write(*,*) 'DA files '
-     & ,flowout(1:fdleno)
+     & ,trim(flowout)
 c
 c     Direct access file opened for writing results used by RBM10 - JRY 10/30/2009
 c
 
-        open (15,FILE=FLOWOUT(1:fdleno),FORM='FORMATTED'
+        open (15,FILE=TRIM(FLOWOUT),FORM='FORMATTED'
      &          ,ACCESS='DIRECT',RECL=60)
 c
 c    Output pathname for heat flux
 c
         READ(1,'(A)') HEATOUT
-        hdleno=index(HEATOUT,' ')-1
         write(*,*) 'DA files ' 
-     &             ,heatout(1:hdleno)                  
+     &             ,HEATOUT                  
 c        
-      open(16,FILE=HEATOUT(1:hdleno),FORM='FORMATTED'
+      open(16,FILE=TRIM(HEATOUT),FORM='FORMATTED'
      &          ,ACCESS='DIRECT',RECL=50)
       end if      
         
@@ -262,6 +244,7 @@ c     number of days to process
 c     start and end year/month from VIC simulation
       READ(1,*) START_YEAR, START_MO, start_day
      &         ,STOP_YEAR, STOP_MO, stop_day
+      write(*,*) 'VIC Simulations ',start_year,start_mo
 c
 c     Calculate Julian date of start and stop for VIC flow
 c
@@ -299,7 +282,7 @@ c     calculate number of days & months in simulation
       PRINT*,'Simulation Days NDAY = ',NDAY, ' NMONTHS = ',NMONTHS
 c
 c     start and end day for full_data record
-c
+c 
       read(1,*) strtmet_yr,strtmet_mo,strtmet_dy
      &         ,stopmet_yr,stopmet_mo,stopmet_dy
 c
@@ -309,7 +292,7 @@ c
       MET_stop=julian(stopmet_yr,stopmet_mo,stopmet_dy)
       write(*,*) 'MET_strt',MET_strt,'MET_stop',MET_stop
 c
-c     Numberof Met records to skip
+c     Number of Met records to skip
 c 
       skip_MET=Nheat_pd*(FLO_strt-MET_strt)
       write(*,*) 'Number of MET records to skip',skip_MET
@@ -318,13 +301,13 @@ c     start and end year/month for writing output
 c 
       READ(1,*) FIRST_YEAR, FIRST_MO, LAST_YEAR, LAST_MO
 c
-c     Read Unit Hydrograph
+c     grid cell impulse response function file
 c 
-      READ(1,'(/A)')FILENAME
+      READ(1,'(/A)')UH_IMPLSE
 c
-c     Read directory to store final *uh_s files
+c     directory where cell response functions files (*.uh_s) are stored
 c 
-      READ(1,'(/A)') UH_DRCTRY
+      READ(1,'(/A)')UH_DRCTRY      
 
 C***********************************************************
 
@@ -337,63 +320,74 @@ C     Loop over required stations
       read(10,*) Flow_Cells,Force_Cells
  100  CONTINUE
       READ(10,*,END=110) 
-     &     NR, NSEG, NAME, PI, PJ, AREA
-      clen=INDEX(NAME,' ')-1
+     &     NR, NSEG, GRID_CELL, PI, PJ, AREA
       Nheat=Nheat+1
       write_flow=.false.
       IF (NR .EQ. 1) THEN
          WRITE(*,'(2I2,2X,A,I4,I4,G12.6)') 
-     &        NR, NSEG, NAME, PI, PJ
+     &        NR, NSEG, GRID_CELL, PI, PJ
       READ(10,'(A80)',END=110) UH_STRING   !new, AW:  uh_string
 c
 c     note, the arrays are flipped left to right
 c
 c
 c     Set Leopold Coefficients (UW_JRY_2011/02/03)
-c 
-        aa_d=a_d(PI,PJ)
-        bb_d=b_d(PI,PJ)
-        aa_w=a_w(PI,PJ)
-        bb_w=b_w(PI,PJ)
-        if (bb_w.lt.0.01)
-     &  write(70,*) ' Rout ',PJ,PI,aa_d,bb_d,aa_w,bb_w
-c 
+c
+        aD_a=D_a(PI,PJ)
+        bD_b=D_b(PI,PJ)
+        aU_a=U_a(PI,PJ)
+        bU_b=U_b(PI,PJ)
+        if (bU_b.lt.0.01)
+     &  write(70,*) ' Rout ',PJ,PI,aD_a,bD_b,aU_a,bU_b
+c     Index Nout - JRY - 10/29/2009
+c
          Nflow=Nflow+1
          write_flow=.true.
          PI=ICOL+1-PI
-         NAME5 = NAME
-         loc=name
-c 
+
+      write(*,*) 'searching catchment...'
          CALL SEARCH_CATCHMENT
      &        (PI,PJ,DIREC,NCOL,NROW,
      &        NO_OF_BOX,CATCHIJ,PMAX,IROW,ICOL)
-c 
+         
+      write(*,*) 'reading grid_UH...'
+      UH_STRING = TRIM(UH_STRING)
+      GRID_CELL = TRIM(GRID_CELL)
+      write(*,*) 'UH_STRING',UH_STRING,' GRID_CELL ',GRID_CELL
          CALL READ_GRID_UH
-     &        (UH_BOX, KE, PMAX, NO_OF_BOX, CATCHIJ,FILENAME)
-c 
+     &        (UH_BOX, KE, PMAX, NO_OF_BOX, CATCHIJ,UH_IMPLSE)
+
+
+      write(*,*) 'making grid UH...'
          CALL MAKE_GRID_UH
      &        (DIREC, NO_OF_BOX, UH_DAY, TMAX, PI, PJ, LE, UH_DAILY, KE,
      &        CATCHIJ,UHM, FR, PMAX, NCOL, NROW, UH_BOX, UH_S,
-     &        UH_STRING,UH_DRCTRY,NAME5,clen)        !new, AW:  added uh_string
-c 
+     &        UH_STRING,GRID_CELL,UH_DRCTRY)        !new, AW:  added uh_string
+
+       write(*,*) 'making convolution...'
          CALL MAKE_CONVOLUTION
-     & (NCOL, NROW, NO_OF_BOX, PMAX, DAYS, CATCHIJ, 
-     &  BASE, RUNO, FLOW, KE, UH_DAY, UH_S, FRACTION, FACTOR_SUM,
-     &  XC, YC, SIZE, DPREC, FLOWPATH,ICOL,NDAY,IDAY,IMONTH,IYEAR,
-     &  MO, YR, NYR)
-c 
+     &        (NCOL, NROW, NO_OF_BOX, PMAX, DAYS,CATCHIJ
+c
+c  Add Qin - JRY- 9/30/2009
+c
+     &        , BASE,RUNO,FLOW, KE,UH_DAY,UH_S,FRACTION,FACTOR_SUM
+     &        ,XC,YC,SIZE,DPREC,FLOWPATH,ICOL
+     &        ,NDAY,IDAY,IMONTH,IYEAR, MO, YR, NYR)
+c
+c        JRY 11/10/2009
+c
          end if
 c 
-         print*, 'writing data...',nheat
+C      print*, 'writing data...'
          CALL WRITE_DATA
 c
 c  Add Qin - JRY- 9/30/2009
 c 
-     &     (write_flow,rbm10,FLOW, Qin, DAYS,NAME5
-     &     ,flowout,fdleno,heatpath,hdleni,LOC,clen
+     &     (write_flow,rbm10,FLOW, Qin, DAYS,GRID_CELL
+     &     ,FLOWOUT,HEATPATH,clen
      &     ,Flow_Cells,Force_Cells,Nflow,Nflow_pd,Nheat,Nheat_pd
      &     ,nday,IDAY,IMONTH,IYEAR,skip_MET
-     &     ,aa_d,bb_d,aa_w,bb_w)
+     &     ,aD_a,bD_b,aU_a,bU_b)
 
 c
 c

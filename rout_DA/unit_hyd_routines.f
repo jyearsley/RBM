@@ -58,7 +58,7 @@ c     Solve for
       SUBROUTINE MAKE_GRID_UH
      & (DIREC, NOB, UH_DAY, TMAX, PI, PJ, LE, UH_DAILY, KE,
      &  CATCHIJ, UHM, FR, PMAX, NCOL, NROW, UH_BOX, 
-     &  UH_S, UH_STRING, UH_DRCTRY, NAME5,clen)
+     &  UH_S, UH_STRING, GRID_CELL,UH_DRCTRY)
 
       IMPLICIT NONE
 
@@ -73,30 +73,32 @@ c     Solve for
       REAL    UH_S(PMAX,KE+UH_DAY-1)
       INTEGER N, I, J, K, L, T, II, JJ, TT, U, clen
       REAL    SUM
-      character*80 UH_DRCTRY
-      CHARACTER*80 UH_STRING       !new, AW
-      CHARACTER*24  NAME5          !was 5 
+      character*80 GRID_CELL,UH_DRCTRY
+      CHARACTER*80 UH_FILE,UH_STRING       !new, AW
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
-        open(98, file=TRIM(UH_DRCTRY)//UH_STRING, status='old') 
+        write(*,*), 'reading UH_S grid from file'
+        UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
+        UH_STRING=TRIM(UH_DRCTRY)//UH_STRING  
+        write(*,*) 'UH_S File ',UH_FILE
+        open(98, file=UH_FILE, status='old') 
         DO N = 1,NOB
           READ(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
         END DO        
 
       ELSE				         ! make UH_S grid, and save it
+        UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
         print*, 'making UH_S grid...it takes a while...'
         print*, 'NOTE:  your new UH_S grid file will be written in the'
-        print*, '       directory you run from, and will be called'
-        print*, '            '//NAME5(1:clen)//'.uh_s'
+        print*, '       directory you run from, and will be called:'
+        write(*,'(A)')  UH_FILE
         print*, '       save this file and specify it in your station'
         print*, '       location file to avoid this step in the future'
 c
-c       added FLEN by JRY 10/22/2009
-c
-
-        open(98, file = TRIM(UH_DRCTRY)//TRIM(NAME5)//'.uh_s',
-     &           status='new')     
+        open(98, file = UH_FILE
+     &         , status='unknown')     
 
         DO N = 1, NOB
+          print*, 'grid cell', N,' out of', NOB
           DO K = 1,UH_DAY
             UH_DAILY(N,K) = 0.0
           END DO
@@ -116,13 +118,8 @@ c
           IF ((I .NE. PI) .OR. (J .NE. PJ)) THEN
             DO T = 1, TMAX
               DO L = 1, LE
-c
-C Implementing update to Make_Grid_UH 10/13/2016
-c
-c                 IF ((T-L) .GT. 0) THEN
-                 IF ((T-L) .GE. 0) THEN
-c                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L) 
-                   FR(T,2) = FR(T,2) + FR(T-L+1,1)*UHM(I,J,L) 
+                 IF ((T-L) .GT. 0) THEN
+                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L) 
                  END IF
                END DO
             END DO

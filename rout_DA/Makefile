@@ -2,24 +2,17 @@
 ### rout.f makefile #################################################### 
 ########################################################################
 #
-# Routing algorithm written D. Lohmann
+# Routing algorithm written originally by D. Lohmann
+# and modified by J. Yearsley for purposes of preparing files necessary
+# to run the semi-Lagrangian stream temperature model, RBM.
 #
-# This is a slightly modified code (main algotrithms unchanged -IO and
-# array dimensions simplified).
-# Maintained by G. O'Donnell (tempgd@hydro.washington.edu) and Andy Wood
 # 
-
 #This program uses the non-standard Fortran argument GETARG
-#Different compilers require different flags to link with this function
-#Comment out one of the following depending on your compiler
-
-#If compiling on SUN and LINUX use  (remember -O)
-FFLAGS = -O -C 
-#If compiling on HP use
-#FFLAGS = -C -O +U77
-#for debugging on plane
-#FFLAGS = -C -g -lm 
-
+#
+FFLAGS = -g 
+#
+# Uses the GFORTRAN compiler
+# 
 FC=gfortran
 
 HFILES=    	parameter.h
@@ -29,7 +22,7 @@ OBJECTS=	rout.o 			\
                 init_routines.o		\
                 read_routines.o		\
                 write_routines.o	\
-                unit_hyd_routines.o
+                unit_hyd_routines.o     
 
 exe:		$(OBJECTS)
 	$(FC) $(FFLAGS) $(OBJECTS) -o rout
