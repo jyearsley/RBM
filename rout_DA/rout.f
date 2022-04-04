@@ -50,7 +50,6 @@ c
 c  Add Qin - JRY- 9/30/2009
 c
       REAL    BASE(DAYS), RUNO(DAYS), FLOW(DAYS), Qin(days)
-      real    base_flow(days),run_off(days)
 
       INTEGER IDAY(DAYS), IMONTH(DAYS), IYEAR(DAYS)
       INTEGER MO(12*NYR),YR(12*NYR)
@@ -367,7 +366,6 @@ c
 
        write(*,*) 'making convolution...'
          CALL MAKE_CONVOLUTION
-<<<<<<< HEAD
      &        (NCOL, NROW, NO_OF_BOX, PMAX, DAYS,CATCHIJ
 c
 c  Add Qin - JRY- 9/30/2009
@@ -378,13 +376,6 @@ c
 c
 c        JRY 11/10/2009
 c
-=======
-     & (NCOL, NROW, NO_OF_BOX, PMAX, DAYS, CATCHIJ, 
-     &  BASE, RUNO, FLOW, KE, UH_DAY, UH_S, FRACTION, FACTOR_SUM,
-     &  XC, YC, SIZE, DPREC, FLOWPATH,ICOL,NDAY,IDAY,IMONTH,IYEAR,
-     &  MO, YR, NYR,base_flow,run_off)
-c 
->>>>>>> origin
          end if
 c 
 C      print*, 'writing data...'
@@ -396,11 +387,7 @@ c
      &     ,FLOWOUT,HEATPATH,clen
      &     ,Flow_Cells,Force_Cells,Nflow,Nflow_pd,Nheat,Nheat_pd
      &     ,nday,IDAY,IMONTH,IYEAR,skip_MET
-<<<<<<< HEAD
      &     ,aD_a,bD_b,aU_a,bU_b)
-=======
-     &     ,aa_d,bb_d,aa_w,bb_w,base_flow,run_off)
->>>>>>> origin
 
 c
 c
