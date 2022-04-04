@@ -16,7 +16,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !     Segment is in cell SEGMENT_CELL(NC)
 !
 !
-                    write(*,*) 'Starting here'
                     ncell = segment_cell(nr,ns)
                     if (dt(ncell) .gt. dt_comp) then
                       nstrt_elm(ns) = ns
@@ -31,7 +30,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                        no_dt(ns) = 1
                       dt_part(nx_s) = dt_comp
                       DONE_PART = .TRUE.
-!if (nr.eq.1) write(26,*) '0',nr,ns,x_part(ns),x1,x2
                     end if 
 !
 !                     
@@ -40,7 +38,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !     Determine if the total elapsed travel time is equal to the
 !     computational interval
 !
-<<<<<<< HEAD
                     if (.not. DONE_PART) then
                       dt_dummy = 0.0
                       dt_total = 0.0
@@ -56,22 +53,12 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                         nstrt_elm(ns) = nss
                         x_dummy = x_dummy + u(ncell)                 &                      
                                 * dt(ncell)
-!if (nr.eq.1) write(26,*) '2',ns,nss,dt_part(nx_s) 
                        xpprt(nssdmm) = x_dummy
                         if (dt_total .gt. dt_comp)  then
                           exit
                         end if
 
                        end do
-=======
-    do while(dt_total.lt.dt_comp.and.nx_part.gt.0)
-       nx_s=nx_s+1
-       x_part(nx_s)=x_dist(nr,nx_part-1)
-       ncell=segment_cell(nr,nx_part)       
-      if (ncell .eq. 0) write(*,*) 'ncell - 0 ',nr,nx_part,ncell
-       dt_part(nx_s)=dt(ncell)
-       dt_total=dt_total+dt_part(nx_s)
->>>>>>> origin
 !
                        if (nstrt_elm(ns) .eq.1 .and.                 &
                           dt_total.lt.dt_comp) then          
@@ -98,7 +85,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !                      
                     end if
                       DONE_PART = .TRUE.
-!if (nr.eq.1) write(26,*) '*****************************'
 !
 !     For the last segment of particle travel, adjust the particle location
 !     such that the total particle travel time is equal to the computational
