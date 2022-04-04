@@ -1,49 +1,27 @@
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM
 !
 use Block_Energy
 use Block_Hydro
+use Block_Ice_Snow
 use Block_Network
 !
 Implicit None
 ! 
 !
-character (len=200):: temp_file
-character (len=200):: param_file
-! 
-integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer          :: nc,nd,ndd,nm,nr,ns
-integer          :: nr_trib,ntribs
-integer          :: nrec_flow,nrec_heat
-integer          :: nnd,nobs,nyear,nd_year,ntmp
-integer          :: npart,nseg,nx_s,nx_part
+integer          :: ncase,ncell, nc_head
+integer          :: nd, ndd, nr, ns
+integer          :: nobs, nyear, nd_year, ntmp
 !
-! Indices for lagrangian interpolation
-!
-integer              :: njb,npndx,ntrp
-integer, dimension(2):: ndltp=(/-1,-2/)
-integer, dimension(2):: nterp=(/2,3/)
-
-!
-real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-real             :: T_dstrb,T_dstrb_load,T_trb_load
+real             :: hpd, xd, xdd, xwpd, xd_year, year
 real             :: rminsmooth
-real             :: T_0,T_dist
 real(8)          :: time
-real             :: x,xd,xdd,xd_year,xwpd,year
-real             :: tntrp
-real             :: dt_ttotal
-real,dimension(4):: ta,xa
-!
-real,dimension(:),allocatable     :: T_head,T_smth,T_trib
-
-logical:: DONE
-!
 !
 ! Allocate the arrays
 !
-allocate (dt_part(ns_max))
-allocate (x_part(ns_max))
+!allocate (ICE(heat_cells))
+!allocate (SNOW(heat_cells))
+!allocate (SUB_ZERO(heat_cells))
+allocate (temp(nreach,0:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
 allocate (T_trib(nreach))
@@ -57,8 +35,8 @@ allocate (u(heat_cells))
 allocate (dt(2*heat_cells))
 allocate (dbt(heat_cells))
 allocate (ea(heat_cells))
-allocate (Q_ns(heat_cells))
-allocate (Q_na(heat_cells))
+allocate (Qns(heat_cells))
+allocate (Qna(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
 !
@@ -77,12 +55,7 @@ T_head=4.0
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
 T_smth=4.0
-
 !
-!     open the output file
-!
-
-open(20,file=TRIM(temp_file),status='unknown')
 !
 !
 ! Initialize dummy counters that facilitate updating simulated values
@@ -116,7 +89,6 @@ do nyear=start_year,end_year
       DO ndd=1,nwpd
       xdd = ndd
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
-
 !
 ! Read the hydrologic and meteorologic forcings
 !
@@ -143,140 +115,27 @@ do nyear=start_year,end_year
 !
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
-      x_bndry=x_dist(nr,0) - 1.0      
-!
-      DONE=.FALSE.
 !
 ! Begin cell computational loop
 !
-        do ns=1,no_celm(nr)
+        do ns=1,no_celm(nr)  
+!
+          ncell = segment_cell(nr,ns)
+!
+! Check to see if air temperature is above freezing (0.0 deg C)
 ! 
-! Testing new code 8/8/2016
-!
-!     Establish particle tracks
-!
-      nx_s = 0
-
-!
-      call Particle_Track(nr,ns,nx_s)
-      ncell=segment_cell(nr,ns)  
-!
-! Start the cell counter for nseg
-!          
-          nseg=nstrt_elm(ns)
-!
-! Check if particle is at x_bndry
-!
-          if(x_part(ns).gt.x_bndry) then
-            T_0 = T_head(nr)
-!write(26,*) 'Headwaters',nr,nseg,T_0
-          else 
-!
-! Do the interpolation
-!
-            dlta1 = x2 - x_part(ns)
-            dlta2 = x_part(ns) - x1
-            dlta = x2 - x1           
-            x=x_part(ns)
-            T_0 = (dlta1*t1 + dlta2*t2)/dlta
-!if (nr.eq.1) write(26 ,*) 'Interp ',T_0,t1,t2
-
-          end if
-!
-!
-          nncell=segment_cell(nr,nstrt_elm(ns))
-!
-!    Initialize inflow
-!
-          Q_inflow = Q_in(nncell)
-          Q_outflow = Q_out(nncell)
-!
-!    Set NCELL0 for purposes of tributary input
-!
-          dt_total=0.0
-          do nm=no_dt(ns),1,-1
-            dt_calc=dt_part(nm)
-            z=depth(nncell)
-!if (nr.eq.1) write(26,*) 'Heat',nr,ns,nm,nncell,T_0,z
-            call energy(T_0,q_surf,nncell,nr)
-!
-            q_dot=(q_surf/(z*rfac))
-!
-! The following update for T_0 is redundant per RJN 7/26/3017
-! and has been commented out for the time being - JRY
-!
-!            T_0=T_0+q_dot*dt_calc
-            if(T_0.lt.0.0) T_0=0.0
-!
-!    Add distributed flows
 !    
-            T_dstrb_load  = 0.0
+          ICE(ncell) = .FALSE.
 !
-            Q_dstrb = Q_diff(nncell)
+          if (dbt(ncell) .lt. 0.01) SUB_ZERO(ncell) = .TRUE.
+        
 !
-! Temperature of distributed inflow assumed = 10.0 deg C
+          if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
 !
-            if(Q_dstrb.gt.0.001) then
-              T_dstrb  = 10.0
-            else
-              T_dstrb  = 10.0
-            end if
-              T_dstrb_load  = Q_dstrb*T_dstrb
-
-!
-!     Look for a tributary.
-!
-            ntribs=no_tribs(nncell)
-            Q_trb_sum   = 0.0
-            T_trb_load  = 0.0
-            if(ntribs.gt.0.and..not.DONE) then
-!
-              do ntrb=1,ntribs
-                nr_trib=trib(nncell,ntrb)
-                if(Q_trib(nr_trib).gt.0.0) then
-                  Q_trb        = Q_trib(nr_trib)
-                  Q_trb_sum    = Q_trb_sum + Q_trb
-!
-!  Update water temperature with tributary input
-!
-                  T_trb_load   = (Q_trb*T_trib(nr_trib))       &
-                               +  T_trb_load
-                end if
-              end do
-!
-              DONE=.TRUE.
-            end if
-!
-!  Update inflow and outflow
-!
-            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-            Q_ratio = Q_inflow/Q_outflow       
-!
-! Do the mass/energy balance
-!
-            T_0  = T_0*Q_ratio                              &
-                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
-                 + q_dot*dt_calc              
-!
-            if (T_0.lt.0.5) T_0 =0.5
-            Q_inflow = Q_outflow
-!
-            ncell0=nncell
-            nseg=nseg+1
-            nncell=segment_cell(nr,nseg)
-!
-!     Reset tributary flag if this is a new cell
-!
-            if(ncell0.ne.nncell) then
-              ncell0=nncell
-              Q_inflow = Q_in(nncell)
-               DONE=.FALSE.
-            end if
-            dt_total=dt_total+dt_calc
-          end do
-          if (T_0.lt.0.5) T_0=0.5
-            temp(nr,ns,n2)=T_0
-	    T_trib(nr)=T_0
+             call Ice_Free (nd,nr,ns,ncell,nc_head)
+          else
+             call Frozen (nd,nr,ns,ncell,nc_head)
+          end if
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
@@ -284,7 +143,8 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+
+        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
 !
 !     End of computational element loop
 !
@@ -298,9 +158,6 @@ do nyear=start_year,end_year
 !
 !     End of weather period loop (NDD=1,NWPD)
 !
-4650 format(16x,12(6x,f6.0,6x))
-4700 format(f10.4,f6.0,15(f6.1,f8.3))
-4750 format(f10.4,10(i4,f8.0))
           end do
 !
 !     End of main loop (ND=1,365/366)
@@ -316,5 +173,4 @@ do nyear=start_year,end_year
 !                        return to rmain
 !     ******************************************************
 !
-950 return
 end SUBROUTINE SYSTMM
