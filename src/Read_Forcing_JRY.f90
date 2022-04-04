@@ -31,8 +31,6 @@ do nr=1,nreach
     Q_in(no_heat) = run_off(no_heat) + base_flow(no_heat)
     Q_in(no_heat) = MAX1(Q_in(no_heat),1.0)
 !
-  if (nnd .eq. 1) write(80,*) 'Read_Forcing ',no_heat,Q_in(no_heat) &
-                                               ,Q_out(no_heat) 
     Q_diff(no_heat) = Q_out(no_heat) - Q_in(no_heat)
 !
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
@@ -100,6 +98,6 @@ end do
 !
 ! Call the water balance subroutine
 !
-  call Water_Balance
+!  call Water_Balance
 !
 END SUBROUTINE Read_Forcing

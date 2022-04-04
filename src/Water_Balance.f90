@@ -36,11 +36,7 @@ do nr = 1,nreach
 !
 !  Nonpoint flow is distributed evenly among all segments in the grid cell
 !
-<<<<<<< HEAD
     Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
-=======
-!    Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
->>>>>>> origin
 !
   end do
 !  

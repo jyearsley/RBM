@@ -157,7 +157,7 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
     segment_cell(nr,nseg)=ncell
-!    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
+    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
@@ -188,12 +188,11 @@ if (trib_cell .gt. 0) then
 end if
 
 if(ns_max_test.lt.nseg) ns_max_test=nseg
-write(*,*) 'ns_max_test',ns_max_test,nseg
 !
 ! End of reach loop
 !
 end do
-if(ns_max.gt.ns_max) then
+if(ns_max_test.gt.ns_max) then
   write(*,*) 'RBM is terminating because'
   write(*,*) 'NS_MAX exceeded. Change NS_MAX in Block_Network to: ',ns_max_test
   stop

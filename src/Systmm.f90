@@ -14,16 +14,8 @@ integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
-<<<<<<< HEAD
 integer          :: nnd,nobs,nyear,nd_year,ntmp
 integer          :: npart,nseg,nx_s,nx_part
-<<<<<<< HEAD
-=======
-integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp,nrr_tmp
-integer          :: npart,nseg,nx_s,nx_part,nx_head
->>>>>>> origin
-=======
->>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
 !
 ! Indices for lagrangian interpolation
 !
@@ -34,10 +26,9 @@ integer, dimension(2):: nterp=(/2,3/)
 !
 real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
 real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-
 real             :: T_dstrb,T_dstrb_load,T_trb_load
 real             :: rminsmooth
-real             :: Qload1,T_0,T_dist
+real             :: T_0,T_dist
 real(8)          :: time
 real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
@@ -48,7 +39,6 @@ real,dimension(:),allocatable     :: T_head,T_smth,T_trib
 
 logical:: DONE
 !
-logical Leap_Year
 !
 ! Allocate the arrays
 !
@@ -61,8 +51,6 @@ allocate (depth(heat_cells))
 allocate (Q_in(heat_cells))
 allocate (Q_out(heat_cells))
 allocate (Q_diff(heat_cells))
-allocate (base_flow(heat_cells))
-allocate (run_off(heat_cells))
 allocate (Q_trib(nreach))
 allocate (width(heat_cells))
 allocate (u(heat_cells))
@@ -111,8 +99,7 @@ hpd=1./xwpd
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-!  if (mod(nyear,4).eq.0) nd_year=366
-  if (Leap_Year(nyear)) nd_year = 366
+  if (mod(nyear,4).eq.0) nd_year=366
 !
 !     Day loop starts
 !
@@ -128,23 +115,12 @@ do nyear=start_year,end_year
 !
       DO ndd=1,nwpd
       xdd = ndd
-<<<<<<< HEAD
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
-=======
-      time=year+(xd+(xdd-1.5)*hpd)/xd_year 
->>>>>>> origin
 
 !
 ! Read the hydrologic and meteorologic forcings
 !
         call READ_FORCING
-        nrr_tmp = 0
-        do nr = 1,nreach
-            do nc=1,no_cells(nr)
-            nrr_tmp = nrr_tmp + 1
-            end do
-        end do
-
 !
 !     Begin reach computations
 !
@@ -152,8 +128,6 @@ do nyear=start_year,end_year
 !     Begin cycling through the reaches
 !
       do nr=1,nreach
-!
-      nrr_tmp = nr
 !
         nc_head=segment_cell(nr,1)
 !
@@ -173,8 +147,6 @@ do nyear=start_year,end_year
 !
       DONE=.FALSE.
 !
-      DONE=.FALSE.
-!
 ! Begin cell computational loop
 !
         do ns=1,no_celm(nr)
@@ -184,23 +156,10 @@ do nyear=start_year,end_year
 !     Establish particle tracks
 !
       nx_s = 0
-<<<<<<< HEAD
 
-=======
-      call Particle_Track(nr,ns,nx_s)
->>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
 !
-<<<<<<< HEAD
       call Particle_Track(nr,ns,nx_s)
       ncell=segment_cell(nr,ns)  
-=======
-          ncell=segment_cell(nr,ns)
-!
-<<<<<<< HEAD
-!     Now do the third-order interpolation to
-!     establish the starting temperature values
-!     for each parcel
->>>>>>> origin
 !
 ! Start the cell counter for nseg
 !          
@@ -208,16 +167,6 @@ do nyear=start_year,end_year
 !
 ! Check if particle is at x_bndry
 !
-=======
-!
-!
-! Start the cell counter for nseg
-!          
-          nseg=nstrt_elm(ns)
-!
-! Check if particle is at x_bndry
-!
->>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
           if(x_part(ns).gt.x_bndry) then
             T_0 = T_head(nr)
 !write(26,*) 'Headwaters',nr,nseg,T_0
@@ -225,81 +174,34 @@ do nyear=start_year,end_year
 !
 ! Do the interpolation
 !
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
             dlta1 = x2 - x_part(ns)
             dlta2 = x_part(ns) - x1
             dlta = x2 - x1           
             x=x_part(ns)
-<<<<<<< HEAD
             T_0 = (dlta1*t1 + dlta2*t2)/dlta
-!if (nr.eq.1) write(26 ,*) 'Interp ',T_0,t1,t2
-
-=======
-!     Interpolation at the upstream or downstream boundary
 !
-            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
-!
-            do ntrp=nterp(npndx),1,-1
-              npart=nseg+ntrp+ndltp(npndx)
-              xa(ntrp)=x_dist(nr,npart)
-              ta(ntrp)=temp(nr,npart,n1)
-            end do
-!
-! Start the cell counter for nx_s
-!
-            x=x_part(nx_s)
-!
-!     Call the interpolation function
-!
-            T_0=tntrp(xa,ta,x,nterp(npndx))
->>>>>>> origin
-=======
-            t0 = (dlta1*t1 + dlta2*t2)/dlta
-
->>>>>>> fe4beab2a09b4ac120ee419ce9f998260876356c
           end if
 !
 !
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
-!    Set NCELL0
-!
-          ncell0 = nncell
-!
 !    Initialize inflow
 !
           Q_inflow = Q_in(nncell)
           Q_outflow = Q_out(nncell)
-<<<<<<< HEAD
 !
 !    Set NCELL0 for purposes of tributary input
 !
-=======
-!          Q_outflow = Q_in(nncell) +Q_diff(nncell)
-          
->>>>>>> origin
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-<<<<<<< HEAD
-!if (nr.eq.1) write(26,*) 'Heat',nr,ns,nm,nncell,T_0,z
+!
             call energy(T_0,q_surf,nncell,nr)
 !
             q_dot=(q_surf/(z*rfac))
 !
 ! The following update for T_0 is redundant per RJN 7/26/3017
-=======
-!
-            call energy(T_0,q_surf,nncell,nrr_tmp)
-!
-            q_dot=(q_surf/(z*rfac))
-!
-! The following update for T_0 is redundant per RJN 7/26/2017
->>>>>>> origin
 ! and has been commented out for the time being - JRY
 !
 !            T_0=T_0+q_dot*dt_calc
@@ -347,33 +249,26 @@ do nyear=start_year,end_year
 !  Update inflow and outflow
 !
             Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-            Q_ratio = Q_inflow/(Q_outflow + 0.1)          ! Temporary fix JRY 06/24/2021      
+            Q_ratio = Q_inflow/Q_outflow       
 !
 ! Do the mass/energy balance
 !
             T_0  = T_0*Q_ratio                              &
-                 + (T_dstrb_load + T_trb_load)/(Q_outflow + 0.1)    &
-                 + q_dot*dt_calc  
-                 
-   Qload1 = q_dot*dt_calc
-
+                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
+                 + q_dot*dt_calc              
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
 !
-<<<<<<< HEAD
             ncell0=nncell
-=======
-!            ncell0=nncell
->>>>>>> origin
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
 !     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
-              ncell0=max(nncell,ncell0)
-              Q_inflow = Q_in(ncell0)
+              ncell0=nncell
+              Q_inflow = Q_in(nncell)
                DONE=.FALSE.
             end if
             dt_total=dt_total+dt_calc
@@ -388,12 +283,7 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-<<<<<<< HEAD
             call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
-=======
-  call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell) &
-                      ,Q_inflow,Q_outflow)
->>>>>>> origin
 !
 !     End of computational element loop
 !
