@@ -1,4 +1,4 @@
-Subroutine BEGIN(param_file,spatial_file)
+Subroutine BEGIN (spatial_file)
 !
 use Block_Energy
 use Block_Hydro
@@ -6,15 +6,15 @@ use Block_Network
 !
 implicit none
 !    
-    character (len=8) :: end_date,start_date     
-    character (len=8) :: lat
-    character (len=10):: long
-    character (len=200):: param_file,source_file,spatial_file
+    character (len=8)     :: end_date,start_date     
+    character (len=8)     :: lat
+    character (len=10)    :: long
+    character (len=200 )  :: spatial_file    
 !
     integer:: Julian
     integer:: head_name,trib_cell
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-    integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+    integer:: ns_max_test,node,ncol,nrow,nr
 !
     logical:: first_cell,source
 !
@@ -205,8 +205,5 @@ dt_comp=86400./xwpd
 !     ******************************************************
 !                         Return to RMAIN
 !     ******************************************************
-!
-900 continue
-!
 !
 end subroutine BEGIN

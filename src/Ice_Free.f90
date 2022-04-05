@@ -11,22 +11,12 @@ integer          :: nd,ncell,nncell,ncell0
 integer          :: nm,nr,ns
 integer          :: min_seg,nr_trib,ntribs
 integer          :: npart,nseg,nx_s,nx_head
-
-
 !
-!
-! Indices for lagrangian interpolation
-!
-integer              :: npndx,ntrp
-integer, dimension(2):: ndltp=(/-1,-2/)
-integer, dimension(2):: nterp=(/2,3/)
-
+logical          :: DONE
 !
 real             :: dt_calc,dt_total,q_dot,q_surf,z
 real             :: Q_dstrb,Q_ratio,Q_trb,Q_trb_sum
 real             :: T_dstrb,T_dstrb_load,T_trb_load
-real             :: x,xprt
-real             :: tntrp
 !
 !
 real,dimension(4):: ta,xa
@@ -35,53 +25,23 @@ real,dimension(4):: ta,xa
 !
 nx_s = 0
 !  
-      call Particle_Track(nr,ns,nx_s,nx_head,xprt)
+      call Particle_Track(nr,ns,nx_s)
 !
           ncell=segment_cell(nr,ns)
-!
-!     Now do the third-order interpolation to
-!     establish the starting temperature values
-!     for each parcel
-!
-
           nseg=nstrt_elm(ns)
 !
-!     Perform polynomial interpolation
+! Check if particle is at x_bndry
 !
-!
-!     Interpolation inside the domain
-!
-          npndx=2
-!
-!     Interpolation at the upstream boundary if the
-!     parcel has reached that boundary
-!
-          if(nx_head.eq.0) then
+          if(x_part(ns).gt.x_bndry) then
             T_0 = T_head(nr)
           else 
 !
+! Linear interpolation
 !
-!     Interpolation at the upstream or downstream boundary
-!        
-
-
-            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
-!
-            do ntrp=nterp(npndx),1,-1
-              npart=nseg+ntrp+ndltp(npndx)
-              xa(ntrp)=x_dist(nr,npart)
-              ta(ntrp)=temp(nr,npart,n1)
-
-            end do
-!
-! Start the cell counter for nx_s
-!
-!            x=x_part(nx_s)
-            x=xprt
-!
-!     Call the interpolation function
-!
-            T_0=tntrp(xa,ta,x,nterp(npndx))
+            dlta1 = x2 - x_part(ns)
+            dlta2 = x_part(ns) - x1
+            dlta  = x2 - x1
+            T_0 = (dlta1*t1 + dlta2*t2)/dlta
 !
           end if
 !
@@ -130,12 +90,10 @@ nx_s = 0
             ntribs=no_tribs(nncell)
             Q_trb_sum   = 0.0
             T_trb_load  = 0.0
-!            if(ntribs.gt.0.and..not.DONE) then
 !
 ! Uses first segment of the cell to advect tributary thermal energy
 !
-            min_seg = first_seg(nncell)
-            if(ntribs.gt.0.and.nseg.eq.min_seg) then
+            if(ntribs.gt.0.and..not.DONE) then
 !
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)

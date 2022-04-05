@@ -8,7 +8,7 @@ use Block_Network
 Implicit None
 ! 
 !
-integer          :: ncase,ncell, nc_head
+integer          :: ncell, nc_head
 integer          :: nd, ndd, nr, ns
 integer          :: nobs, nyear, nd_year, ntmp
 !

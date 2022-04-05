@@ -5,8 +5,7 @@ USE Block_Network
 IMPLICIT NONE
 integer                     :: nr,ns
 integer                     :: jtrp1,jtrp2
-integer                     :: ncell, nx_part
-integer                     :: nss,nssdmm,nx_s,count_step
+integer                     :: ncell,nss,nssdmm,nx_s
 logical                     :: DONE_PART
 !
 real                        :: dt_left,dt_total,dt_dummy,x_dummy
@@ -16,7 +15,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !     Segment is in cell SEGMENT_CELL(NC)
 !
 !
-                    write(*,*) 'Starting here'
                     ncell = segment_cell(nr,ns)
                     if (dt(ncell) .gt. dt_comp) then
                       nstrt_elm(ns) = ns
@@ -31,7 +29,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                        no_dt(ns) = 1
                       dt_part(nx_s) = dt_comp
                       DONE_PART = .TRUE.
-!if (nr.eq.1) write(26,*) '0',nr,ns,x_part(ns),x1,x2
                     end if 
 !
 !                     
@@ -55,7 +52,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                         nstrt_elm(ns) = nss
                         x_dummy = x_dummy + u(ncell)                 &                      
                                 * dt(ncell)
-!if (nr.eq.1) write(26,*) '2',ns,nss,dt_part(nx_s) 
                        xpprt(nssdmm) = x_dummy
                         if (dt_total .gt. dt_comp)  then
                           exit
@@ -88,7 +84,6 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !                      
                     end if
                       DONE_PART = .TRUE.
-!if (nr.eq.1) write(26,*) '*****************************'
 !
 !     For the last segment of particle travel, adjust the particle location
 !     such that the total particle travel time is equal to the computational
