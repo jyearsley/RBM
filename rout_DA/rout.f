@@ -235,7 +235,7 @@ c
      &             ,HEATOUT                  
 c        
       open(16,FILE=TRIM(HEATOUT),FORM='FORMATTED'
-     &          ,ACCESS='DIRECT',RECL=50)
+     &          ,ACCESS='DIRECT',RECL=60)
       end if      
         
 c
