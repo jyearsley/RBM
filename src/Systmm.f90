@@ -199,7 +199,7 @@ do nyear=start_year,end_year
 !
             call energy(T_0,q_surf,nncell,nr)
 !
-            q_dot=(q_surf/(z*rfac))
+            q_dot=(q_surf/(z*rho_Cp)
 !
 ! The following update for T_0 is redundant per RJN 7/26/3017
 ! and has been commented out for the time being - JRY
