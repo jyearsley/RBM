@@ -30,9 +30,12 @@ module Block_Energy
 
 !   Some important constants
 !
-      real             :: lvp,rb,rho
+      real             :: lvp
+      real,parameter   :: a_conv=40.0,b_conv=74.0
+      real,parameter   :: rho_H2O = 1000.,rb = 0.062
       real             :: dlta,dlta1,dlta2,t0,t1,t2,x1,x2
-      real,parameter   :: pi=3.14159
-      real,parameter   :: rho_Cp = 1000.*4184.0 !rho*Cp(kg/meter**3)*(J/KG*degK)       
+      real,parameter   :: kcal_Wsec = 4184.0,pi=3.14159, wind_fctr = 1.0
+      real,parameter   :: rho_Cp = 1000.*4184.0 !rho*Cp(kg/meter**3)*(J/KG*degK)
+      real,dimension(2),parameter   :: evrate = (/1.5e-08,0.75e-08/)       
 !
 end module Block_Energy  

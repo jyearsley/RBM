@@ -98,7 +98,7 @@ c
      &         , status='unknown')     
 
         DO N = 1, NOB
-          print*, 'grid cell', N,' out of', NOB
+c          print*, 'grid cell', N,' out of', NOB
           DO K = 1,UH_DAY
             UH_DAILY(N,K) = 0.0
           END DO
@@ -118,8 +118,10 @@ c
           IF ((I .NE. PI) .OR. (J .NE. PJ)) THEN
             DO T = 1, TMAX
               DO L = 1, LE
-                 IF ((T-L) .GT. 0) THEN
-                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L) 
+c                 IF ((T-L) .GT. 0) THEN
+                 IF ((T-L) .GE. 0) THEN
+c                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L) 
+                   FR(T,2) = FR(T,2) + FR(T-L+1,1)*UHM(I,J,L) 
                  END IF
                END DO
             END DO
@@ -168,7 +170,11 @@ c
 c  write out the grid for future reference...
 
         DO N = 1,NOB
-          WRITE(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
+          do K = 1,KE+UH_DAY-1
+            UH_S(N,K) = UH_BOX(N,K)
+            write(98,*)  UH_BOX(N,K)
+c          WRITE(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
+          end do
         END DO        
 
       END IF 

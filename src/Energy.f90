@@ -2,9 +2,9 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
    use Block_Energy
    implicit none
    integer           :: i,ncell,nd,nr
-   real              :: A,B,e0,q_surf,rb,vpr_diff
-   real              :: H_in,LW_back,LV_in,LW_in,SW_in
-   real              :: td,T_surf,T_Kelvin,T_tetens
+   real              :: A,B,e0,q_surf,vpr_diff
+   real              :: HV_in,LW_back,LV_in,LW_in,SW_in
+   real              :: td,T_rb,T_surf,T_Kelvin,T_tetens
    real, dimension(2):: q_fit, T_fit
 !
    td=nd
@@ -14,7 +14,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
       T_Kelvin = T_fit(i) + 273.0
       T_tetens = T_fit(i) + 237.3
 !
-! Vapor pressure at water surface -kPa (Tetens)
+! Vapor pressure at water surface -kPa (Magnus-Tetens)
 !
       e0=0.61078*exp((17.27*T_fit(i))/T_tetens)
 !
@@ -27,23 +27,23 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
       vpr_diff = e0 - ea(ncell)
 !
 ! Evaporative head flux - uses only the Lake Hefner coefficient
-      LV_in = wind_fctr*rho*lvp*evrate(1)*wind(ncell)
+      LV_in = wind_fctr*rho_H2O*lvp*evrate(1)*wind(ncell)
       LV_in = LV_in*vpr_diff
-      if(LV_in .lt. 0.0) LV_in=0.0
+!      if(LV_in .lt. 0.0) LV_in=0.0
 !
 ! Convective heat flux
-      HV_in=rb*LV_in
+      HV_in=rb*(a_conv*wind(ncell)+b_conv)*(dbt(ncell)-T_fit(i))
 !
 ! Shortwave radiation
-      SW_in = QNS(ncell)
+      SW_in = Q_NS(ncell)
 !
 ! Longwave radiation
-      LW_in = QNA(ncell)
+      LW_in = Q_NA(ncell)
 !
 ! Back radiation
-      LW_back = 280.0.23 + 6.1589*T_fit(i)
+      LW_back = 280.23 + 6.1589*T_fit(i)
 !
-      q_fit(i) = SW_in + LW_in + LW_back - LV_in + H_in
+      q_fit(i) = SW_in + LW_in - LW_back - LV_in + HV_in
 !
    end do
 !
