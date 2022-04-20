@@ -87,15 +87,16 @@ c     Solve for
 
       ELSE				         ! make UH_S grid, and save it
         UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
-        print*, 'making UH_S grid...it takes a while...'
-        print*, 'NOTE:  your new UH_S grid file will be written in the'
-        print*, '       directory you run from, and will be called:'
-        write(*,'(A)')  UH_FILE
-        print*, '       save this file and specify it in your station'
-        print*, '       location file to avoid this step in the future'
+c        print*, 'making UH_S grid...it takes a while...'
+c        print*, 'NOTE:  your new UH_S grid file will be written in the'
+c        print*, '       directory you run from, and will be called:'
+c        write(*,'(A)')  UH_FILE
+c        print*, '       save this file and specify it in your station'
+c        print*, '       location file to avoid this step in the future'
 c
         open(98, file = UH_FILE
-     &         , status='unknown')     
+     &         , status='unknown')
+        write(*,*) 'UH_FILE ',nob,UH_FILE     
 
         DO N = 1, NOB
 c          print*, 'grid cell', N,' out of', NOB
@@ -171,9 +172,7 @@ c  write out the grid for future reference...
 
         DO N = 1,NOB
           do K = 1,KE+UH_DAY-1
-            UH_S(N,K) = UH_BOX(N,K)
-            write(98,*)  UH_BOX(N,K)
-c          WRITE(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
+            WRITE(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
           end do
         END DO        
 
