@@ -90,7 +90,7 @@ c     Solve for
 c        print*, 'making UH_S grid...it takes a while...'
 c        print*, 'NOTE:  your new UH_S grid file will be written in the'
 c        print*, '       directory you run from, and will be called:'
-c        write(*,'(A)')  UH_FILE
+c         write(*,'(A)')  UH_FILE
 c        print*, '       save this file and specify it in your station'
 c        print*, '       location file to avoid this step in the future'
 c
@@ -171,9 +171,7 @@ c                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L)
 c  write out the grid for future reference...
 
         DO N = 1,NOB
-          do K = 1,KE+UH_DAY-1
-            WRITE(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
-          end do
+          WRITE(98, *) (UH_S(N,K), K = 1,KE+UH_DAY-1)
         END DO        
 
       END IF 
