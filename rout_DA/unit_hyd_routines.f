@@ -76,7 +76,7 @@ c     Solve for
       character*80 GRID_CELL,UH_DRCTRY
       CHARACTER*80 UH_FILE,UH_STRING       !new, AW
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
-        write(*,*), 'reading UH_S grid from file'
+        write(*,*) 'reading UH_S grid from file'
         UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
         UH_STRING=TRIM(UH_DRCTRY)//UH_STRING  
         write(*,*) 'UH_S File ',UH_FILE
