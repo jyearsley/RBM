@@ -21,7 +21,6 @@ real(8)          :: time
 !allocate (ICE(heat_cells))
 !allocate (SNOW(heat_cells))
 !allocate (SUB_ZERO(heat_cells))
-allocate (temp(nreach,0:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
 allocate (T_trib(nreach))

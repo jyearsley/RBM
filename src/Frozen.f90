@@ -9,7 +9,7 @@ Implicit None
 !
 integer          :: nd,ncell,nseg,nncell,ncell0
 integer          :: nm,nr,ns,nx_head
-integer          :: min_seg,nr_trib,ntribs
+integer          :: nr_trib,ntribs
 integer          :: npart,nx_s
 !
 logical:: DONE
@@ -17,9 +17,6 @@ logical:: DONE
 real             :: dt_calc,dt_total,q_dot,q_surf,z
 real             :: Q_dstrb,Q_ratio,Q_trb,Q_trb_sum
 real             :: T_dstrb,T_dstrb_load,T_trb_load
-!
-!
-real,dimension(4):: ta,xa
 !
 !     Establish particle tracks
 !

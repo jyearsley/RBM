@@ -76,7 +76,7 @@ c     Solve for
       character*80 GRID_CELL,UH_DRCTRY
       CHARACTER*80 UH_FILE,UH_STRING       !new, AW
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
-        write(*,*), 'reading UH_S grid from file'
+        write(*,*) 'reading UH_S grid from file'
         UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
         UH_STRING=TRIM(UH_DRCTRY)//UH_STRING  
         write(*,*) 'UH_S File ',UH_FILE
@@ -87,18 +87,19 @@ c     Solve for
 
       ELSE				         ! make UH_S grid, and save it
         UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
-        print*, 'making UH_S grid...it takes a while...'
-        print*, 'NOTE:  your new UH_S grid file will be written in the'
-        print*, '       directory you run from, and will be called:'
-        write(*,'(A)')  UH_FILE
-        print*, '       save this file and specify it in your station'
-        print*, '       location file to avoid this step in the future'
+c        print*, 'making UH_S grid...it takes a while...'
+c        print*, 'NOTE:  your new UH_S grid file will be written in the'
+c        print*, '       directory you run from, and will be called:'
+c         write(*,'(A)')  UH_FILE
+c        print*, '       save this file and specify it in your station'
+c        print*, '       location file to avoid this step in the future'
 c
         open(98, file = UH_FILE
-     &         , status='unknown')     
+     &         , status='unknown')
+        write(*,*) 'UH_FILE ',nob,UH_FILE     
 
         DO N = 1, NOB
-          print*, 'grid cell', N,' out of', NOB
+c          print*, 'grid cell', N,' out of', NOB
           DO K = 1,UH_DAY
             UH_DAILY(N,K) = 0.0
           END DO
@@ -118,8 +119,10 @@ c
           IF ((I .NE. PI) .OR. (J .NE. PJ)) THEN
             DO T = 1, TMAX
               DO L = 1, LE
-                 IF ((T-L) .GT. 0) THEN
-                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L) 
+c                 IF ((T-L) .GT. 0) THEN
+                 IF ((T-L) .GE. 0) THEN
+c                   FR(T,2) = FR(T,2) + FR(T-L,1)*UHM(I,J,L) 
+                   FR(T,2) = FR(T,2) + FR(T-L+1,1)*UHM(I,J,L) 
                  END IF
                END DO
             END DO

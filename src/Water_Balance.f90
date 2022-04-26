@@ -6,8 +6,8 @@ USE Block_Network
 IMPLICIT NONE
 !
 integer     :: nc,ncnf,nr,nrc,ntrib,nntrib
-integer     :: tot_trib_in,trib_seg_in
-real        :: Q_start,Q_sum_trib
+!
+real        :: Q_sum_trib
 !
 !
 do nr = 1,nreach

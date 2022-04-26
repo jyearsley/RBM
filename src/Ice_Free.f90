@@ -18,9 +18,6 @@ real             :: dt_calc,dt_total,q_dot,q_surf,z
 real             :: Q_dstrb,Q_ratio,Q_trb,Q_trb_sum
 real             :: T_dstrb,T_dstrb_load,T_trb_load
 !
-!
-real,dimension(4):: ta,xa
-!
 !     Establish particle tracks
 !
 nx_s = 0

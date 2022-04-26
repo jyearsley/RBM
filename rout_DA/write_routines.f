@@ -80,11 +80,11 @@ c            rho,press,wind
 c 
                read(25,*) dmmy
                Heat_data(1)=Heat_data(1)+dmmy(1)/heat_pd
-               Heat_data(2)=Heat_data(2)+10.*dmmy(2)/heat_pd
-               Heat_data(3)=Heat_data(3)+2.388e-4*dmmy(3)/heat_pd
-               Heat_data(4)=Heat_data(4)+2.388e-4*dmmy(4)/heat_pd
+               Heat_data(2)=Heat_data(2)+dmmy(2)/heat_pd
+               Heat_data(3)=Heat_data(3)+dmmy(3)/heat_pd
+               Heat_data(4)=Heat_data(4)+dmmy(4)/heat_pd
                Heat_data(5)=Heat_data(5)+dmmy(5)/heat_pd
-               Heat_data(6)=Heat_data(6)+10.*dmmy(6)/heat_pd
+               Heat_data(6)=Heat_data(6)+dmmy(6)/heat_pd
                Heat_data(7)=Heat_data(7)+dmmy(7)/heat_pd
             end do
             nrec=Force_Cells*(i-1)+Nheat
