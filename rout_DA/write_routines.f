@@ -92,7 +92,7 @@ c
 c         Write the heat budget data for this grid cell
 c         to the RB direct access file
 c         
-            write(16,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)',rec=nrec)
+            write(16,'(i5,2f6.2,2f10.1,2f7.2,f5.2)',rec=nrec)
      &           Nheat,Heat_data
          end do
          close(25)
