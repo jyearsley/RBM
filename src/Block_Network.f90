@@ -1,6 +1,8 @@
 Module Block_Network
 !
-! Module with stream topology variables
+! Module with stream topology variables and output specifications
+!
+    integer, dimension(:),allocatable   :: print_yr 
 !
     integer, dimension(:), allocatable  ::no_celm,no_cells,no_tribs
     integer, dimension(:), allocatable  ::head_cell
@@ -11,7 +13,7 @@ Module Block_Network
 ! Integer variables 
 !
     integer             :: flow_cells,heat_cells
-    integer             :: n1,n2,ndays,nreach,ntrb,nwpd
+    integer             :: n1,n2,ndays,nreach,nprnt_yr,ntrb,nwpd
     integer,parameter   :: ns_max=500
     integer             :: start_year,start_month,start_day
     integer             :: end_year,end_month,end_day

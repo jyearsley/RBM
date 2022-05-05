@@ -14,7 +14,7 @@ implicit none
     integer:: Julian
     integer:: head_name,trib_cell
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-    integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+    integer:: np,ns_max_test,node,ncol,nrow,nr,cum_sgmnt
 !
     logical:: first_cell,source
 !
@@ -32,6 +32,12 @@ implicit none
 read(90,*) start_date,end_date
 read(start_date,'(i4,2i2)') start_year,start_month,start_day
 read(end_date,  '(i4,2i2)') end_year,end_month,end_day
+!
+read(90,*) nprnt_yr
+allocate (print_yr(nprnt_yr))
+read(90,*) (print_yr(np),np=1,nprnt_yr)
+write(*,*) (print_yr(np),np=1,nprnt_yr)
+!
 nyear1=start_year
 nyear2=end_year
 write(*,'(2(2x,i4,2i2))')  &
@@ -157,7 +163,6 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
     segment_cell(nr,nseg)=ncell
-    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)

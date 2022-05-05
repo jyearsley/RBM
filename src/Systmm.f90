@@ -7,10 +7,11 @@ use Block_Network
 Implicit None
 ! 
 !
+character (len=4)  :: year_out
 character (len=200):: temp_file
 character (len=200):: param_file
 ! 
-integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat,np
 integer          :: nc,nd,ndd,nm,nr,ns
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
@@ -37,7 +38,7 @@ real,dimension(4):: ta,xa
 !
 real,dimension(:),allocatable     :: T_head,T_smth,T_trib
 
-logical:: DONE
+logical:: DONE,PRINT_TMP
 !
 !
 ! Allocate the arrays
@@ -81,22 +82,29 @@ T_smth=4.0
 !
 !     open the output file
 !
-
-open(20,file=TRIM(temp_file),status='unknown')
+! Remove opening file = 20 to accommodate multiple output years - JRY 5/5/2022
+!open(20,file=TRIM(temp_file),status='unknown')
 !
 !
 ! Initialize dummy counters that facilitate updating simulated values
 !
-n1=1
-n2=2
-nobs=0
-ndays=0
-xwpd=nwpd
-hpd=1./xwpd
+n1 = 1
+n2 = 2
+nobs = 0
+np = 1
+ndays = 0
+xwpd = nwpd
+hpd = 1./xwpd
 !
 !     Year loop starts
 !
 do nyear=start_year,end_year
+  if (nyear .eq. print_yr(np)) then
+    PRINT_TMP = .TRUE.
+    write(year_out,'(i4)') nyear
+    open(20,FILE='RBM_Temp_'//year_out,status='unknown')
+  end if
+!
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
   if (mod(nyear,4).eq.0) nd_year=366
@@ -274,8 +282,8 @@ do nyear=start_year,end_year
             dt_total=dt_total+dt_calc
           end do
           if (T_0.lt.0.5) T_0=0.5
-            temp(nr,ns,n2)=T_0
-	    T_trib(nr)=T_0
+          temp(nr,ns,n2)=T_0
+          T_trib(nr)=T_0
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
@@ -283,6 +291,7 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
+          if (PRINT_TMP)  &                             
             call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
 !
 !     End of computational element loop
@@ -307,6 +316,9 @@ do nyear=start_year,end_year
         end do
 !
 !     End of year loop
+!
+      PRINT_TMP = .FALSE.
+      if (np .lt. nprnt_yr) np = np + 1
 !
       end do
 !
