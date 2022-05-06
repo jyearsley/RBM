@@ -99,10 +99,15 @@ hpd = 1./xwpd
 !     Year loop starts
 !
 do nyear=start_year,end_year
+  write(*,*) nyear,np,print_yr(np)
+  PRINT_TMP = .FALSE.
   if (nyear .eq. print_yr(np)) then
     PRINT_TMP = .TRUE.
     write(year_out,'(i4)') nyear
-    open(20,FILE='RBM_Temp_'//year_out,status='unknown')
+    temp_file = 'RBM_Temp_'//year_out
+    open(20,FILE=TRIM(temp_file),status='unknown')
+    write(*,*) nyear,temp_file
+    if (np .lt. nprnt_yr) np = np+1
   end if
 !
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
@@ -317,8 +322,6 @@ do nyear=start_year,end_year
 !
 !     End of year loop
 !
-      PRINT_TMP = .FALSE.
-      if (np .lt. nprnt_yr) np = np + 1
 !
       end do
 !

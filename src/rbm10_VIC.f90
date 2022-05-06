@@ -59,14 +59,12 @@ integer numarg
 ! Command line input
 !
 numarg = iargc ( )
-if (numarg .lt. 2) then
+if (numarg .lt. 1) then
   write (*,*) 'Too few arguments were given'
   write (*,*) ' '
   write (*,*) 'First:  Location and prefix of input files'
   write (*,*) '        (networkfile and parameterfile)'
-  write (*,*) 'Second: Location and prefix of output files'
-  write (*,*) ' '
-  write (*,*) 'eg: $ <program-name> ./input/Salmon_0.50 ./output/Salmon_Test'
+  write (*,*) 'eg: $ <program-name> ./input/Salmon_0.50 '
   write (*,*) ' '
   stop
 end if

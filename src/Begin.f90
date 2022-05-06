@@ -88,7 +88,6 @@ do nr=1,nreach
 !     Initialize NSEG, the total number of segments in this reach
 !
   nseg=0
-  write(*,*) ' Starting to read reach ',nr
 !
 !     Read the number of cells in this reach, the headwater #,
 !     the number of the cell where it enters the next higher order stream,
