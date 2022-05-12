@@ -58,6 +58,7 @@ nx_s = 0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
+!write(*,*) 'Calling energy ',T_0,q_surf,nd,nd,nncell,ns
             call energy(T_0,q_surf,nd,nr,nncell,ns)
 
 !

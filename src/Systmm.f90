@@ -124,10 +124,13 @@ do nyear=start_year,end_year
 ! Check to see if air temperature is above freezing (0.0 deg C)
 ! 
 !    
-          ICE(ncell) = .FALSE.
+!write(*,*) 'About to check for ice ',nd,nr,ns,ncell,nc_head
+          ICE(ncell)      = .FALSE.
+          SUB_ZERO(ncell) = .FALSE.
 !
-          if (dbt(ncell) .lt. 0.01) SUB_ZERO(ncell) = .TRUE.
+!          if (dbt(ncell) .lt. 0.01) SUB_ZERO(ncell) = .TRUE.
         
+!write(*,*) 'Checking for ice',dbt(ncell),ICE(ncell),SUB_ZERO(ncell)
 !
           if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
 !

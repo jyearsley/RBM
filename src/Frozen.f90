@@ -57,8 +57,8 @@ real             :: T_dstrb,T_dstrb_load,T_trb_load
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-            call energy(T_0,q_surf,nd,nncell,ICE)
-
+!write(*,*) 'Calling energy in Frozen ',T_0,q_surf,nd,nncell,ICE(nncell)
+            call energy(T_0,q_surf,nd,nr,nncell,ns)
 !
             q_dot=(q_surf/(z*rho_Cp))
             T_0=T_0+q_dot*dt_calc
