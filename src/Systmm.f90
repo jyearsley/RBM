@@ -114,6 +114,7 @@ do nyear=start_year,end_year
 !
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
+      x_bndry=x_dist(nr,0) - 1.0
 !
 ! Begin cell computational loop
 !

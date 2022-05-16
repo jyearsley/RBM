@@ -26,15 +26,15 @@
 !
 ! Bowen ratio - Andreas_et_al JGR Oceans(2013) Figures 1 & 6
 !
-         if (T_fit(i) .ge. 0.01) then
+!         if (T_fit(i) .ge. 0.01) then
            T_rb = T_fit(i)
            if (T_rb .lt. 0.01) T_rb = 0.01
           rb = 0.40*(-0.196231*LOG(T_rb)) + 1.411189
 !
-         else
-           T_rb = T_fit(i) + 40.0
-           rb = 0.4*(-8.688289*LOG(T_rb)) + 32.232621
-         end if
+!         else
+!           T_rb = T_fit(i) + 40.0
+!           rb = 0.4*(-8.688289*LOG(T_rb)) + 32.232621
+!         end if
 !
 ! Latent heat of vaporization/sublimation - joules (Wsec)/kg
 !         

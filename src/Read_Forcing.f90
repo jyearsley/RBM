@@ -22,20 +22,19 @@ do nr=1,nreach
 !
     read(35,'(2i5,3f10.1,f6.1,f6.2)' &
            ,rec=nrec_flow) nnd,ncell &
-           ,Q_dmmy,Q_in(no_heat),Q_dmmy &  
+           ,Q_in(no_heat),Q_out(no_heat),Q_dmmy &  
            ,depth(no_heat),u(no_heat)
-           
+!
+    if (depth(no_heat).lt.0.5) depth(no_heat) = 0.5
+!
+    if(u(no_heat).lt.0.01) u(no_heat)=0.01
+    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat             
 !    
     Q_in(no_heat) = MAX1(Q_in(no_heat),1.0)
-!
-!    Q_in(no_heat) = run_off(no_heat) + base_flow(no_heat)
-    Q_out(no_heat) = Q_in(no_heat)
 !
     Q_diff(no_heat) = Q_out(no_heat) - Q_in(no_heat)
     Q_diff(no_heat) = MAX1(Q_diff(no_heat),0.1)
 !    
-!    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
-!
     read(36,'(i5,2f6.2,2f10.1,2f7.2,f5.2)' &
            ,rec=nrec_heat) ncell &
            ,dbt(no_heat),ea(no_heat) &
