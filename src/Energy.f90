@@ -43,7 +43,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
 ! Back radiation
       LW_back = 280.23 + 6.1589*T_fit(i)
 !
-      q_fit(i) = SW_in + LW_in - LW_back - LV_in + HV_in
+      q_fit(i) = SW_in + LW_in - LW_back - LV_in + HV_in    
 !
    end do
 !

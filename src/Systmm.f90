@@ -133,6 +133,7 @@ do nyear=start_year,end_year
 !
 ! Read the hydrologic and meteorologic forcings
 !
+
         call READ_FORCING
 !
 !     Begin reach computations
@@ -169,6 +170,8 @@ do nyear=start_year,end_year
 !     Establish particle tracks
 !
       nx_s = 0
+!
+      ncell=segment_cell(nr,ns)  
 
 !
       call Particle_Track(nr,ns,nx_s)
@@ -209,8 +212,9 @@ do nyear=start_year,end_year
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
-!
+
             call energy(T_0,q_surf,nncell,nr)
+! if (nr .eq. 1) write(50,*) 'Energy ', nncell,nm,T_0,q_surf,z,dt_calc
 !
             q_dot=q_surf/(z*rho_Cp)
 !
@@ -219,6 +223,7 @@ do nyear=start_year,end_year
 !
 !            T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
+
 !
 !    Add distributed flows
 !    
@@ -280,8 +285,8 @@ do nyear=start_year,end_year
 !     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
-              ncell0=nncell
-!              Q_inflow = Q_in(nncell)
+              ncell0=max(nncell,ncell0)
+              Q_inflow = Q_in(ncell0)
                DONE=.FALSE.
             end if
             dt_total=dt_total+dt_calc

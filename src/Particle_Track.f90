@@ -17,6 +17,7 @@ real,dimension(ns_max)      :: dt_sum,xpprt
 !
 !
                     ncell = segment_cell(nr,ns)
+!
                     if (dt(ncell) .gt. dt_comp) then
                       nstrt_elm(ns) = ns
                       x_part(ns) = x_dist(nr,ns) + u(ncell)*dt_comp
@@ -30,7 +31,7 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                        no_dt(ns) = 1
                       dt_part(nx_s) = dt_comp
                       DONE_PART = .TRUE.
-                    end if 
+                   end if 
 !
 !                     
  100                continue
@@ -54,13 +55,12 @@ real,dimension(ns_max)      :: dt_sum,xpprt
                         x_dummy = x_dummy + u(ncell)                 &                      
                                 * dt(ncell)
                        xpprt(nssdmm) = x_dummy
-                        if (dt_total .gt. dt_comp)  then
-                          exit
+                        if (dt_total .gt. dt_comp) then 
+                        exit
                         end if
-
                        end do
 !
-                       if (nstrt_elm(ns) .eq.1 .and.                 &
+                       if (nstrt_elm(ns) .eq. 1 .and.                 &
                           dt_total.lt.dt_comp) then          
                          x_part(ns) = x_dist(nr,0) 
                           DONE_PART = .TRUE.

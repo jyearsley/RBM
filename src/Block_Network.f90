@@ -14,7 +14,7 @@ Module Block_Network
 !
     integer             :: flow_cells,heat_cells
     integer             :: n1,n2,ndays,nreach,nprnt_yr,ntrb,nwpd
-    integer,parameter   :: ns_max=500
+    integer,parameter   :: ns_max=1000
     integer             :: start_year,start_month,start_day
     integer             :: end_year,end_month,end_day
 !
