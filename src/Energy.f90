@@ -27,9 +27,9 @@
 ! Bowen ratio - Andreas_et_al JGR Oceans(2013) Figures 1 & 6
 !
 !         if (T_fit(i) .ge. 0.01) then
-           T_rb = T_fit(i)
+           T_rb = DBT(ncell)
            if (T_rb .lt. 0.01) T_rb = 0.01
-          rb = 0.40*(-0.196231*LOG(T_rb)) + 1.411189
+          rb = 0.40*(-0.196231*LOG(T_rb) + 1.411189)
 !
 !         else
 !           T_rb = T_fit(i) + 40.0
@@ -78,14 +78,13 @@
 ! Back radiation from the water surface - W/m**2
          LW_back=280.23+6.1589*T_fit(i)
 !
+  if (ncell .eq. 1012) write(80,*) nd,rb,LV_in,H_in
         end if
 !
 ! Thermal energy budget for i = 1,2
 !         q_fit(i)=QNS(ncell)+0.97*QNA(ncell)-QWS-QEVAP+QCONV
          q_fit(i)=SW_in + LW_in - LW_back - LV_in + H_in
-         
-!if (nd .le.5) write(*,*) 'Heat ',i,nd,ncell,T_fit(i),vpr_diff,lvp &
-!                                 ,rb
+!         
       end do
 !
 ! Linear relationship for equilibrium temperature and rate constant

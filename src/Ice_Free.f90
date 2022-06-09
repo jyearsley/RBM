@@ -55,13 +55,10 @@ nx_s = 0
 !
           ncell0=nncell
           dt_total=0.0
- if (nr.eq.1) write(49,*) 'Calling Energy'
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
             z=depth(nncell)
             call energy(T_0,q_surf,nd,nr,nncell,ns)
- if (nr.eq.1) write(49,*) 'Energy ',T_0,q_surf,nd,nncell,ns,Q_inflow,dt_calc
-
 !
             q_dot=(q_surf/(z*rho_Cp))
             T_0=T_0+q_dot*dt_calc

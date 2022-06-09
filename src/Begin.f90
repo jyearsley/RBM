@@ -68,6 +68,10 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(x_dist(nreach,0:ns_max))
  allocate(temp(nreach,-2:ns_max,2))
 !
+ allocate(tmp_arry(nn_avg))
+ allocate(T_smth(nreach,nn_avg))
+
+!
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
 !

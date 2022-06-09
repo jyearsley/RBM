@@ -1,5 +1,8 @@
 module Block_Energy
 !
+!   Averaging period (days)
+  integer, parameter                  :: ishft = -1,nn_avg = 7
+!
 !   Energy budget variables
 !
 !   Incoming short wave radiation, Watts/meter**2
@@ -28,9 +31,10 @@ module Block_Energy
 !
 ! Simulated water temperatures 
 !   
-  real, dimension(:),   allocatable   :: T_head,T_smth,T_trib 
+  real, dimension(:),   allocatable   :: T_head,T_trib 
+  real, dimension(:),   allocatable   :: tmp_arry 
   real, dimension(:,:), allocatable   :: Q_nps
-  real, dimension(:,:), allocatable   :: temp_trib
+  real, dimension(:,:), allocatable   :: T_smth,temp_trib
   real, dimension(:,:), allocatable   :: temp_nps,thermal
     !
   real, dimension(:,:,:), allocatable :: temp

@@ -10,10 +10,10 @@ Implicit None
 !
 integer          :: ncell, nc_head
 integer          :: nd, ndd, nr, ns
-integer          :: nobs, nyear, nd_year, ntmp
+integer          :: nn, nobs, nyear, nd_year, ntmp
 !
 real             :: hpd, xd, xdd, xwpd, xd_year, year
-real             :: rminsmooth
+real             :: T_mohseni,xn_avg
 real(8)          :: time
 !
 ! Allocate the arrays
@@ -22,7 +22,6 @@ real(8)          :: time
 !allocate (SNOW(heat_cells))
 !allocate (SUB_ZERO(heat_cells))
 allocate (T_head(nreach))
-allocate (T_smth(nreach))
 allocate (T_trib(nreach))
 allocate (depth(heat_cells))
 allocate (Q_in(heat_cells))
@@ -53,7 +52,9 @@ T_head=4.0
 !
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
-T_smth=4.0
+xn_avg = nn_avg
+T_smth=0.0
+tmp_arry=0.0
 !
 !
 !
@@ -104,13 +105,23 @@ do nyear=start_year,end_year
 !
 !     Determine smoothing parameters (UW_JRY_2011/06/21)
 !
-        rminsmooth=1.0-smooth_param(nr)
-        T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
+!        rminsmooth=1.0-smooth_param(nr)
+!        T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
+      do nn = 2,nn_avg
+        tmp_arry(nn) = T_smth(nr,nn-1)
+        tmp_arry(1) = dbt(nr)
+        T_Mohseni = sum(tmp_arry)/xn_avg
+      end do
+      do nn = 1,nn_avg
+        T_smth(nr,nn) = tmp_arry(nn)
+      end do
+ if (nr .eq. 1) write(80,*) tmp_arry,T_mohseni
+
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
         T_head(nr)=mu(nr)+(alphaMu(nr) &
-                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr))))) 
+                  /(1.+exp(gmma(nr)*(beta(nr)-T_Mohseni)))) 
 !
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
