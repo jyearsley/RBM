@@ -20,7 +20,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
 !
 !Bowen ratio - Andreas_et_al JGR Oceans (2013) Figure 1
 !
-      T_rb = T_fit(i)
+      T_rb = DBT(ncell)
       if (T_rb .lt. 0.05) T_rb = 0.05
 !
       lvp = kcal_Wsec*(597.0-T_fit(i))
