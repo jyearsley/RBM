@@ -28,10 +28,10 @@
 !
 !         if (T_fit(i) .ge. 0.01) then
            T_rb = DBT(ncell)
-           if (T_rb .lt. 0.01) T_rb = 0.01
-          rb = 0.40*(-0.196231*LOG(T_rb) + 1.411189)
+           if (T_rb .gt. 0.01) then
+             rb = 0.40*(-0.196231*LOG(T_rb) + 1.411189)
 !
-!         else
+           else
 !           T_rb = T_fit(i) + 40.0
 !           rb = 0.4*(-8.688289*LOG(T_rb)) + 32.232621
 !         end if
@@ -78,7 +78,6 @@
 ! Back radiation from the water surface - W/m**2
          LW_back=280.23+6.1589*T_fit(i)
 !
-  if (ncell .eq. 1012) write(80,*) nd,rb,LV_in,H_in
         end if
 !
 ! Thermal energy budget for i = 1,2

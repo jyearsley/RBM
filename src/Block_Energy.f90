@@ -46,7 +46,6 @@ module Block_Energy
 !   Some important constants
 !
   real             :: kcal_Wsec = 4184.0
-  real             :: lvp                    ! Latent heat of vaorization - J(W sec)/kg
   real             :: dlta,dlta1,dlta2,T_0,t1,t2,x1,x2
   real,parameter   :: alpha_ice = 0.5        ! Ice reflectivity - Parkinson-Washington
   real,parameter   :: epsilon = 0.97         ! Emissivity
@@ -54,6 +53,8 @@ module Block_Energy
   real,parameter   :: Ch_Cg = 1.75e-03       ! Transfer coefficent - Parkinson-Washington
   real,parameter   :: cp_air = 1004.0        ! J/Kg/deg K 
   real,parameter   :: kappa_ice = 8.0        ! J/sec/m**2/DegK - Wanders et al
+  real,parameter   :: lvp = 2.501e06         ! Latent heat of vaorization - J(W sec)/kg
+  real,parameter   :: lvf = 0.334e06         ! Latent heat of fusion - J(W sec)/kg
   real,parameter   :: lvs = 2.834e06         ! Latent heat of sublimation                    
   real,parameter   :: comp_eps = 0.378       ! Complement of eps_air_h2o
   real,parameter   :: eps_air_h2o = 0.622    ! Ratio 

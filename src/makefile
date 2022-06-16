@@ -7,7 +7,8 @@
 # Defining variables
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
-	Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
+#	Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
+	Energy.o Julian.o Leap_Year.o Read_Forcing.o \
     Frozen.o Ice_Free.o  \
     Block_Energy.o Block_Hydro.o Block_Ice_Snow.o Block_Network.o\
 	Water_Balance.o Write.o	  
@@ -53,8 +54,8 @@ Julian.o: Julian.f90
 	$(f90comp) -c Julian.f90
 Leap_Year.o: Leap_Year.f90
 	$(f90comp) -c Leap_Year.f90
-tntrp.o: tntrp.f90
-	$(f90comp) -c tntrp.f90
+#tntrp.o: tntrp.f90#
+#	$(f90comp) -c tntrp.f90
 Water_Balance.o: block_hydro.mod block_network.mod Water_Balance.f90
 	$(f90comp) -c Water_Balance.f90
 rbm10_VIC.o: rbm10_VIC.f90
