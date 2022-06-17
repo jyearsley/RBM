@@ -1,5 +1,6 @@
 SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
    use Block_Energy
+   use Block_Network
    implicit none
    integer           :: i,ncell,nd,nr
    real              :: A,B,e0,q_surf,vpr_diff
