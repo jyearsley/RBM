@@ -7,16 +7,19 @@ use Block_Network
 !
 Implicit None
 !
-integer          :: nd,ncell,nncell,ncell0
+integer          :: nd,ncell,nncell,ncell0,strt_cell
 integer          :: nm,nr,ns
-integer          :: min_seg,nr_trib,ntribs
-integer          :: npart,nseg,nx_s,nx_head
+integer          :: nr_trib,ntribs
+integer          :: nseg,nx_s,nx_head
 !
 logical          :: DONE
 !
 real             :: dt_calc,dt_total,q_dot,q_surf,z
 real             :: Q_dstrb,Q_ratio,Q_trb,Q_trb_sum
 real             :: T_dstrb,T_dstrb_load,T_trb_load
+real,parameter   :: ft_to_m =1./3.2808
+!
+DONE = .FALSE.
 !
 !     Establish particle tracks
 !
@@ -57,8 +60,8 @@ nx_s = 0
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
-            z=depth(nncell)
-            call energy(T_0,q_surf,nd,nr,nncell,ns)
+            z=depth(nncell)*ft_to_m
+            call Energy_NO_ICE(T_0,q_surf,nd,nncell)
 !
             q_dot=(q_surf/(z*rho_Cp))
             T_0=T_0+q_dot*dt_calc
@@ -118,7 +121,6 @@ nx_s = 0
                  + (T_dstrb_load + T_trb_load)/Q_outflow    &
                  + q_dot*dt_calc                           
 !
-            if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
 !
             nseg=nseg+1
@@ -133,7 +135,13 @@ nx_s = 0
             end if
             dt_total=dt_total+dt_calc
           end do
-          if (T_0.lt.0.5) T_0=0.5
+           if (T_0.lt.0.001) then
+            T_0 =0.01
+            strt_cell = segment_cell(nr,1) 
+!            SUB_ZERO(strt_cell:ncell) = .TRUE.
+            ice_thick(nr,1:ns,n2) = 0.01
+            ice_temp(nr,1:ns,n2) = -0.01
+          end if
           temp(nr,ns,n2)=T_0
           T_trib(nr)=T_0
 !

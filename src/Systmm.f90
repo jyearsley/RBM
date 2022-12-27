@@ -13,14 +13,18 @@ integer          :: nd, ndd, nr, ns
 integer          :: nn, nobs, nyear, nd_year, ntmp
 !
 real             :: hpd, xd, xdd, xwpd, xd_year, year
-real             :: T_mohseni,xn_avg
+real             :: q_rslt,T_mohseni,xn_avg
 real(8)          :: time
 !
 ! Allocate the arrays
 !
-!allocate (ICE(heat_cells))
-!allocate (SNOW(heat_cells))
-!allocate (SUB_ZERO(heat_cells))
+allocate (ICE(heat_cells))
+allocate (SNOW(heat_cells))
+allocate (SUB_ZERO(heat_cells))
+ICE = .FALSE.
+SNOW= .FALSE.
+SUB_ZERO = .FALSE.
+!
 allocate (T_head(nreach))
 allocate (T_trib(nreach))
 allocate (depth(heat_cells))
@@ -37,6 +41,11 @@ allocate (Qns(heat_cells))
 allocate (Qna(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
+!
+allocate(ice_temp(nreach,-2:ns_max,2))
+ice_temp = 0.0
+allocate(ice_thick(nreach,-2:ns_max,2))
+ice_thick = 0.0!
 !
 ! Initialize some arrays
 !
@@ -137,19 +146,22 @@ do nyear=start_year,end_year
 ! 
 !    
 !write(*,*) 'About to check for ice ',nd,nr,ns,ncell,nc_head
-          ICE(ncell)      = .FALSE.
-          SUB_ZERO(ncell) = .FALSE.
+!          ICE(ncell)      = .FALSE.
+!          SUB_ZERO(ncell) = .FALSE.
 !
 !          if (dbt(ncell) .lt. 0.01) SUB_ZERO(ncell) = .TRUE.
         
 !write(*,*) 'Checking for ice',dbt(ncell),ICE(ncell),SUB_ZERO(ncell)
 !
-          if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
+!          if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
+!          if (ice_thick(nr,ns,n1) .lt. 0.009) then
+          if (ice_temp(nr,ns,n1) .gt. -0.01) then
 !
              call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
-             call Frozen (nd,nr,ns,ncell,nc_head)
+             call ENERGY_ICE (q_rslt, nd, ncell, nr, ns)
           end if
+!
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
@@ -157,8 +169,10 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
+        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = .FALSE.
 
-        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
+                   ice_thick(nr,ns,n2),ice_temp(nr,ns,n2),ICE(ncell))
 !
 !     End of computational element loop
 !

@@ -50,7 +50,6 @@ module Block_Energy
   real,parameter   :: alpha_ice = 0.5        ! Ice reflectivity - Parkinson-Washington
   real,parameter   :: epsilon = 0.97         ! Emissivity
   real,parameter   :: Stfn_Bltz = 5.67e-08   ! Stefan-Boltzmann - W/m**2/degK
-  real,parameter   :: Ch_Cg = 1.75e-03       ! Transfer coefficent - Parkinson-Washington
   real,parameter   :: cp_air = 1004.0        ! J/Kg/deg K 
   real,parameter   :: kappa_ice = 8.0        ! J/sec/m**2/DegK - Wanders et al
   real,parameter   :: lvp = 2.501e06         ! Latent heat of vaorization - J(W sec)/kg
@@ -62,6 +61,6 @@ module Block_Energy
   real,parameter   :: wind_fctr = 1.0        ! dimensionless
   real,parameter   :: rho_Cp = 1000.0*4184.0 ! (Kg/m**3)*(J/(Kg*degK)
   real,parameter   :: rho_air = 1.292        ! Kg/m**3
-  real,dimension(2),parameter :: evrate = (/1.5e-8,0.75e-8/) ! 1/kPa
+  real,dimension(2),parameter :: evrate = (/2.0e-8,2.0e-8/) ! 1/kPa
 !
 end module Block_Energy  

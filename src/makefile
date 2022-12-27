@@ -7,11 +7,11 @@
 # Defining variables
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
-#	Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
-	Energy.o Julian.o Leap_Year.o Read_Forcing.o \
-    Frozen.o Ice_Free.o  \
-    Block_Energy.o Block_Hydro.o Block_Ice_Snow.o Block_Network.o\
-	Water_Balance.o Write.o	  
+	Julian.o Leap_Year.o Read_Forcing.o \
+	Ice_Free.o Energy_ICE.o Energy_NO_ICE.o \
+	Block_Energy.o Block_Hydro.o Block_Ice_Snow.o Block_Network.o\
+	Vapor.o Water_Balance.o Write.o
+# GNU F90 compiler	  
 f90comp = gfortran -Wall -g3 -fbounds-check
 # Makefile
 rbm10_VIC: $(objects)
@@ -35,20 +35,25 @@ block_network.mod: Block_Network.o Block_Network.f90
 Begin.o: block_energy.mod block_network.mod block_hydro.mod \
 	block_ice_snow.mod Begin.f90
 	$(f90comp) -c Begin.f90
-Read_Forcing.o: block_energy.mod block_hydro.mod block_network.mod Read_Forcing.f90
+Read_Forcing.o: block_hydro.mod block_network.mod Read_Forcing.f90
 	$(f90comp) -c Read_Forcing.f90 
-Systmm.o: block_network.mod block_energy.mod block_hydro.mod \
+Systmm.o: block_network.mod block_hydro.mod block_energy.mod\
 	block_ice_snow.mod Systmm.f90
 	$(f90comp) -c Systmm.f90
-Energy.o: block_energy.mod block_ice_snow.mod Energy.f90
-	$(f90comp) -c Energy.f90
-Ice_Free.o: block_energy.mod block_hydro.mod  block_network.mod Ice_Free.f90
+Ice_Free.o: block_hydro.mod  block_network.mod block_energy.mod \
+	block_ice_snow.mod Ice_Free.f90
 	$(f90comp) -c Ice_Free.f90
-Frozen.o: block_energy.mod block_hydro.mod  block_network.mod Frozen.f90
-	$(f90comp) -c Frozen.f90
+Energy_ICE.o: block_hydro.mod  block_network.mod block_energy.mod \
+	block_ice_snow.mod Energy_ICE.f90
+	$(f90comp) -c Energy_ICE.f90
+Energy_NO_ICE.o: block_hydro.mod  block_network.mod block_energy.mod \
+	block_ice_snow.mod Energy_NO_ICE.f90
+	$(f90comp) -c Energy_NO_ICE.f90
+Vapor.o: block_energy.mod block_ice_snow.mod Vapor.f90
+	$(f90comp) -c Vapor.f90
 Particle_Track.o: block_hydro.mod block_network.mod Particle_Track.f90
 	$(f90comp) -c Particle_Track.f90
-Write.o: Write.f90
+Write.o: Write.f90 block_ice_snow.mod block_network.mod
 	$(f90comp) -c Write.f90
 Julian.o: Julian.f90
 	$(f90comp) -c Julian.f90
