@@ -7,7 +7,7 @@ Module Block_Ice_Snow
 !
 ! Logical variables 
 !
-    logical,dimension(:),allocatable :: h_rate,ICE, SNOW, SUB_ZERO
+    logical,dimension(:),allocatable :: h_rate,SNOW, SUB_ZERO
 !
 ! Real variables
 !
@@ -26,7 +26,7 @@ Module Block_Ice_Snow
     real, parameter                 :: T_Kelvin = 273.15    ! Freezing point of H2O, degK
     real, parameter                 :: ltnt_ice_air = 0.840e-03 !Saucier et al
 !
-    real                            :: Ice_Trnsfr
+    real, dimension(:),allocatable  :: ICE
 !
     real, dimension(:,:,:), allocatable :: ice_temp, ice_thick
 !

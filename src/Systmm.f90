@@ -18,10 +18,8 @@ real(8)          :: time
 !
 ! Allocate the arrays
 !
-allocate (ICE(heat_cells))
 allocate (SNOW(heat_cells))
 allocate (SUB_ZERO(heat_cells))
-ICE = .FALSE.
 SNOW= .FALSE.
 SUB_ZERO = .FALSE.
 !
@@ -42,6 +40,8 @@ allocate (Qna(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
 !
+allocate(ICE(heat_cells))
+ICE = 100.
 allocate(ice_temp(nreach,-2:ns_max,2))
 ice_temp = 0.0
 allocate(ice_thick(nreach,-2:ns_max,2))
@@ -124,7 +124,6 @@ do nyear=start_year,end_year
       do nn = 1,nn_avg
         T_smth(nr,nn) = tmp_arry(nn)
       end do
- if (nr .eq. 1) write(80,*) tmp_arry,T_mohseni
 
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
@@ -142,24 +141,15 @@ do nyear=start_year,end_year
 !
           ncell = segment_cell(nr,ns)
 !
-! Check to see if air temperature is above freezing (0.0 deg C)
-! 
-!    
-!write(*,*) 'About to check for ice ',nd,nr,ns,ncell,nc_head
-!          ICE(ncell)      = .FALSE.
-!          SUB_ZERO(ncell) = .FALSE.
-!
-!          if (dbt(ncell) .lt. 0.01) SUB_ZERO(ncell) = .TRUE.
-        
-!write(*,*) 'Checking for ice',dbt(ncell),ICE(ncell),SUB_ZERO(ncell)
-!
-!          if (.not. SUB_ZERO(ncell) .and. .not.ICE(ncell)) then
-!          if (ice_thick(nr,ns,n1) .lt. 0.009) then
           if (ice_temp(nr,ns,n1) .gt. -0.01) then
 !
+ if (nd .ge. 8 .and. nd .le. 12) write(86,*) 'Ice_Free',nd,nr,ns,ice_temp(nr,ns,n1)
+
              call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
+!
              call ENERGY_ICE (q_rslt, nd, ncell, nr, ns)
+!
           end if
 !
 !
@@ -169,7 +159,7 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = .FALSE.
+!        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = 100.
 
         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                    ice_thick(nr,ns,n2),ice_temp(nr,ns,n2),ICE(ncell))
