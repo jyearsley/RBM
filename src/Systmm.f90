@@ -142,9 +142,12 @@ do nyear=start_year,end_year
           ncell = segment_cell(nr,ns)
 !
           if (ice_temp(nr,ns,n1) .gt. -0.01) then
+            ICE(ncell) = 102
+            ice_thick(nr,ns,n2) = 0.000
 !
- if (nd .ge. 8 .and. nd .le. 12) write(86,*) 'Ice_Free',nd,nr,ns,ice_temp(nr,ns,n1)
-
+if (ncell .eq. 980) write(86,*) 'Ice Free ', nd,depth(ncell) &
+                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)
+            
              call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
 !

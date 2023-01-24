@@ -38,22 +38,14 @@ real                      :: T_B,T_p,T_p_cubed,T_srfc
             +cndctvy*(T_B-T_srfc))/dvsr
   cnd_tmp = cndctvy*(T_B-T_srfc)
 
-if (nd .ge. 8 .and. nd .le. 12) then
-  write(86,*)
-  write(86,*) 'Budget', nd,nr,ns, Sens_Heat,Ltnt_Heat,LW_in,SW_in &
-                                 ,LW_back,cnd_tmp,dvsr
-  write(86,*) 'Ltnt_ICE', nd,nr,ns, Ltnt_Heat,lvs,wind(ncell) &
-                                   ,q10,q_ice
-  write(86,*) 'Sens_ICE'   ,Sens_Heat,dbt(ncell),T_srfc,delta_Temp
-  write(86,*)
-end if
+
   ice_temp(nr,ns,n2) = ice_temp(nr,ns,n1) + delta_Temp
   ice_temp(nr,ns,n2) = AMAX1(dbt(ncell),ice_temp(nr,ns,n2))
 !
 !
 ! Check here to see if ice is thawing
 !
-  if (ice_temp(nr,ns,n2) .gt. T_B) then
+  if (ice_temp(nr,ns,n2) .ge. T_B) then
     
     delta_ice = dt_comp*(Sens_Heat + Ltnt_Heat + LW_in + SW_in - LW_back)/lvf
     ice_thick(nr,ns,n2) = ice_thick(nr,ns,n1) - delta_ice                
@@ -61,22 +53,29 @@ end if
     ice_temp(nr,ns,n2) = AMIN1(ice_temp(nr,ns,n2),T_B)
     ice_temp(nr,1:ns,n2) = T_B
     ICE(ncell) = 102.
-!
+if (ncell .eq. 980) write(86,*) '>T_B', nd,depth(ncell),delta_ice &
+                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)!
 ! Freezing
 !
   else
     delta_ice = dt_comp*cndctvy*(T_B-ice_temp(nr,ns,n1))/lvf
     ice_thick(nr,ns,n2) = ice_thick(nr,ns,n1) + delta_ice
+    ice_thick(nr,ns,n2) = AMIN1(ice_thick(nr,ns,n2),depth(ncell))
     ICE(ncell) = 200.
+ if (ncell .eq. 980) write(86,*) 'Freezing ', nd,depth(ncell),delta_ice &
+                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)
 !
-  end if
+!  end if
 !
 ! If ice thickness is less than the minimum, river is no longer frozen
 !
-  if (ice_thick(nr,ns,n2) .lt. 0.001) then 
-    ICE(ncell) = 101.
-    ice_thick(nr,ns,n2) = 0.001
- 
+    if (ice_thick(nr,ns,n2) .lt. 0.01) then 
+      ICE(ncell) = 101.
+      ice_thick(nr,ns,n2) = 0.00
+if (ncell .eq. 980) write(86,*) '101 ', nd,depth(ncell),delta_ice &
+                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)
+    end if
+!
   end if
 !
   if (ice_thick(nr,ns,n2) .gt. depth(ncell)) ice_thick(nr,ns,n2) = depth(ncell)

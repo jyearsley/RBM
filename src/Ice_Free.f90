@@ -138,7 +138,6 @@ nx_s = 0
            if (T_0.lt.0.001) then
             T_0 =0.01
             strt_cell = segment_cell(nr,1) 
-!            SUB_ZERO(strt_cell:ncell) = .TRUE.
             ice_thick(nr,1:ns,n2) = 0.01
             ice_temp(nr,1:ns,n2) = -0.01
           end if
