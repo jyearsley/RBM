@@ -43,9 +43,9 @@ allocate (wind(heat_cells))
 allocate(ICE(heat_cells))
 ICE = 100.
 allocate(ice_temp(nreach,-2:ns_max,2))
-ice_temp = 0.0
+ice_temp = 0.001
 allocate(ice_thick(nreach,-2:ns_max,2))
-ice_thick = 0.0!
+ice_thick = -0.001!
 !
 ! Initialize some arrays
 !
@@ -141,13 +141,10 @@ do nyear=start_year,end_year
 !
           ncell = segment_cell(nr,ns)
 !
-          if (ice_temp(nr,ns,n1) .gt. -0.01) then
+          if (ice_temp(nr,ns,n2) .gt. -0.01) then
             ICE(ncell) = 102
             ice_thick(nr,ns,n2) = 0.000
-!
-if (ncell .eq. 980) write(86,*) 'Ice Free ', nd,depth(ncell) &
-                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)
-            
+!           
              call Ice_Free (nd,nr,ns,ncell,nc_head)
           else
 !
@@ -164,7 +161,7 @@ if (ncell .eq. 980) write(86,*) 'Ice Free ', nd,depth(ncell) &
 !
 !        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = 100.
 
-        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
+        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),depth(ncell), &
                    ice_thick(nr,ns,n2),ice_temp(nr,ns,n2),ICE(ncell))
 !
 !     End of computational element loop

@@ -42,8 +42,7 @@
 ! Thermal energy budget for i = 1,2
          q_fit(i)=QNS(ncell)+0.97*QNA(ncell)-QWS-QEVAP+QCONV
       end do
- if (ncell .eq. 331 .and. i .eq. 1) write(44,*) nd,QNA(ncell) &
-           ,press(ncell),wind(ncell)!
+!
 ! Linear relationship for equilibrium temperature and rate constant
 !
       A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))

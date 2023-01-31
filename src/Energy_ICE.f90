@@ -8,21 +8,21 @@ Use Block_Ice_Snow
 Implicit None
 integer                   :: ncell,nd,nr,ns
 !
-real                      :: cnd_tmp
+real                      :: cnddmmy,cnd_tmp
 real                      :: q_ice,q10
 real                      :: q_rslt
 real                      :: Ltnt_Heat,Sens_Heat
 real                      :: cndctvy,delta_ice,LW_back,LW_in,SW_in
 real                      :: dvsr,delta_Temp
-real                      :: T_B,T_p,T_p_cubed,T_srfc
-!
-!if (ncell .eq. 10)write(*,*) 'Entering Energy_Ice ICE(ncell) = ',ICE(ncell),ns,ncell,dbt(ncell),n1,n2 
+real                      :: T_B,T_ice,T_p,T_p_cubed,T_riv,T_srfc
 !
   T_B = 0.0
   T_srfc = ice_temp(nr,ns,n1)
   T_p = T_srfc + T_Kelvin
   T_p_cubed = T_p*T_p*T_p
-  cndctvy = ice_cndctvy/(ice_thick(nr,ns,n1)+0.01)
+  cnddmmy = ice_cndctvy/(ice_thick(nr,ns,n1)+0.01)
+  cndctvy = ice_cndctvy/depth(ncell)
+
   dvsr = 4.0*epsilon*Stfn_Bltz*T_p_cubed + cndctvy 
   LW_back = epsilon*Stfn_Bltz*T_p*T_p_cubed 
   LW_in = epsilon*QNA(ncell)
@@ -40,7 +40,7 @@ real                      :: T_B,T_p,T_p_cubed,T_srfc
 
 
   ice_temp(nr,ns,n2) = ice_temp(nr,ns,n1) + delta_Temp
-  ice_temp(nr,ns,n2) = AMAX1(dbt(ncell),ice_temp(nr,ns,n2))
+  ice_temp(nr,ns,n2) = AMAX1(-.01,ice_temp(nr,ns,n2))
 !
 !
 ! Check here to see if ice is thawing
@@ -53,18 +53,17 @@ real                      :: T_B,T_p,T_p_cubed,T_srfc
     ice_temp(nr,ns,n2) = AMIN1(ice_temp(nr,ns,n2),T_B)
     ice_temp(nr,1:ns,n2) = T_B
     ICE(ncell) = 102.
-if (ncell .eq. 980) write(86,*) '>T_B', nd,depth(ncell),delta_ice &
-                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)!
+!
 ! Freezing
 !
   else
-    delta_ice = dt_comp*cndctvy*(T_B-ice_temp(nr,ns,n1))/lvf
+    T_ice = ice_temp(nr,ns,n1)
+    T_riv = temp(nr,ns,n1)
+    delta_ice = dt_comp*cndctvy*(T_riv-T_ice)/lvf
+
     ice_thick(nr,ns,n2) = ice_thick(nr,ns,n1) + delta_ice
     ice_thick(nr,ns,n2) = AMIN1(ice_thick(nr,ns,n2),depth(ncell))
     ICE(ncell) = 200.
- if (ncell .eq. 980) write(86,*) 'Freezing ', nd,depth(ncell),delta_ice &
-                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)
-!
 !  end if
 !
 ! If ice thickness is less than the minimum, river is no longer frozen
@@ -72,8 +71,6 @@ if (ncell .eq. 980) write(86,*) '>T_B', nd,depth(ncell),delta_ice &
     if (ice_thick(nr,ns,n2) .lt. 0.01) then 
       ICE(ncell) = 101.
       ice_thick(nr,ns,n2) = 0.00
-if (ncell .eq. 980) write(86,*) '101 ', nd,depth(ncell),delta_ice &
-                                 ,ice_thick(nr,ns,n2),ice_temp(nr,ns,n2)
     end if
 !
   end if
