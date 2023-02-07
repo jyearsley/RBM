@@ -162,7 +162,7 @@ do nyear=start_year,end_year
 !        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = 100.
 
         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),depth(ncell), &
-                   ice_thick(nr,ns,n2),ice_temp(nr,ns,n2),ICE(ncell))
+                   Q_in(ncell),ice_thick(nr,ns,n2),ICE(ncell))
 !
 !     End of computational element loop
 !

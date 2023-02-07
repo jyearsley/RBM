@@ -16,7 +16,7 @@ logical          :: DONE
 !
 real             :: dt_calc,dt_total,q_dot,q_surf,z
 real             :: Q_dstrb,Q_ratio,Q_trb,Q_trb_sum
-real             :: T_dstrb,T_dstrb_load,T_trb_load
+real             :: T_dstrb,T_dstrb_load,T_trb_load,t_total
 real,parameter   :: ft_to_m =1./3.2808
 !
 DONE = .FALSE.
@@ -56,12 +56,17 @@ nx_s = 0
 !
 !    Set NCELL0 for purposes of tributary input
 !
+          t_total = 0.0
           ncell0=nncell
           dt_total=0.0
           do nm=no_dt(ns),1,-1
             dt_calc=dt_part(nm)
+            t_total = t_total + dt_calc
             z=depth(nncell)*ft_to_m
-            call Energy_NO_ICE(T_0,q_surf,nd,nncell)
+            z = AMAX1(z,2.0)
+     if (ncell .eq. 1040 .and. ns .eq. 122) write(86,*)  'Track 2 ',nd,ncell,ncell0 &
+                                                         ,nseg,T_0,dt_calc,t_total,z
+            call Energy_NO_ICE(T_0,q_surf,nd,nr,nncell,nseg)
 !
             q_dot=(q_surf/(z*rho_Cp))
             T_0=T_0+q_dot*dt_calc

@@ -10,6 +10,6 @@ real    :: T_0,T_head
 real(8) :: time
 real    :: dbt
 !
-write (20,'(f12.4,4i6,4f8.2,f8.4,f8.2,2x,f8.0)')           &                                              
+write (20,'(f12.4,4i6,4f8.2,f8.1,f8.2,2x,f8.1)')           &                                              
             time,nd,nr,ncell,ns,T_0,T_head,dbt,dpth,ice_thick,ice_temp,ICC
 end SUBROUTINE WRITE
