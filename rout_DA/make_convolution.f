@@ -23,6 +23,7 @@
 
       CHARACTER*20 LOC
       CHARACTER*72 FLOWPATH
+      CHARACTER*80 STRING_IN
 
       INTEGER DPREC, CLEN
 
@@ -98,7 +99,7 @@ c     read VIC model output: <year> <month> <day> <p> <et> <runoff> <baseflow>
 c           write(*,*) 'Number of days - ',NDAY
 c
            do i = 1,6
-             read(20,*)
+             read(20,*) STRING_IN
            end do
            DO I = 1,NDAY
              READ(20,*,END=9000) IYEAR(I), IMONTH(I), IDAY(I),
