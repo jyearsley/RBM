@@ -78,7 +78,7 @@ c            Read full_data output from VIC runs and average
 c            year,month,day,air_temp,vp,short_wave,long_wave,
 c            rho,press,wind
 c 
-               read(25,*) dmmy
+               read(25,*) nyy,nmm,ndd,nhh,dmmy
                Heat_data(1)=Heat_data(1)+dmmy(1)/heat_pd
                Heat_data(2)=Heat_data(2)+dmmy(2)/heat_pd
                Heat_data(3)=Heat_data(3)+dmmy(3)/heat_pd
@@ -91,8 +91,8 @@ c
 c
 c         Write the heat budget data for this grid cell
 c         to the RB direct access file
-c         
-            write(16,'(i5,2f6.2,2f10.1,2f7.2,f5.2)',rec=nrec)
+c     
+            write(16,'(i5,2f7.2,2f10.1,2f7.2,f5.2)',rec=nrec)
      &           Nheat,Heat_data
          end do
          close(25)
