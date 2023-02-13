@@ -15,7 +15,7 @@ Module Block_Ice_Snow
     real,parameter                  :: alpha_ice = 0.5      ! Ice reflectivity - Parkinson-Wash
     real,parameter                  :: Ch_Cg = 1.75e-03     ! Transfer coefficent - Parkinson-Wash
     real,parameter                  :: kappa_ice = 8.0      ! J/sec/m**2/DegK - Wanders et al
-    real, parameter                 :: ice_cndctvy = 2.04   ! W/m/deg K-Parkinson 
+    real, parameter                 :: ice_cndctvy = 1.04   ! W/m/deg K-Parkinson 
     real, parameter                  :: h2o_albedo = 0.05 
     real, parameter                 :: h2o_dnsty = 1000.0   ! Kg/m**3
     real, parameter                 :: h_ice_min = 0.025    ! meters
