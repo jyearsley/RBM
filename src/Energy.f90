@@ -7,7 +7,7 @@
    real                :: A, B, e0, evap_rate,rb,vpr_diff
    real                :: Denom,LV_in,H_in,SW_in,LW_in,LW_back
    real                :: q10,q_ice,q_rslt
-   real                :: T_Kelvin,T_p,T_p_cubed,T_rb, Tsurf, T_tetens
+   real                :: T_Kelvin,Tk_fourth,T_p,T_p_cubed,T_rb, Tsurf, T_tetens
    real, dimension(2)  :: q_fit, T_fit
 !
 ! Testing effect of hysteresis 
@@ -32,9 +32,9 @@
              rb = 0.40*(-0.196231*LOG(T_rb) + 1.411189)
 !
            else
-!           T_rb = T_fit(i) + 40.0
-!           rb = 0.4*(-8.688289*LOG(T_rb)) + 32.232621
-!         end if
+           T_rb = T_fit(i) + 40.0
+           rb = 0.4*(-8.688289*LOG(T_rb)) + 32.232621
+         end if
 !
 ! Latent heat of vaporization/sublimation - joules (Wsec)/kg
 !         
@@ -62,6 +62,7 @@
          else 
            lvp = kcal_Wsec * (597.0 - T_fit(i))
            vpr_diff = e0 - ea(ncell)
+           Tk_fourth = T_kelvin*T_kelvin*T_kelvin*T_kelvin
 !
 ! Evaporative heat flux
          LV_in=wind_fctr*rho*lvp*evap_rate*WIND(ncell)
@@ -77,6 +78,7 @@
          LW_in = QNA(ncell) 
 ! Back radiation from the water surface - W/m**2
          LW_back=280.23+6.1589*T_fit(i)
+         LW_back = epsilon*Stfn_Bltz*Tk_fourth
 !
         end if
 !

@@ -64,8 +64,6 @@ nx_s = 0
             t_total = t_total + dt_calc
             z=depth(nncell)*ft_to_m
             z = AMAX1(z,2.0)
-     if (ncell .eq. 1040 .and. ns .eq. 122) write(86,*)  'Track 2 ',nd,ncell,ncell0 &
-                                                         ,nseg,T_0,dt_calc,t_total,z
             call Energy_NO_ICE(T_0,q_surf,nd,nr,nncell,nseg)
 !
             q_dot=(q_surf/(z*rho_Cp))

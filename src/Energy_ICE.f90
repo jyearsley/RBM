@@ -16,12 +16,14 @@ real                      :: cndctvy,delta_ice,LW_back,LW_in,SW_in
 real                      :: dvsr,delta_Temp
 real                      :: T_B,T_ice,T_p,T_p_cubed,T_riv,T_srfc
 !
+real,parameter            :: thick0 = 0.8
+!
   T_B = 0.0
   T_srfc = ice_temp(nr,ns,n1)
   T_p = T_srfc + T_Kelvin
   T_p_cubed = T_p*T_p*T_p
-  cnddmmy = ice_cndctvy/(ice_thick(nr,ns,n1)+0.01)
-  cndctvy = ice_cndctvy/depth(ncell)
+!  cndctvy  = ice_cndctvy/(ice_thick(nr,ns,n1)+0.01)
+  cndctvy = ice_cndctvy/thick0
 
   dvsr = 4.0*epsilon*Stfn_Bltz*T_p_cubed + cndctvy 
   LW_back = epsilon*Stfn_Bltz*T_p*T_p_cubed 
@@ -48,7 +50,7 @@ real                      :: T_B,T_ice,T_p,T_p_cubed,T_riv,T_srfc
   if (ice_temp(nr,ns,n2) .ge. T_B) then
     
     delta_ice = dt_comp*(Sens_Heat + Ltnt_Heat + LW_in + SW_in - LW_back)/lvf
-    ice_thick(nr,ns,n2) = ice_thick(nr,ns,n1) - delta_ice                
+   ice_thick(nr,ns,n2) = ice_thick(nr,ns,n1) - delta_ice                
     ice_thick(nr,ns,n2) = AMAX1(ice_thick(nr,ns,n2),0.0)
     ice_temp(nr,ns,n2) = AMIN1(ice_temp(nr,ns,n2),T_B)
     ice_temp(nr,1:ns,n2) = T_B
@@ -64,7 +66,7 @@ real                      :: T_B,T_ice,T_p,T_p_cubed,T_riv,T_srfc
     ice_thick(nr,ns,n2) = ice_thick(nr,ns,n1) + delta_ice
     ice_thick(nr,ns,n2) = AMIN1(ice_thick(nr,ns,n2),depth(ncell))
     ICE(ncell) = 200.
-!  end if
+  end if
 !
 ! If ice thickness is less than the minimum, river is no longer frozen
 !
@@ -73,7 +75,6 @@ real                      :: T_B,T_ice,T_p,T_p_cubed,T_riv,T_srfc
       ice_thick(nr,ns,n2) = 0.00
     end if
 !
-  end if
 !
   if (ice_thick(nr,ns,n2) .gt. depth(ncell)) ice_thick(nr,ns,n2) = depth(ncell)
 !

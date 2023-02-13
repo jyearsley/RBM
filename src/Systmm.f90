@@ -101,7 +101,7 @@ do nyear=start_year,end_year
 !
 ! Read the hydrologic and meteorologic forcings
 !
-        call READ_FORCING
+        call READ_FORCING(nyear,nd)
 !
 !     Begin reach computations
 !

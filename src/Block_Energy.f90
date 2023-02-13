@@ -61,7 +61,7 @@ module Block_Energy
   real,parameter   :: wind_fctr = 1.0        ! dimensionless
   real,parameter   :: rho_Cp = 1000.0*4184.0 ! (Kg/m**3)*(J/(Kg*degK)
   real,parameter   :: rho_air = 1.292        ! Kg/m**3
-  real,dimension(2),parameter :: evrate = (/2.0e-8,2.0e-8/) ! 1/kPa
+  real,dimension(2),parameter :: evrate = (/1.5e-8,1.5e-8/) ! 1/kPa
   real,dimension(13),parameter :: alpha_h2o = (/0.457,0.267,0.144,0.091,0.074,0.070,0.072  &
                                              ,0.084,0.124,0.227,0.417,0.542,0.542/) !monthly h20 albedo
 !
