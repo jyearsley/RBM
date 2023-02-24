@@ -199,7 +199,7 @@ do nyear=start_year,end_year
 !
             call energy(T_0,q_surf,nncell,nr)
 !
-            q_dot=(q_surf/(z*rfac))
+            q_dot=q_surf/(z*rho_Cp)
 !
 ! The following update for T_0 is redundant per RJN 7/26/3017
 ! and has been commented out for the time being - JRY
@@ -253,8 +253,8 @@ do nyear=start_year,end_year
 !
 ! Do the mass/energy balance
 !
-            T_0  = T_0*Q_ratio                              &
-                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
+            T_0  = T_0                              &
+!                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
                  + q_dot*dt_calc              
 !
             if (T_0.lt.0.5) T_0 =0.5
@@ -268,7 +268,7 @@ do nyear=start_year,end_year
 !
             if(ncell0.ne.nncell) then
               ncell0=nncell
-              Q_inflow = Q_in(nncell)
+!              Q_inflow = Q_in(nncell)
                DONE=.FALSE.
             end if
             dt_total=dt_total+dt_calc

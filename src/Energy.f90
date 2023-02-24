@@ -1,24 +1,51 @@
 SUBROUTINE Energy(T_surf,q_surf,ncell,nr)
    use Block_Energy
    implicit none
-   integer::i,ncell,nd,nr
-   real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
+   integer           :: i,ncell,nd,nr
+   real              :: A,B,e0,q_surf,rb,vpr_diff
+   real              :: HV_in,LW_back,LV_in,LW_in,SW_in
+   real              :: td,T_rb,T_surf,T_Kelvin,T_tetens
    real, dimension(2):: q_fit, T_fit
 !
    td=nd
    T_fit(1)=T_surf-1.0
    T_fit(2)=T_surf+1.0
    do i=1,2
-      e0=2.1718E8*EXP(-4157.0/(T_fit(i)+239.09))
-      rb=pf*(dbt(ncell)-T_fit(i))
-      lvp=597.0-0.57*T_fit(i)
-      q_evap=1000.*lvp*evap_coeff*wind(ncell)
-      if(q_evap.lt.0.0) q_evap=0.0
-      q_conv=rb*q_evap
-      q_evap=q_evap*(e0-ea(ncell))
-      q_ws=6.693E-2+1.471E-3*T_fit(i)
-      q_fit(i)=q_ns(ncell)+q_na(ncell)-q_ws-q_evap+q_conv
-!if (nr .eq. 1) write(26,*) 'energy',ncell,T_surf,q_ws
+      T_Kelvin = T_fit(i) + 273.0
+      T_tetens = T_fit(i) + 237.3
+!
+! Vapor pressure at water surface -kPa (Magnus-Tetens)
+!
+      e0=0.61078*exp((17.27*T_fit(i))/T_tetens)
+!
+!Bowen ratio - Andreas_et_al JGR Oceans (2013) Figure 1
+!
+      T_rb = T_fit(i)
+      if (T_rb .lt. 0.05) T_rb = 0.05
+      rb = 0.40*(-0.196231*LOG(T_rb)) + 1.411189
+!
+      lvp = kcal_Wsec*(597.0-T_fit(i))
+      vpr_diff = e0 - ea(ncell)
+!
+! Evaporative head flux - uses only the Lake Hefner coefficient
+      LV_in = wind_fctr*rho_H2O*lvp*evrate(1)*wind(ncell)
+      LV_in = LV_in*vpr_diff
+!      if(LV_in .lt. 0.0) LV_in=0.0
+!
+! Convective heat flux
+      HV_in=rb*(a_conv*wind(ncell)+b_conv)*(dbt(ncell)-T_fit(i))
+!
+! Shortwave radiation
+      SW_in = Q_NS(ncell)
+!
+! Longwave radiation
+      LW_in = Q_NA(ncell)
+!
+! Back radiation
+      LW_back = 280.23 + 6.1589*T_fit(i)
+!
+      q_fit(i) = SW_in + LW_in - LW_back - LV_in + HV_in
+!
    end do
 !
 !     q=AT+B

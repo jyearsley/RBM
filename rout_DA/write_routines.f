@@ -16,6 +16,7 @@ c
       IMPLICIT NONE
 
       INTEGER DAYS
+      integer ny_fd,mm_fd,nd_fd,nh_fd
 c
 c  Add Qin - JRY - 9/30/2009
 c
@@ -76,9 +77,10 @@ c
 c
 c            Read full_data output from VIC runs and average
 c            year,month,day,air_temp,vp,short_wave,long_wave,
-c            rho,press,wind
-c 
-               read(25,*) dmmy
+c            rho,press,wind.
+c            NOTE: This version read the calendar information output from VIC
+c
+               read(25,*) ny_fd,mm_fd,nd_fd,nh_fd,dmmy
                Heat_data(1)=Heat_data(1)+dmmy(1)/heat_pd
                Heat_data(2)=Heat_data(2)+dmmy(2)/heat_pd
                Heat_data(3)=Heat_data(3)+dmmy(3)/heat_pd
@@ -92,7 +94,7 @@ c
 c         Write the heat budget data for this grid cell
 c         to the RB direct access file
 c         
-            write(16,'(i5,2f6.1,2f10.1,f7.1,f7.1,f5.1)',rec=nrec)
+            write(16,'(i5,2f6.2,2f10.1,f7.2,f7.2,f5.2)',rec=nrec)
      &           Nheat,Heat_data
          end do
          close(25)

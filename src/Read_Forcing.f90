@@ -7,7 +7,7 @@ USE Block_Network
 IMPLICIT NONE
 !
 integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
-real    :: Q_avg,Q_dmmy
+real    :: Q_avg,Q_dmmy,rho
 
 
 no_flow=0
@@ -24,13 +24,12 @@ do nr=1,nreach
            ,rec=nrec_flow) nnd,ncell &
            ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
            ,depth(no_heat),u(no_heat)
-write(26,*)  'Depth ',nnd,ncell,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
-                     ,depth(no_heat),u(no_heat)
+    if (depth(no_heat) .lt. 0.5) depth(no_heat) = 0.5
 !
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
-    read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
+    read(36,'(i5,2f6.2,2f10.1,f7.2,f7.2,f5.2)' &
            ,rec=nrec_heat) ncell &
            ,dbt(no_heat),ea(no_heat) &
            ,Q_ns(no_heat),Q_na(no_heat),rho &

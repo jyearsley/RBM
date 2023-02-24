@@ -31,7 +31,7 @@ c     no changes after here
       PARAMETER (KE   = 12    )
       PARAMETER (LE   = 48    )
       PARAMETER (DT   = 3600.0)
-      PARAMETER (UH_DAY = 96  )
+      PARAMETER (UH_DAY = 24  )
       PARAMETER (TMAX = UH_DAY*24)
       PARAMETER (PMAX = 5000   )
       

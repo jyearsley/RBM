@@ -85,7 +85,7 @@ c
       CLOSE(14)
       DO N = 1,NOB
          DO K = 1,KE
-           UH_BOX(N,K)=UH_DATA(K)       
+           UH_BOX(N,K)=UH_DATA(K)
          END DO
       END DO
       RETURN

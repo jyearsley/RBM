@@ -127,13 +127,14 @@ c     in input file
 	 endif
 
          DO I = 1,NDAY
+            factor = 1.0
             RUNO(I) = RUNO(I) * FACTOR
             BASE(I) = BASE(I) * FACTOR
          END DO
          DO I = 1,NDAY
             DO J = 1,KE+UH_DAY-1
                IF ((I-J+1) .GE. 1) THEN
-                  FLOW(I) = FLOW(I)+UH_S(N,J)*(BASE(I-J+1)+RUNO(I-J+1))
+                 FLOW(I) = FLOW(I)+UH_S(N,J)*(BASE(I-J+1)+RUNO(I-J+1))
                END IF
             END DO
          END DO
