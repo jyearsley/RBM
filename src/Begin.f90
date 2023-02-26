@@ -25,8 +25,6 @@ implicit none
 !
 !   Mohseni parameters, if used
 !
-!
-!
 !     Card Group I
 !
 read(90,*) start_date,end_date
