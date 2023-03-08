@@ -8,7 +8,7 @@
 ----------
 
 This is the public source code repository for the **River Basin Model**, **RBM**. RBM documentation can be read on the
-[RBM documentation website](http://rbm.readthedocs.org).
+[RBM documentation website](http://jyearsleyrbm-mk.readthedocs.org).
 
 RBM was first applied to the development of a water temperature Total Maximum Daily Load (TMDL) for the Columbia
 and Snake rivers [Yearsley et al. [2003]](http://www.hydro.washington.edu/Lettenmaier/Models/RBM/publications/Columbia_River_Heat.pdf)
