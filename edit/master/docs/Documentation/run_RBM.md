@@ -3,7 +3,7 @@ The following describes the steps for simulating water temperature with the grid
 
 ## 1. Download Example Datasets
 
-Download the example data sets, please refer to [Documentation/Sample Dataset](http://www.hydroshare.org/resource/30ba1b9867c5499aae77edd29a1a3c9f) <br />
+Download the example data sets, please refer to [Documentation/Sample Dataset](run_RBM.md) <br />
 
 After unzipping the example dataset **RBM_tutorial.zip**, you can find
 the following sub-directories within this directory are:
