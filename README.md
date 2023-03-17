@@ -11,7 +11,7 @@ This is the public source code repository for the **River Basin Model**, **RBM**
 [RBM documentation website](http://jyearsleyrbm-mk.readthedocs.org).
 
 RBM was first applied to the development of a water temperature Total Maximum Daily Load (TMDL) for the Columbia
-and Snake rivers [Yearsley et al. [2003]](http://www.hydro.washington.edu/Lettenmaier/Models/RBM/publications/Columbia_River_Heat.pdf)
+and Snake rivers [Yearsley et al. [2003]](UNDER CONSTRUCTION)
  as a vector-based model. The grid-based version, integrated with the Variable Infiltration Capacity (VIC) macroscale hydrologic model, was developed at the University
 of Washington's Land Surface Hydrology Group as described in  [Yearsley [2009]](http://dx.doi.org/10.1029/2008WR007629).
 RBM has been applied to river basins at scales ranging from regional to global. A selection of RBM applications can be
