@@ -15,7 +15,7 @@ and Snake rivers [Yearsley et al. [2003]](UNDER CONSTRUCTION)
  as a vector-based model. The grid-based version, integrated with the Variable Infiltration Capacity (VIC) macroscale hydrologic model, was developed at the University
 of Washington's Land Surface Hydrology Group as described in  [Yearsley [2009]](http://dx.doi.org/10.1029/2008WR007629).
 RBM has been applied to river basins at scales ranging from regional to global. A selection of RBM applications can be
-found on the [RBM references page](http://rbm.readthedocs.org/en/latest/Documentation/References/).
+found on the [RBM references page](Under Construction).
 
 
 By placing the original source code archive on GitHub, we hope to encourage a more collaborative development environment.
