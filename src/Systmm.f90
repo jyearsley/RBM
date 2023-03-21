@@ -78,7 +78,7 @@ hpd=1./xwpd
 !
 !     Year loop starts
 !
-do nyear=start_year,end_year
+do nyear=force_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
   if (mod(nyear,4).eq.0) nd_year=366
@@ -108,6 +108,9 @@ do nyear=start_year,end_year
 !
 !     Begin cycling through the reaches
 !
+!     Skip to the starting year
+!
+    do while (nyear >= start_year)  
       do nr=1,nreach
 !
         nc_head=segment_cell(nr,1)
@@ -185,7 +188,10 @@ do nyear=start_year,end_year
 !     End of year loop
 !
       end do
+!     
+!     End of WHILE loop
 !
+    end do
 !
 !     ******************************************************
 !                        return to rmain

@@ -15,6 +15,7 @@ Module Block_Network
     integer,parameter   :: ns_max=500
     integer             :: start_year,start_month,start_day
     integer             :: end_year,end_month,end_day
+    integer             :: force_year,force_month,force_day
 !
 ! Real variables
 !

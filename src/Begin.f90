@@ -6,7 +6,7 @@ use Block_Network
 !
 implicit none
 !    
-    character (len=8)     :: end_date,start_date     
+    character (len=8)     :: end_date,start_date,start_force     
     character (len=8)     :: lat
     character (len=10)    :: long
     character (len=200 )  :: spatial_file    
@@ -29,9 +29,10 @@ implicit none
 !
 !     Card Group I
 !
-read(90,*) start_date,end_date
+read(90,*) start_force,start_date,end_date
 read(start_date,'(i4,2i2)') start_year,start_month,start_day
 read(end_date,  '(i4,2i2)') end_year,end_month,end_day
+read(end_date,  '(i4,2i2)') force_year,force_month,force_day
 nyear1=start_year
 nyear2=end_year
 write(*,'(2(2x,i4,2i2))')  &
