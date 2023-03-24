@@ -6,7 +6,7 @@ use Block_Network
 !
 implicit none
 !    
-    character (len=8)     :: end_date,start_date,start_force     
+    character (len=8)     :: end_date,force_date,start_date     
     character (len=8)     :: lat
     character (len=10)    :: long
     character (len=200 )  :: spatial_file    
@@ -16,7 +16,8 @@ implicit none
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
     integer:: ns_max_test,node,ncol,nrow,nr
 !
-    logical:: first_cell,source
+    logical:: first_cell
+    logical, parameter :: source = .FALSE.
 !
     real :: nndlta
     real :: rmile0,rmile1,xwpd
@@ -29,10 +30,10 @@ implicit none
 !
 !     Card Group I
 !
-read(90,*) start_force,start_date,end_date
+read(90,*) force_date,start_date,end_date
 read(start_date,'(i4,2i2)') start_year,start_month,start_day
 read(end_date,  '(i4,2i2)') end_year,end_month,end_day
-read(end_date,  '(i4,2i2)') force_year,force_month,force_day
+read(force_date,  '(i4,2i2)') force_year,force_month,force_day
 nyear1=start_year
 nyear2=end_year
 write(*,'(2(2x,i4,2i2))')  &
@@ -42,7 +43,8 @@ write(*,'(2(2x,i4,2i2))')  &
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,source
+read(90,*) nreach,flow_cells,heat_cells
+write(*,*) nreach,flow_cells,heat_cells
 !
 ! Allocate dynamic arrays
 !

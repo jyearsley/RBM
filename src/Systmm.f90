@@ -101,6 +101,7 @@ do nyear=force_year,end_year
 !
 ! Read the hydrologic and meteorologic forcings
 !
+        if (nd .eq. 1) write(*,*) 'NYEAR - ', nyear
         call READ_FORCING(nyear,nd)
 !
 !     Begin reach computations
@@ -110,7 +111,6 @@ do nyear=force_year,end_year
 !
 !     Skip to the starting year
 !
-    do while (nyear >= start_year)  
       do nr=1,nreach
 !
         nc_head=segment_cell(nr,1)
@@ -164,8 +164,14 @@ do nyear=force_year,end_year
 !
 !        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = 100.
 
+    if (nyear >= start_year) then  
+!
         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),depth(ncell), &
                    Q_in(ncell),ice_thick(nr,ns,n2),ICE(ncell))
+!
+!     End of IF THEN loop
+!
+      end if
 !
 !     End of computational element loop
 !
@@ -181,17 +187,18 @@ do nyear=force_year,end_year
 !
           end do
 !
+
+!
 !     End of main loop (ND=1,365/366)
 !
         end do
+
 !
 !     End of year loop
 !
       end do
 !     
-!     End of WHILE loop
-!
-    end do
+
 !
 !     ******************************************************
 !                        return to rmain
