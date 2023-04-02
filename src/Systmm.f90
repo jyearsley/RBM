@@ -7,14 +7,18 @@ use Block_Network
 !
 Implicit None
 ! 
+character (len=4)    :: year_out
+character (len=200 ) :: temp_file
 !
-integer          :: ncell, nc_head
-integer          :: nd, ndd, nr, ns
-integer          :: nn, nobs, nyear, nd_year, ntmp
+integer              :: ncell, nc_head
+integer              :: nd, ndd, nr, ns
+integer              :: nn, nobs, nyear, nd_year, ntmp
 !
-real             :: hpd, xd, xdd, xwpd, xd_year, year
-real             :: q_rslt,T_mohseni,xn_avg
-real(8)          :: time
+logical              :: PRINT_TMP
+!
+real                 :: hpd, xd, xdd, xwpd, xd_year, year
+real                 :: q_rslt,T_mohseni,xn_avg
+real(8)              :: time
 !
 ! Allocate the arrays
 !
@@ -79,9 +83,24 @@ hpd=1./xwpd
 !     Year loop starts
 !
 do nyear=force_year,end_year
+!
+  write(*,*) 'Forcing files begin - ',force_year, 'Simulation ends  - ', end_year
+!
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
   if (mod(nyear,4).eq.0) nd_year=366
+!
+! Prepare output file sequences
+!
+    PRINT_TMP = .FALSE.
+    if (nyear .ge. start_year) then
+      close (20)
+      PRINT_TMP = .TRUE.
+      write(year_out,'(i4)') nyear
+      temp_file = 'RBM_Temp_'//year_out
+      open(20,FILE=TRIM(temp_file),status='unknown')
+      write(*,*) nyear,temp_file
+    end if
 !
 !     Day loop starts
 !
@@ -89,6 +108,7 @@ do nyear=force_year,end_year
     year=nyear
     xd=nd
     xd_year=nd_year
+!
 !     Start the numbers of days-to-date counter
 !
     ndays=ndays+1
@@ -164,14 +184,10 @@ do nyear=force_year,end_year
 !
 !        if (ice_thick(nr,ns,n2) .lt. 0.009) ICE(ncell) = 100.
 
-    if (nyear >= start_year) then  
+    if (PRINT_TMP) &  
 !
         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),depth(ncell), &
                    Q_in(ncell),ice_thick(nr,ns,n2),ICE(ncell))
-!
-!     End of IF THEN loop
-!
-      end if
 !
 !     End of computational element loop
 !
