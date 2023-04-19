@@ -150,6 +150,7 @@ do nr=1,nreach
 !    Set the number of segments of the default, if not specified
 !
     if (ndelta(ncell).lt.1) ndelta(ncell)=n_default
+!
     if(first_cell) then
       first_cell=.false.
       head_cell(nr)=ncell
