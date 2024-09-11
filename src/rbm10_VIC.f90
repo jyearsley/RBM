@@ -30,7 +30,7 @@
 !     For additional information contact:
 !
 !     John Yearsley
-!     Land Surface Hydrology Group
+!     UW Hydro
 !     Dept. of Civil and Environmental Engineering
 !     Box 352700
 !     University of Washington
